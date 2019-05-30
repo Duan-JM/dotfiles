@@ -1,6 +1,9 @@
 {
-  "python.autoComplete.addBrackets": true,
-  "python.jediEnabled": true,
+  "diagnostic.warningSign": "W",
+  "diagnostic.errorSign": ">>",
+  "diagnostic.displayByAle": true,
+  "python.autoComplete.addBrackets": false,
+  "python.jediEnabled": false,
   "languageserver": {
     "cquery": {
           "command": "cquery",
@@ -10,6 +13,12 @@
           "initializationOptions": {
             "cacheDirectory": "/tmp/cquery"
           }
-        }
     },
+    "golang": {
+      "command": "gopls",
+      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+      "filetypes": ["go"]
+    }
+},
+"java.errors.incompleteClasspath.severity": "ignore"
 }

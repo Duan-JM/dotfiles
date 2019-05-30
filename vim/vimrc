@@ -92,6 +92,7 @@ Plug 'therubymug/vim-pyte'                                                      
 Plug 'vim-scripts/mayansmoke'
 " https://github.com/vim-scripts/mayansmoke
 Plug 'vim-scripts/peaksea'
+Plug 'haishanh/night-owl.vim'
 
 " Github
 Plug 'tpope/vim-fugitive'
@@ -575,7 +576,7 @@ set wildmenu
 if has('nvim')                                                          " Use floating windows to complete the commond, only neovim support
   set wildoptions=pum
   set termguicolors                                                     " With out this settings, transparable float-win will not work normally
-  set pumblend=10                                                       " Let floatingwindow to be transparable
+  set pumblend=30                                                       " Let floatingwindow to be transparable
 elseif
   set wildmode=list:longest,full                                        " Set list to show completeopt, however it will lead to disfunc for floating windows
 endif
@@ -921,6 +922,21 @@ autocmd! BufNewFile,BufRead *.bat
             \ if getline(1) =~ '--\*-Perl-\*--' | setf perl | endif
 
 
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"                                    Themes                                    "
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" should be placed before AutoCMD, or some color configure will not avaliable
+" colorscheme Tomorrow-Night
+" colorscheme PaperColor
+" colorscheme hybrid_material
+" colorscheme mayansmoke
+" colorscheme anderson
+" colorscheme wombat256
+" colorscheme space-vim-dark
+colorscheme gruvbox
+" colorscheme vividchalk
+" colorscheme night-owl
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                  AutoCMD                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -982,21 +998,7 @@ autocmd BufNewFile,BufRead *.py,*.cpp,*.java set tabstop=4 |set softtabstop=4|
 autocmd BufNewFile,BufRead *.tex set textwidth=79 |set fileformat=unix
             \ | set formatoptions+=t
 
-
 "Let external space be red
 highlight BadWhitespace guifg=gray guibg=red ctermfg=gray ctermbg=red
 autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
 "}
-
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"                                    Themes                                    "
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" colorscheme Tomorrow-Night
-" colorscheme PaperColor
-" colorscheme hybrid_material
-" colorscheme mayansmoke
-" colorscheme anderson
-" colorscheme wombat256
-" colorscheme space-vim-dark
-colorscheme gruvbox
-" colorscheme vividchalk
