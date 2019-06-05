@@ -14,7 +14,7 @@ export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --preview '(highlight -O 
 # Most often
 alias sbrook='sudo brook vpn -l 127.0.0.1:1081 -s 165.227.7.215:9998 -p amazingss'
 alias hbrook='brook client -l 127.0.0.1:9999 -i 127.0.0.1 -s 165.227.7.215:9998 -p amazingss'
-alias proxy='export all_proxy=socks5://127.0.0.1:1086'
+alias proxy='export all_proxy=socks5://127.0.0.1:1080'
 alias unproxy='unset all_proxy'
 alias sublime='open -a Sublime\ Text'
 alias vscode='open -a Visual\ Studio\ Code'
