@@ -39,7 +39,7 @@ Plug 'VDeamoV/vim-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
-Plug 'jiangmiao/auto-pairs'                             " insert or delete pairs
+" Plug 'jiangmiao/auto-pairs'                             " insert or delete pairs
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
 Plug 'andymass/vim-matchup'                             " extence
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
@@ -84,7 +84,6 @@ Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'itchyny/lightline.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'Yggdroot/indentLine'                                                      " Show indent line
-Plug 'bling/vim-bufferline'                                                     " 为打开的文件有一个快捷栏
 Plug 'kshenoy/vim-signature'                                                    " Visible Mark
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
 Plug 'luochen1990/rainbow'                                                      " multi color for Parentheses
@@ -214,10 +213,11 @@ if executable('ag')
 endif
 
 " vim-smooth-scroll
-noremap <silent> <c-u> :call smooth_scroll#up(&scroll, 0, 2)<CR>
-noremap <silent> <c-d> :call smooth_scroll#down(&scroll, 0, 2)<CR>
-noremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 0, 4)<CR>
-noremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 0, 4)<CR>
+" Distance Duration Speed
+noremap <silent> <c-u> :call smooth_scroll#up(&scroll, 8, 2)<CR>
+noremap <silent> <c-d> :call smooth_scroll#down(&scroll, 8, 2)<CR>
+noremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 8, 4)<CR>
+noremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 8, 4)<CR>
 
 " junegunn/vim-slash
 noremap <plug>(slash-after) zz
@@ -572,6 +572,8 @@ set guifont=Source\ Code\ Pro\ for\ Powerline:h16
 set switchbuf=useopen                                                   " reveal already opened files from the
                                                                         " quickfix window instead of opening new buffers
 set wildmenu
+set cursorcolumn                                                        " highlight column
+set cursorline                                                          " highlight row
 " set wildmode=list:longest,full
 if has('nvim')                                                          " Use floating windows to complete the commond, only neovim support
   set wildoptions=pum
