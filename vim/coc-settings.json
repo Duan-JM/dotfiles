@@ -20,5 +20,7 @@
       "filetypes": ["go"]
     }
 },
-"java.errors.incompleteClasspath.severity": "ignore"
+"java.errors.incompleteClasspath.severity": "ignore",
+"imselect.defaultInput": "com.apple.keylayout.ABC",
+"imselect.enableStatusItem": true,
 }

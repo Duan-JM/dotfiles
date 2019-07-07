@@ -19,13 +19,8 @@ call plug#begin('~/.vim/plugged')
 Plug 'takac/vim-hardtime'
 
 " System
-" Plug 'lyokha/vim-xkbswitch', {'as': 'xkbswitch'}        " fix for cn change en
+Plug 'neoclide/coc-imselect'                            " need install im-select
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
-Plug 'kana/vim-textobj-indent'
-Plug 'kana/vim-textobj-user'
-Plug 'kana/vim-textobj-syntax'
-Plug 'kana/vim-textobj-function', { 'for':['c', 'cpp', 'vim', 'java', 'python'] }
-Plug 'sgur/vim-textobj-parameter'
 Plug 'michaeljsmith/vim-indent-object'                  " used for align
 Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
 Plug 'tpope/vim-obsession'
@@ -39,7 +34,7 @@ Plug 'VDeamoV/vim-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
-" Plug 'jiangmiao/auto-pairs'                             " insert or delete pairs
+Plug 'jiangmiao/auto-pairs'                             " insert or delete pairs
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
 Plug 'andymass/vim-matchup'                             " extence
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
@@ -142,7 +137,7 @@ nnoremap [<space>  :<c-u>put! =repeat(nr2char(10), v:count1)<cr>'[
 nnoremap ]<space>  :<c-u>put =repeat(nr2char(10), v:count1)<cr>
 
 " use c+[ to exit term to normal mode
-tnoremap <c-[> <c-\><c-n>
+" tnoremap <c-,> <c-\><c-n>
 
 " Use <C-L> to clear the highlighting of :set hlsearch
 if maparg('<C-L>', 'n') ==# ''
@@ -698,6 +693,10 @@ if exists('$TMUX')
   set term=screen-256color
 endif
 
+if has('nvim')
+    autocmd TermOpen term://* startinsert
+endif
+
 
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -884,7 +883,7 @@ func! CompileRun()
         exec "!clear"
         exec "!time bash %"
     elseif &filetype == 'python'
-        exec "!python3 %"
+        exec ":term python3 %"
 
     elseif &filetype == 'html'
         exec "!open -a Safari % &"

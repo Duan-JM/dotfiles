@@ -30,7 +30,7 @@ cp ~/.vim/coc-settings.json $VIMRC_FILE/coc-settings.json
 ###########################
 #  BACKUP TMUX CONFIGURE  #
 ###########################
-# TODO: This part should run on server <30-05-19, VDeamoV> #
+cp -rf ~/.tmux.conf $DOT_FILE/tmux/tmux.conf
 
 
 ##############
