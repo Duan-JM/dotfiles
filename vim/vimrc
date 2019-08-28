@@ -26,8 +26,10 @@ Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
 Plug 'tpope/vim-obsession'
 
 " Coding
-Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
-Plug 'ludovicchabant/vim-gutentags'                     " auto generate tags
+" Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'zxqfl/tabnine-vim'
+" Plug 'ludovicchabant/vim-gutentags'                     " auto generate tags
 Plug 'w0rp/ale'                                         " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'VDeamoV/vim-snippets'
@@ -688,20 +690,18 @@ set formatoptions-=t "disable wrap
 " endif
 " set wrapmargin=2 " 2 chars wrap margin from the right window border, hard wrap
 
-" for tmux
-if exists('$TMUX')
-  set term=screen-256color
-endif
-
-if has('nvim')
-    autocmd TermOpen term://* startinsert
-endif
-
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                 Functions                                  "
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"let W Wq wQ not be error
+command! -bar -nargs=* -complete=file -range=% -bang W         <line1>,<line2>write<bang> <args>
+command! -bar -nargs=* -complete=file -range=% -bang Wq        <line1>,<line2>wq<bang> <args>
+command! -bar -nargs=* -complete=file -range=% -bang WQ        <line1>,<line2>wq<bang> <args>
+command! -bar -nargs=* -complete=file -range=% -bang We        <line1>,<line2>w<bang> | e <args>
+command! -bar -nargs=* -complete=file          -bang E         edit<bang> <args>
+command! -bar                                  -bang Q         quit<bang>"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+
 " Set tabstop, softtabstop and shiftwidth to the same value
 command! -nargs=1 Rename let tpname = expand('%:t') | saveas <args> | edit <args> | call delete(expand(tpname))
 command! -nargs=* Stab call Stab()
@@ -871,9 +871,9 @@ map <leader>r :call CompileRun()<CR>
 func! CompileRun()
     exec "w"
     if &filetype == 'c'
-        exec "g++ % -o %<"
+        exec "gcc % -o %<"
     elseif &filetype == 'cpp'
-        exec "g++ % -o %<"
+        exec "!g++ % -o %<"
         exec "!time ./%<"
     elseif &filetype == 'java'
         exec "!clear"

@@ -6,7 +6,8 @@ alias vimrc='vim ~/.vimrc'
 alias vi='nvim'
 alias vim='nvim'
 alias pg='cd ~/Documents/Coding/Test'
-alias wk='cd ~/Documents/Github/DeepFashionLandmark'
+alias wk='cd ~/Documents/Github/Few-shot-Playground_'
+alias cpv='rsync -ah --info=progress2'
 
 # fzf
 export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --preview '(highlight -O ansi {} || cat {}) 2> /dev/null | head -500'"
@@ -21,6 +22,8 @@ alias sublime='open -a Sublime\ Text'
 alias vscode='open -a Visual\ Studio\ Code'
 alias xc='open -a "Xcode"'
 alias ggrep='git grep --break --heading -n'
+alias mnt='mount | grep -E ^/dev | column -t'
+alias count='find . -type f | wc -l'
 #alias vim='nvim'
 #alias vi='nvim'
 
@@ -42,6 +45,7 @@ alias ldot='ls -ld .*'
 alias lS='ls -1FSsh'
 alias lart='ls -1Fcart'
 alias lrt='ls -1Fcrt'
+alias lt='du -sh * | sort -h'
 
 
 alias grep='grep --color'
@@ -79,7 +83,7 @@ alias mvi='mv -i'
 
 #Git self configure
 
-#change gd(git diff)
+#change gd(git diff) need to manually change in the zsh git plugin
 function gd() {
 	params="$@"
   params=`scmpuff expand "$@" 2>/dev/null`

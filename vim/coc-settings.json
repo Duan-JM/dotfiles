@@ -1,9 +1,9 @@
 {
   "diagnostic.warningSign": "W",
   "diagnostic.errorSign": ">>",
-  "diagnostic.displayByAle": true,
+  "diagnostic.displayByAle": false,
   "python.autoComplete.addBrackets": false,
-  "python.jediEnabled": false,
+  "python.jediEnabled": true,
   "languageserver": {
     "cquery": {
           "command": "cquery",
