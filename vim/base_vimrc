@@ -1,3 +1,9 @@
+"""""""""""""""""""""""""
+"  !!!! ATTENTION !!!!  "
+"""""""""""""""""""""""""
+" This config file is try to minimize the config,
+" It WILL NOT INCLUDE code completion
+
 "  Check for vim-plug  "
 """"""""""""""""""""""""
 " Check for vim-plug if not exist download it
@@ -14,30 +20,25 @@ endif
 "                                   Pluglist                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
-
 " Need attention
 Plug 'takac/vim-hardtime'
 
 " System
-Plug 'neoclide/coc-imselect'                            " need install im-select
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
 Plug 'michaeljsmith/vim-indent-object'                  " used for align
 Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
 Plug 'tpope/vim-obsession'
 
 " Coding
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'w0rp/ale'                                         " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'VDeamoV/vim-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
-" Plug 'jiangmiao/auto-pairs'                             " insert or delete pairs
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
 Plug 'andymass/vim-matchup'                             " extence
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
-Plug 'easymotion/vim-easymotion'                        " trigger with <leader><leader>+s/w/gE
 Plug 'skywind3000/asyncrun.vim'                         " Compile
 Plug 'godlygeek/tabular'                                " align text
 Plug 'tpope/vim-surround'                               " change surroundings
@@ -47,32 +48,11 @@ Plug 'tpope/vim-surround'                               " change surroundings
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
 Plug 'chxuan/tagbar'                                    " show params and functions
 
-" Writing Blog
-Plug 'hotoo/pangu.vim', {'for': ['markdown']}                                   "to make your document better
-Plug 'godlygeek/tabular', {'for': ['markdown']}
-Plug 'plasticboy/vim-markdown', {'for': ['markdown']}
-Plug 'mzlogin/vim-markdown-toc', {'for': ['markdown']}
-" :GenTocGFM/:GenTocRedcarpet
-":UpdateToc 更新目录
-Plug 'dhruvasagar/vim-table-mode', {'for': ['markdown']}
-"<leader>tm to enable
-"|| in the insert mode to create a horizontal line
-"| match the | up row
-"<leader>tdd to delete the row
-"<leader>tdc to delete the coloum
-"<leader>tt to change the exist text to format table
-Plug 'xuhdev/vim-latex-live-preview', {'for': ['tex']}                          " Use when you work with cn
-Plug 'lervag/vimtex', {'for': ['tex']}                                          " English is okay, fail with cn
-
-
 "FileManage
 Plug 'scrooloose/nerdtree'
-Plug 'Xuyuanp/nerdtree-git-Plugin'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'mhinz/vim-startify'
 Plug 'justinmk/vim-dirvish'
-Plug 'kristijanhusak/vim-dirvish-git'
-
 
 " Apperance
 Plug 'itchyny/lightline.vim'
@@ -82,10 +62,6 @@ Plug 'kshenoy/vim-signature'                                                    
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
 Plug 'luochen1990/rainbow'                                                      " multi color for Parentheses
 Plug 'therubymug/vim-pyte'                                                      " theme pyte
-Plug 'vim-scripts/mayansmoke'
-" https://github.com/vim-scripts/mayansmoke
-Plug 'vim-scripts/peaksea'
-Plug 'haishanh/night-owl.vim'
 
 " Github
 Plug 'tpope/vim-fugitive'
@@ -99,7 +75,6 @@ Plug 'airblade/vim-gitgutter'                                                   
 Plug 'tpope/vim-abolish'                                                        "增强版的substitue
                                                                                 ":%S/{man,dog}/{dog,man}/g 替换man和dog的位置
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
-Plug 'mileszs/ack.vim'                                                          " Use to search pattern in files
 call plug#end()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                   Mappings                                   "
@@ -178,36 +153,9 @@ function! Sesh(bang)
   endif
 endfunction
 
-" coc.nvim
-set shell=/bin/zsh
-let g:coc_status_error_sign='E'
-let g:coc_status_warning_sign='W'
-
-
-" coc-python
-" Remap key for gotos.
-nmap <leader>jd <Plug>(coc-definition)
-" nmap <leader>gy <Plug>(coc-type-definition)
-" nmap <leader>gi <Plug>(coc-implementation)
-" nmap <leader>gr <Plug>(coc-references)
-
-" Highlight symbol under cursor on CursorHold
-autocmd CursorHold * silent call CocActionAsync('highlight')
-
-" Remap for format selected region
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
-" Fix autofix problem of current line
-nmap <leader>qf  <Plug>(coc-fix-current)
-
 " rainbow
 let g:rainbow_active = 1
 
-" ack
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
-endif
 
 " vim-smooth-scroll
 " Distance Duration Speed
@@ -253,16 +201,6 @@ nnoremap <F10> : call asyncrun#quickfix_toggle(10)<CR>
 " nnoremap <silent> <F8> : AsyncRun -cwd=<root> -mode=4 make run <CR>
 nnoremap <silent> <F7> : AsyncRun -cwd=<root> make run<CR>
 
-"vim-latex-live-preview
-autocmd Filetype tex setl updatetime=1
-let g:livepreview_previewer = 'open -a Preview'
-
-"vimtex
-let g:tex_flavor='latex'
-let g:vimtex_view_method='skim'
-let g:vimtex_quickfix_mode=0
-set conceallevel=1
-let g:tex_conceal='abdmg'
 
 "mhinz/vim-startify
 let g:startify_list_order = [
@@ -293,19 +231,6 @@ let g:nerdtree_tabs_open_on_console_startup=1
 let g:NERDTreeShowBookmarks=1
 let g:NERDTreeIgnore=['\.pyc','\~$','\.swp','\.DS_Store']
 
-"vim-table-mode
-let g:table_mode_corner = '|'
-let g:table_mode_delimiter = ' '
-let g:table_mdoe_verbose = 0
-let g:table_mode_auto_align = 0
-"autocmd FileType markdown TableModeEnable
-
-"vim-markdown
-let g:vim_markdown_math=1
-
-"vim-markdown-toc
-let g:vmt_auto_update_on_save=1 "update toc when save
-let g:vmt_dont_insert_fence=0 "if equals to 1, can't update toc when save
 
 "gist-vim
 let github_user='VDeamoV'
@@ -345,7 +270,6 @@ let g:lightline = {
       \     [ 'mode', 'paste' ],
       \     [ 'filename', 'modified' ],
       \     [ 'gitbranch', 'git_changes' ],
-      \     [ 'cocstatus' ]
       \   ],
       \   'right': [
       \     ['lineinfo'],
@@ -359,7 +283,6 @@ let g:lightline = {
       \   'obsession':  'LightlineObsessionStatus',
       \   'gitbranch': 'fugitive#head',
       \   'git_changes': 'LightLineChanges',
-      \   'cocstatus': 'coc#status'
       \ },
       \ 'component_expand': {
       \     'linter_warnings': 'LightlineLinterWarnings',
@@ -456,7 +379,6 @@ function! s:MaybeUpdateLightline()
 endfunction
 
 
-
 "SirVer/ultisnips
 "customize python and keymapping
 "ref:https://gist.github.com/lencioni/dff45cd3d1f0e5e23fe6
@@ -466,7 +388,7 @@ let g:UltiSnipsExpandTrigger       = "<tab>"
 let g:UltiSnipsListSnippets        = "<c-l>"
 let g:UltiSnipsJumpForwardTrigger  = "<c-j>"
 let g:UltiSnipsJumpBackwardTrigger = "<c-k>"
-let g:snips_author = "VDeamoV"
+let g:snips_author = "VDeamoV"                            "change to users
 let g:snips_email = "vincent.duan95@outlook.com"
 let g:snips_github = "https://github.com/VDeamoV"
 
