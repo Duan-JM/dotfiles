@@ -29,11 +29,10 @@ Plug 'tpope/vim-obsession'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'w0rp/ale'                                         " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
-Plug 'VDeamoV/vim-snippets'
+Plug 'VDeamoV/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
-" Plug 'jiangmiao/auto-pairs'                             " insert or delete pairs
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
 Plug 'andymass/vim-matchup'                             " extence
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
@@ -882,12 +881,12 @@ augroup END
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                             FileType Conifgure                             "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+autocmd! BufNewFile,BufRead *.markdown *.md set filetype=markdown
+autocmd! BufNewFile,BufRead *.ts set filetype=typescript
+autocmd! BufNewFile,BufRead *.json set filetype=json
+autocmd! BufNewFile,BufRead,BufReadPost *.snippets set filetype=snippets
 autocmd! BufNewFile,BufRead *.vs,*.fs set filetype=glsl
 autocmd! BufNewFile,BufRead *.swift set filetype=swift
-autocmd! BufNewFile,BufRead *.markdown *.md set filetype=markdown
-autocmd! BufNewFile,BufRead,BufReadPost *.snippets set filetype=snippets
-autocmd! BufNewFile,BufRead *.json set filetype=json
-autocmd! BufNewFile,BufRead *.ts set filetype=typescript
 autocmd! BufNewFile,BufRead *.vm *.xtpl *.ejs set filetype=html
 autocmd! BufNewFile,BufRead *.html.twig set filetype=html.twig
 autocmd! BufNewFile,BufRead *.conf set filetype=config
@@ -919,29 +918,20 @@ colorscheme gruvbox
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                  AutoCMD                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" config for all file type =====>
 " Return to last edit position when opening files (You want this!)
 autocmd BufReadPost *
             \ if &filetype != "gitcommit" && line("'\"") > 0 && line("'\"") <= line("$") |
             \   exe "normal! g`\"" |
             \ endif
 
-" autocmd! BufWritePost .vimrc source ~/.vimrc                              " source vimrc immediately
-
-autocmd! FileType gitcommit autocmd! BufEnter COMMIT_EDITMSG
-            \ call setpos('.', [0, 1, 1, 0])                                " set it to the first line when editing a git commit message
-autocmd! FileType css set omnifunc=csscomplete#CompleteCSS
 autocmd Filetype *
             \if &omnifunc == "" |
             \setlocal omnifunc=syntaxcomplete#Complete |
             \endif
-autocmd! FileType python syn keyword pythonDecorator True None False self
-
-autocmd FocusGained, BufEnter * :silent! !
 
 autocmd VimEnter * :call SetTabLabel()
-autocmd WinEnter call SetTabLabel()
-autocmd BufEnter call SetTabLabel()
-"
+
 "https://superuser.com/questions/195022/vim-how-to-synchronize-nerdtree-with-current-opened-tab-file-path
 if expand("%:p")
     autocmd BufEnter * lcd %:p:h
@@ -960,8 +950,33 @@ autocmd BufRead *
             \ exec "set path-=".s:default_path |
             \ exec "set path^=".s:tempPath |
             \ exec "set path^=".s:default_path
+
 " Automatically open and close the popup menu / preview window
 autocmd CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
+
+
+autocmd FocusGained, BufEnter * :silent! !
+autocmd WinEnter call SetTabLabel()                                         " show tabline
+autocmd BufEnter call SetTabLabel()
+" config for all file type <=========
+
+" config for special filetype ==========>
+autocmd! BufWritePost .vimrc source ~/.vimrc                                " source vimrc immediately
+
+
+autocmd! FileType gitcommit autocmd! BufEnter COMMIT_EDITMSG
+            \ call setpos('.', [0, 1, 1, 0])                                " set it to the first line when editing a git commit message
+
+
+autocmd! FileType css set omnifunc=csscomplete#CompleteCSS
+
+
+" config for python
+" Let external space be red for python
+autocmd! FileType python syn keyword pythonDecorator True None False self
+highlight BadWhitespace guifg=gray guibg=red ctermfg=gray ctermbg=red
+autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+
 
 " gnuplot syntax highlighting
 autocmd BufNewFile,BufRead *.plt,.gnuplot setf gnuplot
@@ -969,15 +984,16 @@ autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=red
 autocmd FileType ruby set dictionary+=~/.vim/dict/ruby.dict
 autocmd FileType javascript set dictionary+=$HOME/.vim/dict/node.dict
 
+
 " 按照PEP8标准来配置vim
 autocmd BufNewFile,BufRead *.py,*.cpp,*.java set tabstop=4 |set softtabstop=4|
             \ set shiftwidth=4|set textwidth=79|set expandtab|set autoindent
             \ |set fileformat=unix
+
+
 " set auto wrap for tex
 autocmd BufNewFile,BufRead *.tex set textwidth=79 |set fileformat=unix
-            \ | set formatoptions+=t
+            \ | set formatoptions+=t | set spell | set spelllang=en_us,cjk
 
-"Let external space be red
-highlight BadWhitespace guifg=gray guibg=red ctermfg=gray ctermbg=red
-autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
+" config for special filetype <==========
 "}
