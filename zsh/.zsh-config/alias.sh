@@ -14,8 +14,6 @@ export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --preview '(highlight -O 
 
 
 # Most often
-alias sbrook='sudo brook vpn -l 127.0.0.1:1081 -s 165.227.7.215:9998 -p amazingss'
-alias hbrook='brook client -l 127.0.0.1:9999 -i 127.0.0.1 -s 165.227.7.215:9998 -p amazingss'
 alias proxy='export all_proxy=socks5://127.0.0.1:1080'
 alias unproxy='unset all_proxy'
 alias sublime='open -a Sublime\ Text'
@@ -24,13 +22,7 @@ alias xc='open -a "Xcode"'
 alias ggrep='git grep --break --heading -n'
 alias mnt='mount | grep -E ^/dev | column -t'
 alias count='find . -type f | wc -l'
-#alias vim='nvim'
-#alias vi='nvim'
 
-# add when make openpose
-#alias g++='g++ -std=c++11'
-#alias gcc='gcc -std=c++11'
-#alias clang='clang -std=c++11'
 
 # other's configure
 # Advanced Aliases.

@@ -34,9 +34,9 @@ Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
-Plug 'andymass/vim-matchup'                             " extence
+" Plug 'andymass/vim-matchup'                             " extence
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
-Plug 'easymotion/vim-easymotion'                        " trigger with <leader><leader>+s/w/gE
+" Plug 'easymotion/vim-easymotion'                        " trigger with <leader><leader>+s/w/gE
 Plug 'skywind3000/asyncrun.vim'                         " Compile
 Plug 'godlygeek/tabular'                                " align text
 Plug 'tpope/vim-surround'                               " change surroundings
@@ -44,9 +44,10 @@ Plug 'tpope/vim-surround'                               " change surroundings
                                                         " ds[partten]
                                                         " ys(iww)[partten] / yss)
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
-Plug 'chxuan/tagbar'                                    " show params and functions
+" Plug 'chxuan/tagbar'                                    " show params and functions
 
 " Writing Blog
+Plug 'rhysd/vim-grammarous', {'for': ['markdown', 'tex']}                       " grammarly checks
 Plug 'hotoo/pangu.vim', {'for': ['markdown']}                                   "to make your document better
 Plug 'godlygeek/tabular', {'for': ['markdown']}
 Plug 'plasticboy/vim-markdown', {'for': ['markdown']}
@@ -65,8 +66,8 @@ Plug 'lervag/vimtex', {'for': ['tex']}                                          
 
 
 "FileManage
-Plug 'scrooloose/nerdtree'
-Plug 'Xuyuanp/nerdtree-git-Plugin'
+" Plug 'scrooloose/nerdtree'
+" Plug 'Xuyuanp/nerdtree-git-Plugin'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'mhinz/vim-startify'
 Plug 'justinmk/vim-dirvish'
@@ -77,7 +78,7 @@ Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'itchyny/lightline.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'Yggdroot/indentLine'                                                      " Show indent line
-Plug 'kshenoy/vim-signature'                                                    " Visible Mark
+" Plug 'kshenoy/vim-signature'                                                    " Visible Mark
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
 Plug 'luochen1990/rainbow'                                                      " multi color for Parentheses
 Plug 'therubymug/vim-pyte'                                                      " theme pyte
@@ -87,17 +88,17 @@ Plug 'vim-scripts/peaksea'
 Plug 'haishanh/night-owl.vim'
 
 " Github
-Plug 'tpope/vim-fugitive'
+" Plug 'tpope/vim-fugitive'
 Plug 'mattn/gist-vim'
 Plug 'mattn/webapi-vim'
 Plug 'junegunn/vim-github-dashboard', { 'on': ['GHDashboard', 'GHActivity'] }   " visit github in vim 
 Plug 'junegunn/gv.vim'
-Plug 'airblade/vim-gitgutter'                                                   " [c ]c jump to prev/next change [C ]C
+" Plug 'airblade/vim-gitgutter'                                                   " [c ]c jump to prev/next change [C ]C
 
 " Search
-Plug 'tpope/vim-abolish'                                                        "增强版的substitue
-                                                                                ":%S/{man,dog}/{dog,man}/g 替换man和dog的位置
-Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
+"Plug 'tpope/vim-abolish'                                                        "增强版的substitue
+"                                                                                ":%S/{man,dog}/{dog,man}/g 替换man和dog的位置
+" Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
 Plug 'mileszs/ack.vim'                                                          " Use to search pattern in files
 call plug#end()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -147,6 +148,21 @@ endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "pathogen
 execute pathogen#infect()
+
+
+" vim-grammarous
+let g:grammarous#hooks = {}
+function! g:grammarous#hooks.on_check(errs) abort
+    nmap <buffer><C-n> <Plug>(grammarous-move-to-next-error)
+    nmap <buffer><C-p> <Plug>(grammarous-move-to-previous-error)
+    nmap <buffer><C-c><Plug>(grammarous-move-to-info-window)
+endfunction
+
+function! g:grammarous#hooks.on_reset(errs) abort
+    nunmap <buffer><C-n>
+    nunmap <buffer><C-p>
+    nunmap <buffer><C-c>
+endfunction
 
 " tpope/vim-obsession
 " :Obsession ~/.vim/obsessions/
@@ -227,17 +243,17 @@ let g:hardtime_default_on = 0
 let g:hardtime_timeout = 500
 let g:hardtime_ignore_quickfix = 1
 
-"easymotion
-" s{char}{char} to move to {char}{char}
-nmap <leader>s <Plug>(easymotion-overwin-f2)
+""easymotion
+"" s{char}{char} to move to {char}{char}
+"nmap <leader>s <Plug>(easymotion-overwin-f2)
 
-" Move to line
-map L <Plug>(easymotion-bd-jk)
-nmap <leader>L <Plug>(easymotion-overwin-line)
+"" Move to line
+"map L <Plug>(easymotion-bd-jk)
+"nmap <leader>L <Plug>(easymotion-overwin-line)
 
-" Move to word
-map  W <Plug>(easymotion-bd-w)
-nmap <leader>W <Plug>(easymotion-overwin-w)
+"" Move to word
+"map  W <Plug>(easymotion-bd-w)
+"nmap <leader>W <Plug>(easymotion-overwin-w)
 
 
 "asyncrun
@@ -314,26 +330,26 @@ let github_user='VDeamoV'
 let g:indentLine_enabled=1
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
-"LeaderF
-let g:Lf_ShortcutF = '<c-p>'
-let g:Lf_ShortcutB = '<m-n>'
-" execute "set <A-m>=\em,"
-" execute "set <A-b>=\eb"
-" execute "set <A-m>=\em"
-noremap <c-n> :LeaderfMru<cr>
-noremap <A-m> :LeaderfFunction!<cr>
-noremap <A-b> :LeaderfBuffer<cr>
-" noremap <A-m> :LeaderfTag<cr>
-let g:Lf_StlSeparator = { 'left': '', 'right': '', 'font': '' }
+""LeaderF
+"let g:Lf_ShortcutF = '<c-p>'
+"let g:Lf_ShortcutB = '<m-n>'
+"" execute 'set <A-m>=\em,'
+"" execute 'set <A-b>=\eb'
+"" execute 'set <A-m>=\em'
+"noremap <c-n> :LeaderfMru<cr>
+"noremap <A-m> :LeaderfFunction!<cr>
+"noremap <A-b> :LeaderfBuffer<cr>
+"" noremap <A-m> :LeaderfTag<cr>
+"let g:Lf_StlSeparator = { 'left': '', 'right': '', 'font': '' }
 
-let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
-let g:Lf_WorkingDirectoryMode = 'Ac'
-let g:Lf_WindowHeight = 0.30
-let g:Lf_CacheDirectory = expand('~/.vim/cache')
-let g:Lf_ShowRelativePath = 0
-let g:Lf_HideHelp = 1
-let g:Lf_StlColorscheme = 'powerline'
-let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
+"let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
+"let g:Lf_WorkingDirectoryMode = 'Ac'
+"let g:Lf_WindowHeight = 0.30
+"let g:Lf_CacheDirectory = expand('~/.vim/cache')
+"let g:Lf_ShowRelativePath = 0
+"let g:Lf_HideHelp = 1
+"let g:Lf_StlColorscheme = 'powerline'
+"let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
 
 
 "LightLine
@@ -356,7 +372,7 @@ let g:lightline = {
       \ 'component_function': {
       \   'match_count': 'MatchCountStatusline',
       \   'obsession':  'LightlineObsessionStatus',
-      \   'gitbranch': 'fugitive#head',
+      "\   'gitbranch': 'fugitive#head',
       \   'git_changes': 'LightLineChanges',
       \   'cocstatus': 'coc#status'
       \ },
@@ -542,7 +558,7 @@ set autoread
 set autowrite
 set autowriteall                                                        " Auto-write all file changes
 set iskeyword-=_,.,=,-,:,
-set guifont=Source\ Code\ Pro\ for\ Powerline:h16
+" set guifont=Source\ Code\ Pro\ for\ Powerline:h16
 set switchbuf=useopen                                                   " reveal already opened files from the
                                                                         " quickfix window instead of opening new buffers
 set wildmenu
