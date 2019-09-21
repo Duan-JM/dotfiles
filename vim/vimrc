@@ -352,6 +352,31 @@ let g:Lf_StlColorscheme = 'powerline'
 let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
 
 
+" vista.vim
+" How each level is indented and what to prepend.
+" This could make the display more compact or more spacious.
+" e.g., more compact: ["▸ ", ""]
+let g:vista_icon_indent = ["╰─▸ ", "├─▸ "]
+let g:vista#renderer#enable_icon = 1
+
+" The default icons can't be suitable for all the filetypes, you can extend it as you wish.
+let g:vista#renderer#icons = {
+\   "function": "\uf794",
+\   "variable": "\uf71b",
+\  }
+
+function! NearestMethodOrFunction() abort
+  return get(b:, 'vista_nearest_method_or_function', '')
+endfunction
+set statusline+=%{NearestMethodOrFunction()}
+
+" By default vista.vim never run if you don't call it explicitly.
+"
+" If you want to show the nearest function in your statusline automatically,
+" you can add the following line to your vimrc 
+autocmd VimEnter * call vista#RunForNearestMethodOrFunction()
+
+
 "LightLine
 let g:lightline = {
       \ 'colorscheme': 'seoul256',
@@ -360,6 +385,7 @@ let g:lightline = {
       \     [ 'mode', 'paste' ],
       \     [ 'filename', 'modified' ],
       \     [ 'gitbranch', 'git_changes' ],
+      \     [ 'vista' ],
       \     [ 'cocstatus' ]
       \   ],
       \   'right': [
@@ -372,9 +398,10 @@ let g:lightline = {
       \ 'component_function': {
       \   'match_count': 'MatchCountStatusline',
       \   'obsession':  'LightlineObsessionStatus',
-      "\   'gitbranch': 'fugitive#head',
+      \   'gitbranch': 'fugitive#head',
       \   'git_changes': 'LightLineChanges',
-      \   'cocstatus': 'coc#status'
+      \   'cocstatus': 'coc#status',
+      \   'vista': 'NearestMethodOrFunction'
       \ },
       \ 'component_expand': {
       \     'linter_warnings': 'LightlineLinterWarnings',
