@@ -34,9 +34,9 @@ Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
-" Plug 'andymass/vim-matchup'                             " extence
+Plug 'andymass/vim-matchup'                             " extence
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
-" Plug 'easymotion/vim-easymotion'                        " trigger with <leader><leader>+s/w/gE
+Plug 'easymotion/vim-easymotion'                        " trigger with <leader><leader>+s/w/gE
 Plug 'skywind3000/asyncrun.vim'                         " Compile
 Plug 'godlygeek/tabular'                                " align text
 Plug 'tpope/vim-surround'                               " change surroundings
@@ -44,7 +44,8 @@ Plug 'tpope/vim-surround'                               " change surroundings
                                                         " ds[partten]
                                                         " ys(iww)[partten] / yss)
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
-" Plug 'chxuan/tagbar'                                    " show params and functions
+Plug 'chxuan/tagbar'                                    " show params and functions
+Plug 'liuchengxu/vista.vim'                                    " show params and functions
 
 " Writing Blog
 Plug 'rhysd/vim-grammarous', {'for': ['markdown', 'tex']}                       " grammarly checks
@@ -66,8 +67,8 @@ Plug 'lervag/vimtex', {'for': ['tex']}                                          
 
 
 "FileManage
-" Plug 'scrooloose/nerdtree'
-" Plug 'Xuyuanp/nerdtree-git-Plugin'
+Plug 'scrooloose/nerdtree'
+Plug 'Xuyuanp/nerdtree-git-Plugin'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'mhinz/vim-startify'
 Plug 'justinmk/vim-dirvish'
@@ -96,9 +97,9 @@ Plug 'junegunn/gv.vim'
 " Plug 'airblade/vim-gitgutter'                                                   " [c ]c jump to prev/next change [C ]C
 
 " Search
-"Plug 'tpope/vim-abolish'                                                        "增强版的substitue
-"                                                                                ":%S/{man,dog}/{dog,man}/g 替换man和dog的位置
-" Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
+Plug 'tpope/vim-abolish'                                                        "增强版的substitue
+                                                                                ":%S/{man,dog}/{dog,man}/g 替换man和dog的位置
+Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
 Plug 'mileszs/ack.vim'                                                          " Use to search pattern in files
 call plug#end()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -159,8 +160,7 @@ function! g:grammarous#hooks.on_check(errs) abort
 endfunction
 
 function! g:grammarous#hooks.on_reset(errs) abort
-    nunmap <buffer><C-n>
-    nunmap <buffer><C-p>
+    nunmap <buffer><C-n> nunmap <buffer><C-p>
     nunmap <buffer><C-c>
 endfunction
 
@@ -243,17 +243,17 @@ let g:hardtime_default_on = 0
 let g:hardtime_timeout = 500
 let g:hardtime_ignore_quickfix = 1
 
-""easymotion
-"" s{char}{char} to move to {char}{char}
-"nmap <leader>s <Plug>(easymotion-overwin-f2)
+"easymotion
+" s{char}{char} to move to {char}{char}
+nmap <leader>s <Plug>(easymotion-overwin-f2)
 
-"" Move to line
-"map L <Plug>(easymotion-bd-jk)
-"nmap <leader>L <Plug>(easymotion-overwin-line)
+" Move to line
+map L <Plug>(easymotion-bd-jk)
+nmap <leader>L <Plug>(easymotion-overwin-line)
 
-"" Move to word
-"map  W <Plug>(easymotion-bd-w)
-"nmap <leader>W <Plug>(easymotion-overwin-w)
+" Move to word
+map  W <Plug>(easymotion-bd-w)
+nmap <leader>W <Plug>(easymotion-overwin-w)
 
 
 "asyncrun
@@ -331,25 +331,25 @@ let g:indentLine_enabled=1
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
 ""LeaderF
-"let g:Lf_ShortcutF = '<c-p>'
-"let g:Lf_ShortcutB = '<m-n>'
-"" execute 'set <A-m>=\em,'
-"" execute 'set <A-b>=\eb'
-"" execute 'set <A-m>=\em'
-"noremap <c-n> :LeaderfMru<cr>
-"noremap <A-m> :LeaderfFunction!<cr>
-"noremap <A-b> :LeaderfBuffer<cr>
-"" noremap <A-m> :LeaderfTag<cr>
-"let g:Lf_StlSeparator = { 'left': '', 'right': '', 'font': '' }
+let g:Lf_ShortcutF = '<c-p>'
+let g:Lf_ShortcutB = '<m-n>'
+" execute 'set <A-m>=\em,'
+" execute 'set <A-b>=\eb'
+" execute 'set <A-m>=\em'
+noremap <c-n> :LeaderfMru<cr>
+noremap <A-m> :LeaderfFunction!<cr>
+noremap <A-b> :LeaderfBuffer<cr>
+" noremap <A-m> :LeaderfTag<cr>
+let g:Lf_StlSeparator = { 'left': '', 'right': '', 'font': '' }
 
-"let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
-"let g:Lf_WorkingDirectoryMode = 'Ac'
-"let g:Lf_WindowHeight = 0.30
-"let g:Lf_CacheDirectory = expand('~/.vim/cache')
-"let g:Lf_ShowRelativePath = 0
-"let g:Lf_HideHelp = 1
-"let g:Lf_StlColorscheme = 'powerline'
-"let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
+let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
+let g:Lf_WorkingDirectoryMode = 'Ac'
+let g:Lf_WindowHeight = 0.30
+let g:Lf_CacheDirectory = expand('~/.vim/cache')
+let g:Lf_ShowRelativePath = 0
+let g:Lf_HideHelp = 1
+let g:Lf_StlColorscheme = 'powerline'
+let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
 
 
 "LightLine
@@ -562,14 +562,13 @@ set iskeyword-=_,.,=,-,:,
 set switchbuf=useopen                                                   " reveal already opened files from the
                                                                         " quickfix window instead of opening new buffers
 set wildmenu
-set cursorcolumn                                                        " highlight column
-set cursorline                                                          " highlight row
-" set wildmode=list:longest,full
+" set cursorcolumn                                                        " highlight column
+" set cursorline                                                          " highlight row
 if has('nvim')                                                          " Use floating windows to complete the commond, only neovim support
   set wildoptions=pum
   set termguicolors                                                     " With out this settings, transparable float-win will not work normally
   set pumblend=30                                                       " Let floatingwindow to be transparable
-elseif
+else
   set wildmode=list:longest,full                                        " Set list to show completeopt, however it will lead to disfunc for floating windows
 endif
 set nowrap                                                              " Do not wrap long lines
@@ -645,7 +644,7 @@ set colorcolumn=+1                                                      " color 
 "                     :loadview to reload
 " mark ....
 " syntax
-set foldmethod=manual
+set foldmethod=indent
 set foldlevel=99
 set foldlevelstart=99
 
@@ -683,6 +682,7 @@ set formatoptions-=t "disable wrap
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                 Functions                                  "
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "let W Wq wQ not be error
 command! -bar -nargs=* -complete=file -range=% -bang W         <line1>,<line2>write<bang> <args>
 command! -bar -nargs=* -complete=file -range=% -bang Wq        <line1>,<line2>wq<bang> <args>

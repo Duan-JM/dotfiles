@@ -1,7 +1,7 @@
 {
   "diagnostic.warningSign": "W",
   "diagnostic.errorSign": ">>",
-  "diagnostic.displayByAle": false,
+  "diagnostic.displayByAle": true,
   "python.autoComplete.addBrackets": false,
   "python.jediEnabled": true,
   "languageserver": {
