@@ -100,7 +100,7 @@ Plug 'junegunn/gv.vim'
 Plug 'tpope/vim-abolish'                                                        "增强版的substitue
                                                                                 ":%S/{man,dog}/{dog,man}/g 替换man和dog的位置
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
-Plug 'mileszs/ack.vim'                                                          " Use to search pattern in files
+Plug 'wsdjeg/FlyGrep.vim'                                                       " Search Files
 call plug#end()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                   Mappings                                   "
@@ -215,14 +215,11 @@ nmap <leader>f  <Plug>(coc-format-selected)
 
 " Fix autofix problem of current line
 nmap <leader>qf  <Plug>(coc-fix-current)
+nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
 
 " rainbow
 let g:rainbow_active = 1
 
-" ack
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep'
-endif
 
 " vim-smooth-scroll
 " Distance Duration Speed
@@ -230,6 +227,9 @@ noremap <silent> <c-u> :call smooth_scroll#up(&scroll, 8, 2)<CR>
 noremap <silent> <c-d> :call smooth_scroll#down(&scroll, 8, 2)<CR>
 noremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 8, 4)<CR>
 noremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 8, 4)<CR>
+
+" flygrep
+nnoremap <Space>s/ :FlyGrep<cr>
 
 " junegunn/vim-slash
 noremap <plug>(slash-after) zz
@@ -245,7 +245,7 @@ let g:hardtime_ignore_quickfix = 1
 
 "easymotion
 " s{char}{char} to move to {char}{char}
-nmap <leader>s <Plug>(easymotion-overwin-f2)
+" nmap <leader>s <Plug>(easymotion-overwin-f2)
 
 " Move to line
 map L <Plug>(easymotion-bd-jk)
