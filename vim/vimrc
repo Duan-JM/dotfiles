@@ -1,14 +1,5 @@
 "  Check for vim-plug  "
 """"""""""""""""""""""""
-" Check for vim-plug if not exist download it
-if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
-        \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  augroup vimplug
-    au!
-    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
-  augroup END
-endif
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                   Pluglist                                   "
@@ -248,11 +239,11 @@ let g:hardtime_ignore_quickfix = 1
 " nmap <leader>s <Plug>(easymotion-overwin-f2)
 
 " Move to line
-map L <Plug>(easymotion-bd-jk)
+" map L <Plug>(easymotion-bd-jk)
 nmap <leader>L <Plug>(easymotion-overwin-line)
 
 " Move to word
-map  W <Plug>(easymotion-bd-w)
+" map  W <Plug>(easymotion-bd-w)
 nmap <leader>W <Plug>(easymotion-overwin-w)
 
 
@@ -883,7 +874,7 @@ set background=dark
 noremap <leader>bg :call ToggleBG()<CR>
 
 "CompileConfig
-map <leader>r :call CompileRun()<CR>
+nnoremap <leader>r :call CompileRun()<CR>
 "TODO: seperate compile and run 
 func! CompileRun()
     exec "w"
@@ -961,6 +952,16 @@ colorscheme gruvbox
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                  AutoCMD                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" Check for vim-plug if not exist download it
+if filereadable('~/.vim/autoload/plug.vim')
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+        \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  augroup vimplug
+    au!
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+  augroup END
+endif
+
 " config for all file type =====>
 " Return to last edit position when opening files (You want this!)
 autocmd BufReadPost *
