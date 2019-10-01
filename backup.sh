@@ -5,8 +5,8 @@
 ###############
 
 
-DOT_FILE='/Users/deamov/Documents/Github/VDeamoV-dotfiles'
-VIMRC_FILE='/Users/deamov/Documents/Github/VDeamoV-vimrc'
+DOT_FILE='/Users/deamov/Documents/Github/dotfiles'
+VIMRC_FILE='/Users/deamov/Documents/Github/vimrc'
 
 
 ##########################
