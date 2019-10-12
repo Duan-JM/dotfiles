@@ -106,6 +106,7 @@ source ~/.zsh-config/cheat-config.sh
 
 export PATH="/usr/local/sbin:$PATH"
 export PATH="/usr/bin/local:$PATH"
+export PATH="/Users/deamov/bin:$PATH"
 
 export PYTHONSTARTUP=~/.pythonstartup
 #to fix auto complete problem

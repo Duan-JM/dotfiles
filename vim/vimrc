@@ -12,12 +12,13 @@ Plug 'vim-scripts/LargeFile'                            " Fast Load for Large fi
 Plug 'michaeljsmith/vim-indent-object'                  " used for align
 Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
 Plug 'tpope/vim-obsession'
+Plug 'wellle/targets.vim'                               " text objects
 
 " Coding
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'w0rp/ale'                                         " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
-Plug 'VDeamoV/vdeamov-snippets'
+Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
@@ -33,7 +34,7 @@ Plug 'tpope/vim-surround'                               " change surroundings
                                                         " ys(iww)[partten] / yss)
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
 Plug 'chxuan/tagbar'                                    " show params and functions
-Plug 'liuchengxu/vista.vim'                                    " show params and functions
+Plug 'liuchengxu/vista.vim'                             " show params and functions
 
 " Writing Blog
 Plug 'rhysd/vim-grammarous', {'for': ['markdown', 'tex']}                       " grammarly checks
@@ -237,11 +238,11 @@ let g:hardtime_ignore_quickfix = 1
 
 " Move to line
 " map L <Plug>(easymotion-bd-jk)
-nmap <leader>L <Plug>(easymotion-overwin-line)
+" nnoremap <leader>L <Plug>(easymotion-overwin-line)
 
 " Move to word
 " map  W <Plug>(easymotion-bd-w)
-nmap <leader>W <Plug>(easymotion-overwin-w)
+" nnoremap <leader>W <Plug>(easymotion-overwin-w)
 
 
 "asyncrun
@@ -311,7 +312,7 @@ let g:vmt_auto_update_on_save=1 "update toc when save
 let g:vmt_dont_insert_fence=0 "if equals to 1, can't update toc when save
 
 "gist-vim
-let github_user='VDeamoV'
+let github_user='Duan-JM'
 
 
 "Yggdroot/indentLine
@@ -496,9 +497,9 @@ let g:UltiSnipsExpandTrigger       = "<tab>"
 let g:UltiSnipsListSnippets        = "<c-l>"
 let g:UltiSnipsJumpForwardTrigger  = "<c-j>"
 let g:UltiSnipsJumpBackwardTrigger = "<c-k>"
-let g:snips_author = "VDeamoV"
+let g:snips_author = "Duan-JM"
 let g:snips_email = "vincent.duan95@outlook.com"
-let g:snips_github = "https://github.com/VDeamoV"
+let g:snips_github = "https://github.com/Duan-JM"
 
 
 "w0rp/ale
@@ -718,6 +719,7 @@ xnoremap & :&&<CR>
 " 可视模式下，用 * 和 # 搜索选中文本
 xnoremap * :<C-u>call <SID>VSetSearch()<CR>/<C-r>=@/<CR><CR>
 xnoremap # :<C-u>call <SID>VSetSearch()<CR>?<C-r>=@/<CR><CR>
+
 function! s:VSetSearch()
     let temp = @s
     norm! gv"sy

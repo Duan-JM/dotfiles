@@ -1,5 +1,5 @@
 # os check
-if [ "$(uname)"=="Darwin" ]; then
+if [ $(uname) == "Darwin" ]; then
   echo "Dectect MacOS"
 
   if command -v brew >/dev/null 2>&1; then 
@@ -31,7 +31,8 @@ if [ "$(uname)"=="Darwin" ]; then
     echo 'oh my zsh detected, skip installing'
   fi
 
-elif [ "$(uname)"=="Linux" ]; then
+elif [ $(uname) == "Linux" ]; then
+  echo "Detect Linux"
 
   if command -v git >/dev/null 2>&1; then 
     echo 'git detected, skip install git' 
@@ -62,7 +63,14 @@ fi
 echo "Copy the Configure Files"
 
 cp ./zsh/zshrc ~/.zshrc
-cp -rf ./zsh/zsh-config ~/.zsh-config
+cp -rf ./zsh/.zsh-config ~/.zsh-config
+
+echo "Installing Plugins"
 git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 
+echo "Installing Themes"
+git clone https://github.com/iplaces/astro-zsh-theme.git /tmp/astro-zsh-theme
+cp /tmp/astro-zsh-theme/astro.zsh-theme ~/.oh-my-zsh/themes/
+
+echo "Install Finished, Please manually change default bash to zsh"
