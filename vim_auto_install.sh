@@ -86,8 +86,8 @@ if [ -f "~/.config/nvim/init.vim" ]; then
 fi
 
 echo "Creating link to nvim configfile"
-ln -s ~/.vim ~/.config/nvim
-ln -s ~/.vimrc ~/.config/nvim/init.vim
+ln -sf ~/.vim ~/.config/nvim
+ln -sf ~/.vimrc ~/.config/nvim/init.vim
 
 
 # maychange to install node without sudo
