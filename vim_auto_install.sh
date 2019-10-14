@@ -141,7 +141,7 @@ elif [ $(uname) == "Linux" ]; then
   sudo apt-get install autoconf autogen
 
   echo "Install ctags"
-  git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctgs
+  git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags
   ./autogen.sh
   ./configure
