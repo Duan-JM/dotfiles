@@ -104,6 +104,11 @@ if [ -f "~/.config/nvim/init.vim" ]; then
   rm ~/.config/nvim/init.vim
 fi
 
+if [ -d "~/.config/" ]; then
+  echo "No ~/.config file creating"
+  mkdir ~/.config/
+fi
+
 echo "Creating link to nvim configfile"
 ln -sf ~/.vim ~/.config/nvim
 ln -sf ~/.vimrc ~/.config/nvim/init.vim
