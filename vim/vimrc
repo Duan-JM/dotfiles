@@ -14,6 +14,7 @@ Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
 Plug 'tpope/vim-obsession'
 Plug 'wellle/targets.vim'                               " text objects
 
+
 " Coding
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'w0rp/ale'                                         " Syntax Check
@@ -41,6 +42,7 @@ Plug 'rhysd/vim-grammarous', {'for': ['markdown', 'tex']}                       
 Plug 'hotoo/pangu.vim', {'for': ['markdown']}                                   "to make your document better
 Plug 'godlygeek/tabular', {'for': ['markdown']}
 Plug 'plasticboy/vim-markdown', {'for': ['markdown']}
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'mzlogin/vim-markdown-toc', {'for': ['markdown']}
 " :GenTocGFM/:GenTocRedcarpet
 ":UpdateToc 更新目录
@@ -90,6 +92,7 @@ Plug 'tpope/vim-abolish'                                                        
                                                                                 ":%S/{man,dog}/{dog,man}/g 替换man和dog的位置
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
 Plug 'wsdjeg/FlyGrep.vim'                                                       " Search Files
+Plug 'dyng/ctrlsf.vim'                                                          " Change same pattern in multi files
 call plug#end()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                   Mappings                                   "
@@ -138,7 +141,6 @@ endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "pathogen
 execute pathogen#infect()
-
 
 " vim-grammarous
 let g:grammarous#hooks = {}
@@ -209,6 +211,8 @@ nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
 " rainbow
 let g:rainbow_active = 1
 
+""markdown-preview
+"let g:mkdp_browser = 'Safari'
 
 " vim-smooth-scroll
 " Distance Duration Speed
@@ -251,11 +255,7 @@ let g:asyncrun_open=6
 let g:asyncrun_bell=1
 let g:asyncrun_rootmarks = ['.svn', '.git', '.root', '_darcs' , 'build.xml', 'Makefile']
 nnoremap <F10> : call asyncrun#quickfix_toggle(10)<CR>
-" commnent for I barely use cpp for now
-" nnoremap <silent> <F9> : AsyncRun gcc -Wall -O2 "$(VIM_FILEPATH)" -o "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" <CR>
-" nnoremap <silent> <F5> : AsyncRun -raw -cwd=$(VIM_FILEDIR) "$(VIM_FILEDIR)/$(VIM_FILENOEXT)" <CR>
-" nnoremap <silent> <F8> : AsyncRun -cwd=<root> -mode=4 make run <CR>
-nnoremap <silent> <F7> : AsyncRun -cwd=<root> make run<CR>
+nnoremap <silent> <F7> : AsyncRun python3 %<CR>
 
 "vim-latex-live-preview
 autocmd Filetype tex setl updatetime=1
@@ -944,7 +944,8 @@ autocmd! BufNewFile,BufRead *.bat
 " colorscheme anderson
 " colorscheme wombat256
 " colorscheme space-vim-dark
-colorscheme gruvbox
+" colorscheme gruvbox
+colorscheme Atelier_CaveDark
 " colorscheme vividchalk
 " colorscheme night-owl
 
