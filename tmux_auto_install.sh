@@ -40,6 +40,7 @@ elif [ $(uname) == "Linux" ]; then
     echo 'no exist tmux, installing'
     sudo apt install tmux
   fi
+fi
 
 # simple script
 cp -r ./tmux/tmux.conf ~/.tmux.conf
