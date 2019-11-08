@@ -5,6 +5,7 @@ call plug#begin('~/.vim/plugged')
 
 " Need attention
 Plug 'takac/vim-hardtime'
+Plug 'michamos/vim-arxivist'
 
 " System
 Plug 'neoclide/coc-imselect'                            " need install im-select
@@ -139,6 +140,8 @@ endif
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                               PluginConfigure                                "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"
+let g:arxivist_dir = 'cs'
 "pathogen
 execute pathogen#infect()
 
@@ -316,7 +319,7 @@ let github_user='Duan-JM'
 
 
 "Yggdroot/indentLine
-let g:indentLine_enabled=1
+let g:indentLine_enabled=0
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
 ""LeaderF
@@ -614,6 +617,9 @@ set undodir=$HOME/.vim/undo
 set undolevels=1000
 set undoreload=10000
 
+set splitbelow
+set splitright
+
 filetype on
 filetype plugin indent on
 
@@ -660,7 +666,7 @@ set colorcolumn=+1                                                      " color 
 "                     :loadview to reload
 " mark ....
 " syntax
-set foldmethod=indent
+set foldmethod=manual
 set foldlevel=99
 set foldlevelstart=99
 
@@ -890,7 +896,7 @@ func! CompileRun()
         exec "!clear"
         exec "!time bash %"
     elseif &filetype == 'python'
-        exec ":term python3 %"
+        exec ":split | term python3 %"
 
     elseif &filetype == 'html'
         exec "!open -a Safari % &"
@@ -939,15 +945,14 @@ autocmd! BufNewFile,BufRead *.bat
 " should be placed before AutoCMD, or some color configure will not avaliable
 " colorscheme Tomorrow-Night
 " colorscheme PaperColor
-" colorscheme hybrid_material
 " colorscheme mayansmoke
 " colorscheme anderson
 " colorscheme wombat256
 " colorscheme space-vim-dark
 " colorscheme gruvbox
-colorscheme Atelier_CaveDark
+" colorscheme Atelier_CaveDark
 " colorscheme vividchalk
-" colorscheme night-owl
+colorscheme night-owl
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                  AutoCMD                                   "
