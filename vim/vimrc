@@ -874,6 +874,14 @@ function!  ToggleBG()
         set background=light
     endif
 endfunction
+
+" set background transparable
+func! s:transparent_background()
+    highlight Normal guibg=None ctermbg=None
+    highlight NonText guibg=None ctermbg=None
+endf
+autocmd ColorScheme * call s:transparent_background()
+
 " set background is dark at the startup
 set background=dark
 noremap <leader>bg :call ToggleBG()<CR>
@@ -952,7 +960,9 @@ autocmd! BufNewFile,BufRead *.bat
 " colorscheme gruvbox
 " colorscheme Atelier_CaveDark
 " colorscheme vividchalk
-colorscheme night-owl
+" colorscheme night-owl
+let g:onedark_termcolors=256
+colorscheme onedark
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                  AutoCMD                                   "
