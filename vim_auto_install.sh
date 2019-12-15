@@ -149,8 +149,9 @@ elif [ $(uname) == "Linux" ]; then
   sudo make install
 fi
 
-echo "Installing Pylint autopep8 jedi"
+echo "Installing Pylint autopep8 jedi flake8"
 pip3 install pylint autopep8 jedi
+pip3 install flake8 flake8-mypy flake8-bugbear flake8-comprehensions flake8-executable flake8-pyi mccabe pycodestyle pyflakes
 echo "Install Finished, Please manually change default bash to zsh"
 
 echo "Please Manually Install Plugin in neovim using follow cmds"
