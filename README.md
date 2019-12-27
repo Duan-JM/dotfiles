@@ -9,9 +9,13 @@ Collection for my dotfiles
 * [Tmux](#tmux)
   * [Requirements](#requirements-1)
   * [Install Manual](#install-manual-1)
+    * [Automatically Install](#automatically-install)
+    * [Manually Install](#manually-install)
 * [Zsh](#zsh)
   * [Requirements](#requirements-2)
   * [Install Manual](#install-manual-2)
+    * [Automatically Install](#automatically-install-1)
+    * [Manually Install](#manually-install-1)
 
 <!-- vim-markdown-toc -->
 
@@ -21,14 +25,36 @@ Collection for my dotfiles
 
 ## Tmux
 ### Requirements
+- git
+- tmux (will auto installed)
+
 ### Install Manual
+#### Automatically Install
+You can install tmux and config it automatically on ubuntu / Mac OS with
+following command.
+
+```bash
+bash ./tmux_auto_install.sh
+```
+
+#### Manually Install
+
 
 ## Zsh
 ### Requirements
-- zsh
+- git
+- zsh (will auto installed)
 
 ### Install Manual
+#### Automatically Install
+You can install zsh and config it automatically on ubuntu / Mac OS with
+following command.
 
+```bash
+bash ./oh_my_zsh_auto_install.sh
+```
+
+#### Manually Install
 1. Basic Install Steps
 
 ```bash
@@ -57,7 +83,7 @@ cp astro.zsh-theme ~/.oh-my-zsh/themes/
 2. Plugin Install Steps
 
 - [Plugin] Zsh-syntax-highlighting
-  
+
   ```bash
   git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
