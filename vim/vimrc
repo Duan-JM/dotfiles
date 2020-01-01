@@ -8,22 +8,23 @@ Plug 'takac/vim-hardtime'
 Plug 'voldikss/vim-translate-me'
 
 " System
-Plug 'neoclide/coc-imselect'                            " need install im-select
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
 Plug 'michaeljsmith/vim-indent-object'                  " used for align
 Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
-Plug 'tpope/vim-obsession'
 Plug 'wellle/targets.vim'                               " text objects
 Plug 'ryanoasis/vim-devicons'                           " extensions for icons
 
 
 " Coding
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
+Plug 'davidhalter/jedi-vim'
+Plug 'deoplete-plugins/deoplete-jedi'
 Plug 'w0rp/ale'                                         " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
+
                                                         " 补全括号 shift+tab出来
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
 Plug 'andymass/vim-matchup'                             " extence
@@ -90,6 +91,7 @@ Plug 'Yggdroot/LeaderF'                                                         
 Plug 'wsdjeg/FlyGrep.vim'                                                       " Search Files
 Plug 'dyng/ctrlsf.vim'                                                          " Change same pattern in multi files
 call plug#end()
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                   Mappings                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -145,9 +147,27 @@ vnoremap ^ g^
 vnoremap 0 g0
 vnoremap $ g$
 
+" use <C-l> to correct spell while insert mode
+inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                               PluginConfigure                                "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" deoplete
+let g:deoplete#enable_at_startup = 1
+
+" deoplete-plugins/deoplete-jedi
+let g:deoplete#sources#jedi#show_docstring = 0
+
+" davidhalter/jedi-vim
+let g:jedi#completions_enabled = 0
+let g:jedi#auto_vim_configuration = 0
+let g:jedi#goto_assignments_command = '<leader>g'   " dynamically done for
+let g:jedi#goto_definitions_command = '<leader>jd'  " dynamically done for
+let g:jedi#smart_auto_mappings = 1
+let g:jedi#rename_command = ""
+let g:jedi#auto_close_doc = 1
+
 " translate-me
 let g:vtm_default_mapping = 0
 let g:vtm_target_lang = 'en' " default translate to english
@@ -179,59 +199,6 @@ function! g:grammarous#hooks.on_reset(errs) abort
     nunmap <buffer><C-n> nunmap <buffer><C-p>
     nunmap <buffer><C-c>
 endfunction
-
-" tpope/vim-obsession
-" :Obsession ~/.vim/obsessions/
-" :source ~/.vim/obsessions/Session.vim
-command! -bang Sesh call Sesh(<bang>0)
-function! Sesh(bang)
-  let l:file = $HOME . '/.vim/obsessions/Session.vim'
-  let l:isTracking = !empty(ObsessionStatus('tracking', '')) " true for both off and pused
-
-  if (a:bang) " replace persisted session
-    if (l:isTracking)
-      Obsession!
-    endif
-    if (filereadable(l:file))
-      call delete(l:file)
-    endif
-    exec 'Obsession ' . l:file
-  else " restore session if possible or start tracking current
-    if (!l:isTracking)
-      if (filereadable(l:file))
-        exec 'source ' . l:file
-      else
-        exec 'Obsession ' . l:file
-      endif
-    else
-      echom 'already tracking'
-    endif
-  endif
-endfunction
-
-" coc.nvim
-set shell=/bin/zsh
-let g:coc_status_error_sign='E'
-let g:coc_status_warning_sign='W'
-
-
-" coc-python
-" Remap key for gotos.
-nmap <leader>jd <Plug>(coc-definition)
-" nmap <leader>gy <Plug>(coc-type-definition)
-" nmap <leader>gi <Plug>(coc-implementation)
-" nmap <leader>gr <Plug>(coc-references)
-
-" Highlight symbol under cursor on CursorHold
-autocmd CursorHold * silent call CocActionAsync('highlight')
-
-" Remap for format selected region
-xmap <leader>f  <Plug>(coc-format-selected)
-nmap <leader>f  <Plug>(coc-format-selected)
-
-" Fix autofix problem of current line
-nmap <leader>qf  <Plug>(coc-fix-current)
-nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
 
 " rainbow
 let g:rainbow_active = 1
@@ -381,21 +348,17 @@ let g:lightline = {
       \     [ 'filename', 'modified' ],
       \     [ 'gitbranch', 'git_changes' ],
       \     [ 'vista' ],
-      \     [ 'cocstatus' ]
       \   ],
       \   'right': [
       \     ['lineinfo'],
       \     ['percent'],
       \     ['readonly', 'linter_warnings', 'linter_errors', 'linter_ok'],
-      \     ['obsession'],
       \   ]
       \ },
       \ 'component_function': {
       \   'match_count': 'MatchCountStatusline',
-      \   'obsession':  'LightlineObsessionStatus',
       \   'gitbranch': 'fugitive#head',
       \   'git_changes': 'LightLineChanges',
-      \   'cocstatus': 'coc#status',
       \ },
       \ 'component_expand': {
       \     'linter_warnings': 'LightlineLinterWarnings',
@@ -416,12 +379,6 @@ let g:lightline = {
       \     'tabline': 0
       \   }
     \ }
-
-function! LightlineObsessionStatus()
-  if exists('*ObsessionStatus')
-    return ObsessionStatus('session', 'session paused')
-  endif
-endfunction
 
 function! LightLineChanges()
   let l:hunkSummary = v:null
@@ -499,7 +456,6 @@ endfunction
 "ref:https://stackoverflow.com/questions/14896327/ultisnips-and-youcompleteme
 let g:UltiSnipsUsePythonVersion    = 3
 let g:UltiSnipsExpandTrigger       = "<tab>"
-let g:UltiSnipsListSnippets        = "<c-l>"
 let g:UltiSnipsJumpForwardTrigger  = "<c-j>"
 let g:UltiSnipsJumpBackwardTrigger = "<c-k>"
 let g:snips_author = "Duan-JM"
@@ -890,6 +846,20 @@ set background=dark
 noremap <leader>bg :call ToggleBG()<CR>
 
 "CompileConfig
+"按F5运行python"
+map <F5> :w<CR> :call RunPython()<CR>
+function! RunPython()
+    let mp = &makeprg
+    let ef = &errorformat
+    let exeFile = expand("%:t")
+    setlocal makeprg=python\ -u
+    set efm=%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
+    silent make %
+    copen
+    let &makeprg = mp
+    let &errorformat = ef
+endfunction
+
 nnoremap <leader>r :call CompileRun()<CR>
 func! CompileRun()
     exec "w"
@@ -1034,8 +1004,8 @@ autocmd! BufWritePost .vimrc source ~/.vimrc                                " so
 autocmd! FileType gitcommit autocmd! BufEnter COMMIT_EDITMSG
             \ call setpos('.', [0, 1, 1, 0])                                " set it to the first line when editing a git commit message
 
-
-
+" config for tex
+autocmd! FileType tex set spell | set spelllang=en_gb
 
 " config for python
 " Let external space be red for python
@@ -1049,5 +1019,8 @@ autocmd BufNewFile,BufRead *.plt,.gnuplot setf gnuplot
 autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=red
 autocmd FileType ruby set dictionary+=~/.vim/dict/ruby.dict
 autocmd FileType javascript set dictionary+=$HOME/.vim/dict/node.dict
+
+
 " config for special filetype <==========
+
 "}

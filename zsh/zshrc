@@ -101,10 +101,16 @@ source $ZSH/oh-my-zsh.sh
 MAILCHECK=0
 
 source ~/.zsh-config/alias.sh
+source ~/.zsh-config/go-config.sh
+source ~/.zsh-config/gem-config.sh
+source ~/.zsh-config/cheat-config.sh
 
 export PATH="/usr/local/sbin:$PATH"
 export PATH="/usr/bin/local:$PATH"
 export PATH="/Users/deamov/bin:$PATH"
+
+export PYTHONSTARTUP=~/.pythonstartup
+#to fix auto complete problem
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
