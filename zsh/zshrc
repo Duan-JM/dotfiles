@@ -101,9 +101,7 @@ source $ZSH/oh-my-zsh.sh
 MAILCHECK=0
 
 source ~/.zsh-config/alias.sh
-source ~/.zsh-config/go-config.sh
 source ~/.zsh-config/gem-config.sh
-source ~/.zsh-config/cheat-config.sh
 
 export PATH="/usr/local/sbin:$PATH"
 export PATH="/usr/bin/local:$PATH"

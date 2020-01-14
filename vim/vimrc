@@ -24,7 +24,6 @@ Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
-
                                                         " 补全括号 shift+tab出来
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
 Plug 'andymass/vim-matchup'                             " extence
@@ -56,6 +55,7 @@ Plug 'dhruvasagar/vim-table-mode', {'for': ['markdown']}
 "<leader>tt to change the exist text to format table
 Plug 'xuhdev/vim-latex-live-preview', {'for': ['tex']}                          " Use when you work with cn
 Plug 'lervag/vimtex', {'for': ['tex']}                                          " English is okay, fail with cn
+Plug 'deoplete-plugins/deoplete-dictionary'
 
 
 "FileManage
@@ -92,12 +92,11 @@ Plug 'wsdjeg/FlyGrep.vim'                                                       
 Plug 'dyng/ctrlsf.vim'                                                          " Change same pattern in multi files
 call plug#end()
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                   Mappings                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Caution: Mapping should place before PluginConfigure
-
-
 let mapleader=' '
 
 nmap . .`[
@@ -141,18 +140,15 @@ nnoremap ^ g^
 nnoremap 0 g0
 nnoremap $ g$
 
-vnoremap j gj
-vnoremap k gk
-vnoremap ^ g^
-vnoremap 0 g0
-vnoremap $ g$
-
 " use <C-l> to correct spell while insert mode
 inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                               PluginConfigure                                "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" kite
+let g:kite_auto_complete=0
+
 " deoplete
 let g:deoplete#enable_at_startup = 1
 
@@ -167,6 +163,16 @@ let g:jedi#goto_definitions_command = '<leader>jd'  " dynamically done for
 let g:jedi#smart_auto_mappings = 1
 let g:jedi#rename_command = ""
 let g:jedi#auto_close_doc = 1
+
+" deoplete-dictionary
+setlocal dictionary+=/usr/share/dict/words
+setlocal dictionary+=/usr/share/dict/american-english
+" Remove this if you'd like to use fuzzy search
+call deoplete#custom#source('dictionary', 'matchers', ['matcher_head'])
+" If dictionary is already sorted, no need to sort it again.
+call deoplete#custom#source('dictionary', 'sorters', [])
+" Do not complete too short words
+call deoplete#custom#source('dictionary', 'min_pattern_length', 4)
 
 " translate-me
 let g:vtm_default_mapping = 0
@@ -230,15 +236,15 @@ let g:hardtime_ignore_quickfix = 1
 
 "easymotion
 " s{char}{char} to move to {char}{char}
-" nmap <leader>s <Plug>(easymotion-overwin-f2)
+nmap <leader>ss <Plug>(easymotion-overwin-f2)
 
 " Move to line
-" map L <Plug>(easymotion-bd-jk)
-" nnoremap <leader>L <Plug>(easymotion-overwin-line)
+map L <Plug>(easymotion-bd-jk)
+nnoremap <leader>L <Plug>(easymotion-overwin-line)
 
 " Move to word
-" map  W <Plug>(easymotion-bd-w)
-" nnoremap <leader>W <Plug>(easymotion-overwin-w)
+map W <Plug>(easymotion-bd-w)
+nnoremap <leader>W <Plug>(easymotion-overwin-w)
 
 
 "vim-latex-live-preview
@@ -340,6 +346,7 @@ let g:vista#renderer#icons = {
 
 
 "LightLine
+"%{kite#statusline()}"
 let g:lightline = {
       \ 'colorscheme': 'seoul256',
       \ 'active': {
@@ -348,6 +355,7 @@ let g:lightline = {
       \     [ 'filename', 'modified' ],
       \     [ 'gitbranch', 'git_changes' ],
       \     [ 'vista' ],
+      \     [ 'kite' ],
       \   ],
       \   'right': [
       \     ['lineinfo'],
@@ -359,6 +367,7 @@ let g:lightline = {
       \   'match_count': 'MatchCountStatusline',
       \   'gitbranch': 'fugitive#head',
       \   'git_changes': 'LightLineChanges',
+      \   'kite': 'kite#statusline'
       \ },
       \ 'component_expand': {
       \     'linter_warnings': 'LightlineLinterWarnings',
@@ -562,7 +571,7 @@ set showcmd                                                             " Show p
 " Selected characters/lines in visual mode
 set viewoptions=folds,options,cursor,unix,slash                         " Better Unix / Windows compatibility
 set virtualedit=onemore                                                 " used with caution of breaking plugins
-set completeopt=menuone,menu,preview,longest
+set completeopt=menuone,noinsert,menu,preview,longest
 set tags=./tags;/,~/.vimtags
 set dictionary+=/usr/share/dict/words                                   " autocompletion with dictionary help
 set dictionary+=~/.vim/dict/
@@ -935,9 +944,9 @@ autocmd! BufNewFile,BufRead *.bat
 " colorscheme gruvbox
 " colorscheme Atelier_CaveDark
 " colorscheme vividchalk
-colorscheme night-owl
-" let g:onedark_termcolors=256
-" colorscheme onedark
+" colorscheme night-owl
+let g:onedark_termcolors=256
+colorscheme onedark
 " colorscheme peaksea
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
