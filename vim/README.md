@@ -2,7 +2,7 @@ Welcome to MyVimrc
 ==================
 TODO LIST
 --------
-- [x] Try coc plugin to replce YCM or something else
+- [ ] Rewrite using and install manual
 
 Special Information
 ------------------
@@ -36,7 +36,6 @@ ln -sf ~/.vimrc ~/.config/nvim/init.vim
 alias vim='nvim'
 alias vi='nvim'
 ```
-
 
 Vim Installation
 ----------------
@@ -196,45 +195,44 @@ PluginList
 ```bash
 " Need attention
 Plug 'takac/vim-hardtime'
+Plug 'voldikss/vim-translate-me'
 
 " System
-Plug 'lyokha/vim-xkbswitch', {'as': 'xkbswitch'}        " fix for cn change en
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
-Plug 'kana/vim-textobj-indent'
-Plug 'kana/vim-textobj-user'
-Plug 'kana/vim-textobj-syntax'
-Plug 'kana/vim-textobj-function', { 'for':['c', 'cpp', 'vim', 'java', 'python'] }
-Plug 'sgur/vim-textobj-parameter'
 Plug 'michaeljsmith/vim-indent-object'                  " used for align
 Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
+Plug 'wellle/targets.vim'                               " text objects
+Plug 'ryanoasis/vim-devicons'                           " extensions for icons
+Plug 'brglng/vim-im-select'                             " auto change input methods, needs `imselect` cmd
 
 " Coding
-Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
-Plug 'ludovicchabant/vim-gutentags'                     " auto generate tags
+Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
+Plug 'davidhalter/jedi-vim'
+Plug 'deoplete-plugins/deoplete-jedi'
 Plug 'w0rp/ale'                                         " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
-Plug 'VDeamoV/vim-snippets'
+Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
-Plug 'Shougo/echodoc.vim'                               " U will like it
+Plug 'andymass/vim-matchup'                             " extence
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
 Plug 'easymotion/vim-easymotion'                        " trigger with <leader><leader>+s/w/gE
-Plug 'skywind3000/asyncrun.vim'                         " Compile
 Plug 'godlygeek/tabular'                                " align text
 Plug 'tpope/vim-surround'                               " change surroundings
                                                         " c[ange]s[old parttern] [new partten]
                                                         " ds[partten]
                                                         " ys(iww)[partten] / yss)
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
-Plug 'chxuan/tagbar'                                    " show params and functions
-
+Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python']}                     " show params and functions
 
 " Writing Blog
+Plug 'rhysd/vim-grammarous', {'for': ['markdown', 'tex']}                       " grammarly checks
 Plug 'hotoo/pangu.vim', {'for': ['markdown']}                                   "to make your document better
 Plug 'godlygeek/tabular', {'for': ['markdown']}
 Plug 'plasticboy/vim-markdown', {'for': ['markdown']}
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'mzlogin/vim-markdown-toc', {'for': ['markdown']}
 " :GenTocGFM/:GenTocRedcarpet
 ":UpdateToc 更新目录
@@ -247,6 +245,7 @@ Plug 'dhruvasagar/vim-table-mode', {'for': ['markdown']}
 "<leader>tt to change the exist text to format table
 Plug 'xuhdev/vim-latex-live-preview', {'for': ['tex']}                          " Use when you work with cn
 Plug 'lervag/vimtex', {'for': ['tex']}                                          " English is okay, fail with cn
+Plug 'deoplete-plugins/deoplete-dictionary'
 
 
 "FileManage
@@ -262,98 +261,48 @@ Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'itchyny/lightline.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'Yggdroot/indentLine'                                                      " Show indent line
-Plug 'bling/vim-bufferline'                                                     " 为打开的文件有一个快捷栏
 Plug 'kshenoy/vim-signature'                                                    " Visible Mark
-Plug 'junegunn/vim-slash'                                                       " clean hightline after search
 Plug 'luochen1990/rainbow'                                                      " multi color for Parentheses
-Plug 'therubymug/vim-pyte'                                                      " theme pyte
-Plug 'vim-scripts/mayansmoke'
-" https://github.com/vim-scripts/mayansmoke
 Plug 'vim-scripts/peaksea'
+Plug 'haishanh/night-owl.vim'
+Plug 'nightsense/stellarized'
+Plug 'nightsense/cosmic_latte'
 
 " Github
-Plug 'tpope/vim-fugitive'
 Plug 'mattn/gist-vim'
 Plug 'mattn/webapi-vim'
-Plug 'junegunn/vim-github-dashboard', { 'on': ['GHDashboard', 'GHActivity'] }   " visit github in vim 
-Plug 'junegunn/gv.vim'
+Plug 'tpope/vim-fugitive'
+Plug 'junegunn/gv.vim'                                                          " Rely on fugitive
+Plug 'airblade/vim-gitgutter'                                                   " [c ]c jump to prev/next change [C ]C
 
 " Search
 Plug 'tpope/vim-abolish'                                                        "增强版的substitue
-                                                                                ":%S/{man,dog}/{dog,man}/g 替换man和dog的位置
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
-Plug 'mileszs/ack.vim'                                                          " Use to search pattern in files
+                                                                                " <c-]> open in vertical 
+Plug 'junegunn/vim-slash'                                                       " clean hightline after search
+Plug 'brooth/far.vim'                                                           " search and replace
 ```
 
-Old Plugin Configure Backup
----------------------------
-### YouCompleteMe
-1. *add `~/.vim.ycm_extra_conf.py` follow the instructions in [here](https://jonasdevlieghere.com/a-better-youcompleteme-config/)*
-2. put config below to the vimrc
-```bash
+TIPS Usage
+----------
+### Searching & Navigating
+1. Search files names
 
-YouCompleteMe
-let g:ycm_min_num_of_chars_for_completion = 2
-"Preview windows settings
-set splitbelow  "set preview window below
-let g:ycm_add_preview_to_completeopt = 1
-let g:ycm_autoclose_preview_window_after_completion = 0
-let g:ycm_autoclose_preview_window_after_insertion = 0
-let g:ycm_show_diagnostics_ui = 0
-let g:ycm_server_log_level = 'info'
-let g:ycm_cache_omnifunc=0
-" 禁止缓存匹配项,每次都重新生成匹配项
-"leave '<tab>', '<c-j>' for ultisnips
-let g:ycm_key_list_select_completion = ['<c-n>', '<Down>']
-"leave '<s-tab>', '<c-k>' for ultisnips
-let g:ycm_key_list_previous_completion = ['<c-p>', '<Up>']
-nnoremap <leader>lo :lopen<CR>
-nnoremap <leader>lc :lclose<CR>
+We use `Leaderf` to search files, use `<c-p>` to trigger the plugin, use `<c-]>` to open the file vertially.
 
-" 开启各种补全引擎
-let g:ycm_auto_trigger = 1                  " 开启 YCM 基于标识符补全，默认为1
-let g:ycm_seed_identifiers_with_syntax=1                " 开启 YCM 基于语法关键字补全
-let g:ycm_complete_in_comments = 1              " 在注释输入中也能补全
-let g:ycm_complete_in_strings = 1               " 在字符串输入中也能补全
-let g:ycm_collect_identifiers_from_comments_and_strings = 1 " 注释和字符串中的文字也会被收入补全
-let g:ycm_collect_identifiers_from_tags_files=1         " 开启 YCM 基于标签引擎
-let g:ycm_python_binary_path='/usr/local/bin/python3'
-let g:ycm_server_python_interpreter='/usr/local/bin/python3'
+2. Search content of lots of files
 
-nnoremap <leader>jd :YcmCompleter GoToDefinitionElseDeclaration<CR>
-nnoremap <leader>jd :YcmCompleter GoToDeclaration<CR>
-"跳转到定义处
-let g:ycm_confirm_extra_conf = 0
-let g:ycm_global_ycm_extra_conf = '~/.vim/.ycm_extra_conf.py'
-let g:ycm_key_list_select_completion=[]
-let g:ycm_key_list_previous_completion=[]
-let g:ycm_filetype_blacklist = {
-            \ 'tagbar' : 1,
-            \ 'qf' : 1,
-            \ 'notes' : 1,
-            \ 'markdown' : 1,
-            \ 'unite' : 1,
-            \ 'text' : 1,
-            \ 'vimwiki' : 1,
-            \ 'pandoc' : 1,
-            \ 'infolog' : 1,
-            \ 'mail' : 1
-            \}
+We use `far` plugin to search the content in a bunch of files. 
+Using `<space>s/` to triger the command line, using `:F foo file_mask` to
+search. eg, `:F test **/*.py` search test in all `py` file in the folder.
 
-let g:ycm_semantic_triggers =  {
-            \ 'c' : ['->', '.'],
-            \ 'objc' : ['->', '.'],
-            \ 'ocaml' : ['.', '#'],
-            \ 'cpp,objcpp' : ['->', '.', '::'],
-            \ 'perl' : ['->'],
-            \ 'php' : ['->', '::'],
-            \ 'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
-            \ 'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
-            \ 'ruby' : ['.', '::'],
-            \ 'lua' : ['.', ':'],
-            \ 'erlang' : [':'],
-            \ 'css': ['re!^\s{4}', 're!:\s+'],
-            \ 'html': ['</'],
-            \}
+3. Navigate between buffers and functions
 
-```
+we also use `LeaderF` or `Vista` to navigate between buffers and functions. We
+use `<A-b>` to trigger the list of buffers, use `<A-m>` to trigger the
+functions list (also work in markdown files).
+
+
+4. Tabs Controls
+We use `<leader>t` to create a new tab, `<leader>v` to create a new tab
+vertically and `<leader>tq` to close tabs and `<leader>tn` to switch tabs.
