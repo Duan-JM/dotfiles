@@ -144,8 +144,7 @@ elif [ $(uname) == "Linux" ]; then
   echo "Install ctags"
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags
-  ./autogen.sh
-  ./configure
+  ./autogen.sh ./configure
   make
   sudo make install
 fi
@@ -153,13 +152,6 @@ fi
 echo "Installing Pylint autopep8 jedi flake8"
 pip3 install pylint autopep8 jedi
 pip3 install flake8 flake8-mypy flake8-bugbear flake8-comprehensions flake8-executable flake8-pyi mccabe pycodestyle pyflakes
-echo "Install Finished, Please manually change default bash to zsh"
 
-echo "Please Manually Install Plugin in neovim using follow cmds"
-echo ":PlugInstall"
-echo ":PlugUpgrade"
-echo ":PlugUpdate"
-echo ":CocInstall coc-ultisnips"
-echo ":CocInstall coc-python"
-echo ":CocInstall coc-tabnine"
-echo ":CocInstall coc-json"
+echo "We have deprecated coc, so we are Good to Go with simple :PlugInstall"
+echo "If configure is not set up correctly, please check out if ~/.config/nvim and ~/.config/nvim/init.vim are generated properly"
