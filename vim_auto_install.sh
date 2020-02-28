@@ -97,6 +97,7 @@ echo "Changing relevant linking"
 if [ -f "~/.config/nvim" or -d "~/.config/nvim" ]; then
   echo "deleting existing nvim config file"
   rm -rf ~/.config/nvim
+  mkdir ~/.config/nvim
 fi
 
 if [ -f "~/.config/nvim/init.vim" ]; then
