@@ -17,14 +17,12 @@ cp -rf ~/.vim/fonts $DOT_FILE/vim
 cp -rf ~/.vim/colors $DOT_FILE/vim
 cp -rf ~/.vim/autoload $DOT_FILE/vim
 cp ~/.vimrc $DOT_FILE/vim/vimrc
-cp ~/.vim/coc-settings.json $DOT_FILE/vim/coc-settings.json
 
 # back up to vimrc
 cp -rf ~/.vim/fonts $VIMRC_FILE
 cp -rf ~/.vim/colors $VIMRC_FILE
 cp -rf ~/.vim/autoload $VIMRC_FILE
 cp ~/.vimrc $VIMRC_FILE/vimrc
-cp ~/.vim/coc-settings.json $VIMRC_FILE/coc-settings.json
 
 
 ###########################

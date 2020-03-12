@@ -14,8 +14,16 @@ Plug 'wellle/targets.vim'                               " text objects
 Plug 'ryanoasis/vim-devicons'                           " extensions for icons
 Plug 'brglng/vim-im-select'                             " auto change input methods, needs `imselect` cmd
 Plug 'unblevable/quick-scope'                           " Advance setting for f t search
-Plug 'vim-scripts/YankRing.vim'                         " multiple yank record
-                                                        " <leader>p to trigger
+Plug 'mbbill/undotree'                                  " history of the undo
+if has('nvim')
+  Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' } " insteresting system
+else
+  Plug 'Shougo/denite.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+Plug 'Shougo/neoyank.vim'                                     " yank history using denite
+Plug 'ncm2/float-preview.nvim'                                " showing doc with float windows not preview beside the functions
 
 " Coding
 Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
@@ -149,16 +157,36 @@ inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                               PluginConfigure                                "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" YankRing
-let yankring_min_element_length = 5
-let yankring_max_history = 100
-let yankring_history_dir = '~/.cache'
-let yankring_min_element_length = 1
-let yankring_enabled = 1
-let YankRingyankring_ignore_duplicate = 1
-let yankring_window_auto_close = 1
-let ClipboardMonitor = 1
-nnoremap <leader>p :YRShow<cr>
+"ncm2/float_preview
+function! DisableExtras()
+  call nvim_win_set_option(g:float_preview#win, 'number', v:false)
+  call nvim_win_set_option(g:float_preview#win, 'relativenumber', v:false)
+  call nvim_win_set_option(g:float_preview#win, 'cursorline', v:false)
+endfunction
+autocmd User FloatPreviewWinOpen call DisableExtras()
+let g:float_preview#docked = 0
+
+" Define mappings
+autocmd FileType denite call s:denite_my_settings()
+function! s:denite_my_settings() abort
+  nnoremap <silent><buffer><expr> <CR>
+  \ denite#do_map('do_action')
+  nnoremap <silent><buffer><expr> d
+  \ denite#do_map('do_action', 'delete')
+  nnoremap <silent><buffer><expr> p
+  \ denite#do_map('do_action', 'preview')
+  nnoremap <silent><buffer><expr> q
+  \ denite#do_map('quit')
+  nnoremap <silent><buffer><expr> i
+  \ denite#do_map('open_filter_buffer')
+  nnoremap <silent><buffer><expr> <Space>
+  \ denite#do_map('toggle_select').'j'
+endfunction
+
+
+" Neoyank
+nnoremap <leader>y :Denite neoyank<cr>
+
 
 " quick-scope
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
@@ -168,6 +196,7 @@ augroup qs_colors
   autocmd ColorScheme * highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline
   autocmd ColorScheme * highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
 augroup END
+
 
 " Far
 set regexpengine=1
@@ -573,6 +602,7 @@ if has('nvim')                                                          " Use fl
   set wildoptions=pum
   set termguicolors                                                     " With out this settings, transparable float-win will not work normally
   set pumblend=30                                                       " Let floatingwindow to be transparable
+  set winblend=9
 else
   set wildmode=list:longest,full                                        " Set list to show completeopt, however it will lead to disfunc for floating windows
 endif
@@ -591,6 +621,7 @@ set showcmd                                                             " Show p
 set viewoptions=folds,options,cursor,unix,slash                         " Better Unix / Windows compatibility
 set virtualedit=onemore                                                 " used with caution of breaking plugins
 set completeopt=menuone,noinsert,menu,preview,longest
+set completeopt-=preview                                                " avoid preview windows for function docs
 set tags=./tags;/,~/.vimtags
 set dictionary+=/usr/share/dict/words                                   " autocompletion with dictionary help
 set dictionary+=~/.vim/dict/
@@ -1069,4 +1100,3 @@ autocmd TermClose * call feedkeys("i")
 " add space between current character
 let @s='i la '
 "}
-
