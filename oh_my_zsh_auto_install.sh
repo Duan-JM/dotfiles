@@ -1,3 +1,5 @@
+#!/bin/bash
+SUDO_PREFIX=$1
 # os check
 if [ $(uname) == "Darwin" ]; then
   echo "Dectect MacOS"
@@ -38,14 +40,14 @@ elif [ $(uname) == "Linux" ]; then
     echo 'git detected, skip install git' 
   else 
     echo 'no exists git, installing' 
-    sudo apt install git
+    ${SUDO_PREFIX} apt install git
   fi
 
   if command -v zsh >/dev/null 2>&1; then
     echo 'zsh detected, skip install zsh'
   else
     echo 'no exist zsh, installing'
-    sudo apt install zsh
+    ${SUDO_PREFIX} apt install zsh
     chsh -s /bin/zsh
   fi
 

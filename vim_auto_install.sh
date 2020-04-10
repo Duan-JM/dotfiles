@@ -1,4 +1,5 @@
 #!/bin/bash
+SUDO_PREFIX=$1
 
 # We only support neovim here
 if [ $(uname) == "Darwin" ]; then
@@ -48,9 +49,9 @@ elif [ $(uname) == "Linux" ]; then
     echo "neovim detected"
   else
     echo 'no existing neovim, installing'
-    sudo apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
-    sudo apt update
-    sudo apt-get install neovim --yes
+    ${SUDO_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
+    ${SUDO_PREFIX} apt update
+    ${SUDO_PREFIX} apt-get install neovim --yes
   fi
 
   if command -v git >/dev/null 2>&1; then 
@@ -64,7 +65,7 @@ elif [ $(uname) == "Linux" ]; then
     echo 'pip3 detected, skip install pip'
   else
     echo 'no exists pip, installing'
-    sudo apt-get install python3-pip
+    ${SUDO_PREFIX} apt-get install python3-pip
   fi
 
 else
@@ -121,14 +122,14 @@ if [ $(uname) == "Darwin" ]; then
 
 elif [ $(uname) == "Linux" ]; then
   echo "Install node for coc"
-  sudo add-apt-repository ppa:chris-lea/node.js --yes
-  sudo apt-get update
-  sudo apt-get install nodejs npm --yes
-  sudo npm config set registry https://registry.npm.taobao.org
-  sudo npm config list
-  sudo npm install n -g
-  sudo n stable
-  sudo node -v
+  ${SUDO_PREFIX} add-apt-repository ppa:chris-lea/node.js --yes
+  ${SUDO_PREFIX} apt-get update
+  ${SUDO_PREFIX} apt-get install nodejs npm --yes
+  ${SUDO_PREFIX} npm config set registry https://registry.npm.taobao.org
+  ${SUDO_PREFIX} npm config list
+  ${SUDO_PREFIX} npm install n -g
+  ${SUDO_PREFIX} n stable
+  ${SUDO_PREFIX} node -v
   echo "Install latest node finished"
 
 fi
@@ -139,14 +140,14 @@ if [ $(uname) == "Darwin" ]; then
 
 elif [ $(uname) == "Linux" ]; then
   echo "install autoconf autogen"
-  sudo apt-get install autoconf autogen
+  ${SUDO_PREFIX} apt-get install autoconf autogen
 
   echo "Install ctags"
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags
   ./autogen.sh ./configure
   make
-  sudo make install
+  ${SUDO_PREFIX} make install
 fi
 
 echo "Installing Pylint autopep8 jedi flake8"

@@ -1,4 +1,5 @@
 #!/bin/bash
+SUDO_PREFIX=$1
 
 if [ $(uname) == "Darwin" ]; then
   echo "Dectect MacOS"
@@ -31,14 +32,14 @@ elif [ $(uname) == "Linux" ]; then
     echo 'git detected, skip install git' 
   else 
     echo 'no exists git, installing' 
-    sudo apt install git
+    ${SUDO_PREFIX} apt install git
   fi
 
   if command -v tmux >/dev/null 2>&1; then
     echo 'tmux detected, skip install tmux'
   else
     echo 'no exist tmux, installing'
-    sudo apt install tmux
+    ${SUDO_PREFIX} apt install tmux
   fi
 fi
 
