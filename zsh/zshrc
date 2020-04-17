@@ -103,6 +103,7 @@ MAILCHECK=0
 
 source ~/.zsh-config/alias.sh
 source ~/.zsh-config/gem-config.sh
+source ~/.zsh-config/fzf.sh
 
 export PATH="/usr/local/sbin:$PATH"
 export PATH="/usr/bin/local:$PATH"
@@ -113,8 +114,6 @@ export PATH="/Users/deamov/bin:$PATH"
 # to fix scapy problem
 
 export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.tuna.tsinghua.edu.cn/homebrew-bottles
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 function gi() { curl -sLw n https://www.gitignore.io/api/$@ ;}

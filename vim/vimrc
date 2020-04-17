@@ -3,6 +3,7 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 " Need attention
+Plug 'skywind3000/asynctasks.vim'
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
@@ -408,7 +409,7 @@ let g:Lf_ShowRelativePath = 0
 let g:Lf_HideHelp = 1
 let g:Lf_StlColorscheme = 'powerline'
 let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
-
+let g:Lf_UseVersionControlTool = 0
 
 " vista.vim
 " How each level is indented and what to prepend.
@@ -710,7 +711,7 @@ set colorcolumn=+1                                                      " color 
 "                     :loadview to reload
 " mark ....
 " syntax
-set foldmethod=manual
+set foldmethod=indent
 set foldlevel=99
 set foldlevelstart=99
 
@@ -991,6 +992,25 @@ func! CompileRun()
     endif
 endfunc
 
+
+" retain indent level on folds
+" Modified from http://dhruvasagar.com/2013/03/28/vim-better-foldtext
+let indent_level = indent(v:foldstart)
+let indent = repeat(' ',indent_level)
+function! NeatFoldText()
+  let indent_level = indent(v:foldstart)
+  let indent = repeat(' ',indent_level)
+  let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
+  let lines_count = v:foldend - v:foldstart + 1
+  let lines_count_text = '-' . printf("%10s", lines_count . ' lines') . ' '
+  let foldchar = matchstr(&fillchars, 'fold:\zs.')
+  let foldtextstart = strpart('+' . repeat(foldchar, v:foldlevel*2) . line, 0, (winwidth(0)*2)/3)
+  let foldtextend = lines_count_text . repeat(foldchar, 8)
+  let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
+  return indent . foldtextstart . repeat(foldchar, winwidth(0)-foldtextlength) . foldtextend
+endfunction
+set foldtext=NeatFoldText()
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                             FileType Conifgure                             "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -1109,3 +1129,4 @@ autocmd FileType javascript set dictionary+=$HOME/.vim/dict/node.dict
 " add space between current character
 let @s='i la '
 "}
+

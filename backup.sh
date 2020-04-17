@@ -41,3 +41,9 @@ cp -rf ~/.tmux.conf $DOT_FILE/tmux/tmux.conf
 cp ~/.zshrc $DOT_FILE/zsh/zshrc
 cp -rf ~/.zsh-config $DOT_FILE/zsh
 
+
+#####################
+#   Pylint & flake8 #
+#####################
+cp ~/.pylintrc $DOT_FILE/pylintrc
+

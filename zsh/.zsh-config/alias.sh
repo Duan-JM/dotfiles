@@ -8,10 +8,7 @@ alias vim='nvim'
 alias pg='cd ~/Documents/Coding/Test'
 alias wk='cd ~/Documents/Github/Few-shot-Playground_'
 alias cpv='rsync -ah --info=progress2'
-
-# fzf
-export FZF_DEFAULT_OPTS="--height 40% --layout=reverse --preview '(highlight -O ansi {} || cat {}) 2> /dev/null | head -500'"
-
+alias task='asynctask -f'
 
 # Most often
 alias proxy='export all_proxy=socks5://127.0.0.1:1080'
