@@ -1103,7 +1103,7 @@ autocmd! FileType gitcommit autocmd! BufEnter COMMIT_EDITMSG
 autocmd! FileType tex set spell | 
             \ set spelllang=en_us | 
             \ set wrap | 
-            \ set whichwrap=b,s,h,l,<,>,>h,[,]                                                            " Do not wrap long lines
+            \ set whichwrap=b,s,h,l,<,>,>h,[,]                              " Do not wrap long lines
 
 
 
@@ -1122,11 +1122,5 @@ autocmd FileType javascript set dictionary+=$HOME/.vim/dict/node.dict
 
 " configure for term to exit directly
 " autocmd TermClose * call feedkeys("i")
-
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"                                 Custom Reg                                  "
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" add space between current character
-let @s='i la '
 "}
 
