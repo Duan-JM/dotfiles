@@ -189,15 +189,6 @@ autocmd! User GoyoLeave Limelight!
 " Goyo
 let g:goyo_linenr = 1
 
-"ncm2/float_preview
-function! DisableExtras()
-  call nvim_win_set_option(g:float_preview#win, 'number', v:false)
-  call nvim_win_set_option(g:float_preview#win, 'relativenumber', v:false)
-  call nvim_win_set_option(g:float_preview#win, 'cursorline', v:false)
-endfunction
-autocmd User FloatPreviewWinOpen call DisableExtras()
-let g:float_preview#docked = 0
-
 " Define mappings
 autocmd FileType denite call s:denite_my_settings()
 function! s:denite_my_settings() abort
@@ -231,7 +222,19 @@ augroup END
 
 " Far
 set regexpengine=1
-nnoremap <space>s/ :F
+nnoremap <space>s/ :call FarSearchCurrentFolder()<cr>
+function! FarSearchCurrentFolder()
+    "设置缩进
+    let l:pattern = input('keywords=')
+    let far_params = {
+            \   'pattern': pattern,
+            \   'replace_with': pattern,
+            \   'file_mask': '**/*',
+            \   'range': [-1, -1],
+            \   }
+
+    call far#find(far_params, ['--result-preview=0', '--enable-replace=0'])
+endfunction
 
 " deoplete-tabnine
 call deoplete#custom#var('tabnine', {
