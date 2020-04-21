@@ -64,8 +64,8 @@ fi
 
 echo "Copy the Configure Files"
 
-cp ./zsh/zshrc ~/.zshrc
-cp -rf ./zsh/.zsh-config ~/.zsh-config
+cp ./zshrc ~/.zshrc
+cp -rf ./zsh-config ~/.zsh-config
 
 echo "Installing Plugins"
 git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting

@@ -18,12 +18,6 @@ cp -rf ~/.vim/colors $DOT_FILE/vim
 cp -rf ~/.vim/autoload $DOT_FILE/vim
 cp ~/.vimrc $DOT_FILE/vim/vimrc
 
-# back up to vimrc
-cp -rf ~/.vim/fonts $VIMRC_FILE
-cp -rf ~/.vim/colors $VIMRC_FILE
-cp -rf ~/.vim/autoload $VIMRC_FILE
-cp ~/.vimrc $VIMRC_FILE/vimrc
-
 
 ###########################
 #  BACKUP TMUX CONFIGURE  #
@@ -40,10 +34,11 @@ cp -rf ~/.tmux.conf $DOT_FILE/tmux/tmux.conf
 # git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 cp ~/.zshrc $DOT_FILE/zsh/zshrc
 cp -rf ~/.zsh-config $DOT_FILE/zsh
+mv $DOT_FILE/zsh/.zsh-config $DOT_FILE/zsh/zsh-config
 
 
 #####################
-#   Pylint & flake8 #
+#  Pylint & flake8  #
 #####################
 cp ~/.pylintrc $DOT_FILE/pylintrc
 

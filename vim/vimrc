@@ -4,6 +4,7 @@
 call plug#begin('~/.vim/plugged')
 " Need attention
 Plug 'skywind3000/asynctasks.vim'
+Plug 'voldikss/vim-floaterm'
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
@@ -22,12 +23,21 @@ else
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
 Plug 'Shougo/neoyank.vim'                                     " yank history using denite
-Plug 'ncm2/float-preview.nvim'                                " showing doc with float windows not preview beside the functions
+
+if has('nvim')
+  Plug 'ncm2/float-preview.nvim'                              " showing doc with float windows not preview beside the functions
+endif
 Plug 'junegunn/goyo.vim', {'for': ['markdown', 'tex']}
 Plug 'junegunn/limelight.vim'
 
 " Coding
-Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
 Plug 'davidhalter/jedi-vim'
 Plug 'deoplete-plugins/deoplete-jedi'
 Plug 'tbodt/deoplete-tabnine', { 'do': './install.sh' }
@@ -931,8 +941,8 @@ endfunction
 
 " set background transparable
 func! s:transparent_background()
-    highlight Normal guibg=None ctermbg=None
-    highlight NonText guibg=None ctermbg=None
+    highlight Normal guibg=NONE ctermbg=NONE
+    highlight NonText guibg=NONE ctermbg=NONE
 endf
 autocmd ColorScheme * call s:transparent_background()
 
@@ -1092,7 +1102,7 @@ autocmd CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
 
 
 autocmd FocusGained, BufEnter * :silent! !
-autocmd WinEnter call SetTabLabel()                                         " show tabline
+autocmd WinEnter call SetTabLabel()
 autocmd BufEnter call SetTabLabel()
 autocmd VimEnter * :call SetTabLabel()
 
@@ -1126,4 +1136,3 @@ autocmd FileType javascript set dictionary+=$HOME/.vim/dict/node.dict
 " configure for term to exit directly
 " autocmd TermClose * call feedkeys("i")
 "}
-

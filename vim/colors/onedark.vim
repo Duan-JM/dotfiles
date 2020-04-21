@@ -91,6 +91,7 @@ function! s:h(group, style)
   execute "highlight" a:group
     \ "guifg="   (has_key(a:style, "fg")    ? a:style.fg.gui   : "NONE")
     \ "guibg="   (has_key(a:style, "bg")    ? a:style.bg.gui   : "NONE")
+
     \ "guisp="   (has_key(a:style, "sp")    ? a:style.sp.gui   : "NONE")
     \ "gui="     (has_key(a:style, "gui")   ? a:style.gui      : "NONE")
     \ "ctermfg=" . l:ctermfg
@@ -455,3 +456,6 @@ if has("nvim")
   let g:terminal_color_background = g:terminal_color_0
   let g:terminal_color_foreground = g:terminal_color_7
 endif
+
+highlight Normal guibg=NONE ctermbg=NONE
+highlight NonText guibg=NONE ctermbg=NONE

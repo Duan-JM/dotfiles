@@ -1,8 +1,5 @@
 Welcome to MyVimrc
-==================
-TODO LIST
---------
-- [ ] Rewrite using and install manual
+=====================
 
 Special Information
 ------------------
@@ -16,6 +13,7 @@ for neovim, it works fine.
 ```Bash
 # for mac
 brew install neovim
+
 # `brew install --HEAD neovim` for latest version
 pip3 install pynvim
 ln -sf ~/.vim ~/.config/nvim
@@ -35,52 +33,11 @@ ln -sf ~/.vimrc ~/.config/nvim/init.vim
 # put code below in the ~/.zshrc
 alias vim='nvim'
 alias vi='nvim'
+
+# You can also choice to use the script in this repo to install vim automatically
+# However, we highly recommand you to configure your vim by yourself.
 ```
 
-Vim Installation
-----------------
-### For Mac
-```bash
-brew install vim --with-lua --with-python
-brew install vim # in new version of brew
-```
-### For Ubuntu
-1. Install for Prerequisites
-```bash
-sudo apt-get install liblua5.1-dev \
-                     luajit libluajit-5.1 \
-                     python-dev ruby-dev\
-                     libperl-dev libncurses5-dev\
-                     libatk1.0-dev libx11-dev\
-                     libxpm-dev libxt-dev
-sudo mkdir /usr/include/lua5.1/include
-sudo cp /usr/include/lua5.1/*.h /usr/include/lua5.1/include/
-```
-2. Download VIM from github
-```bash
-git clone https://github.com/vim/vim ~/vim
-cd ~/vim
-git pull && git fetch
-cd ~/vim/src
-make distclean
-./configure --with-features=huge \
-            --enable-rubyinterp \
-            --enable-largefile \
-            --disable-netbeans \
-            --enable-pythoninterp \
-            --enable-perlinterp \
-            --enable-luainterp \
-            --with-luajit \
-            --enable-fail-if-missing \
-            --enable-cscope
-make
-sudo make install
-```
-3. Check VIM
-```bash
-vim --version
-# check if there is + in front of the lua and python
-```
 PluginInstall
 ------------
 1. Git from this repository
@@ -92,6 +49,7 @@ cd ~/.vim/fonts
 sudo ./install.sh # install fonts for the themes
 cp ~/.vim/vimrc ~/.vimrc
 ```
+
 2. Install Plugs
   - Check requirements
     ```bash
@@ -162,13 +120,15 @@ Mappings
 let mapleader=' '
 
 nmap . .`[
+nmap <leader>w :w<CR>
+nmap <leader>q :q<CR>
+
 
 nnoremap <Leader>eg :e ++enc=gbk<CR>
 nnoremap <Leader>eu :e ++enc=utf8<CR>
 
-nnoremap <leader>l :set list!<CR>                       " quick config to see or not see special character  
+" nnoremap <leader>sl :set list!<CR>                    " quick config to see or not see special character  
 nnoremap <leader>ll :set conceallevel=0<CR>             " quick change conceal mode
-nnoremap <leader>lc :set conceallevel=1<CR>
 
 nnoremap <leader>ev :tabe $MYVIMRC<CR>                  " Quickly edit/reload the vimrc file
 
@@ -180,22 +140,36 @@ nnoremap <Leader>xr :%!xxd -r<CR>
 nnoremap <leader>t :tabe<CR>                            " open a new tab
 nnoremap <leader>v :vnew<CR>                            " close tab
 nnoremap <leader>tq :tabclose<CR>
+nnoremap <leader>tn :tabnext<CR>
 
 " use ]+space create spaceline
 nnoremap [<space>  :<c-u>put! =repeat(nr2char(10), v:count1)<cr>'[
+nnoremap ]<space>  :<c-u>put =repeat(nr2char(10), v:count1)<cr>
+
+" control term
+" use c+[ to exit term to normal mode
+tnoremap <c-[> <c-\><c-n>
+nnoremap <leader>` :split \| term
 
 " Use <C-L> to clear the highlighting of :set hlsearch
 if maparg('<C-L>', 'n') ==# ''
     nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
 endif
+
+" map g* to *
+nnoremap j gj
+nnoremap k gk
+
+" use <C-l> to correct spell while insert mode
+inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 ```
 
 PluginList
 ---------
 ```bash
 " Need attention
-Plug 'takac/vim-hardtime'
-Plug 'voldikss/vim-translate-me'
+Plug 'skywind3000/asynctasks.vim'
+Plug 'voldikss/vim-floaterm'
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
@@ -204,12 +178,35 @@ Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
 Plug 'wellle/targets.vim'                               " text objects
 Plug 'ryanoasis/vim-devicons'                           " extensions for icons
 Plug 'brglng/vim-im-select'                             " auto change input methods, needs `imselect` cmd
+Plug 'unblevable/quick-scope'                           " Advance setting for f t search
+Plug 'mbbill/undotree'                                  " history of the undo
+if has('nvim')
+  Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' } " insteresting system
+else
+  Plug 'Shougo/denite.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+Plug 'Shougo/neoyank.vim'                                     " yank history using denite
+
+if has('nvim')
+  Plug 'ncm2/float-preview.nvim'                              " showing doc with float windows not preview beside the functions
+endif
+Plug 'junegunn/goyo.vim', {'for': ['markdown', 'tex']}
+Plug 'junegunn/limelight.vim'
 
 " Coding
-Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
 Plug 'davidhalter/jedi-vim'
 Plug 'deoplete-plugins/deoplete-jedi'
-Plug 'w0rp/ale'                                         " Syntax Check
+Plug 'tbodt/deoplete-tabnine', { 'do': './install.sh' }
+Plug 'w0rp/ale', {'for': ['cpp', 'python']}             " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
@@ -218,7 +215,6 @@ Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能�
 Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
 Plug 'andymass/vim-matchup'                             " extence
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
-Plug 'easymotion/vim-easymotion'                        " trigger with <leader><leader>+s/w/gE
 Plug 'godlygeek/tabular'                                " align text
 Plug 'tpope/vim-surround'                               " change surroundings
                                                         " c[ange]s[old parttern] [new partten]
@@ -228,6 +224,7 @@ Plug 'tpope/vim-repeat'                                 " for use . to repeat fo
 Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python']}                     " show params and functions
 
 " Writing Blog
+Plug 'voldikss/vim-translate-me', {'for':['markdown', 'tex']}
 Plug 'rhysd/vim-grammarous', {'for': ['markdown', 'tex']}                       " grammarly checks
 Plug 'hotoo/pangu.vim', {'for': ['markdown']}                                   "to make your document better
 Plug 'godlygeek/tabular', {'for': ['markdown']}
@@ -257,7 +254,7 @@ Plug 'justinmk/vim-dirvish'
 Plug 'kristijanhusak/vim-dirvish-git'
 
 
-" Apperance
+" Appearance
 Plug 'itchyny/lightline.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'Yggdroot/indentLine'                                                      " Show indent line
@@ -269,7 +266,7 @@ Plug 'nightsense/stellarized'
 Plug 'nightsense/cosmic_latte'
 
 " Github
-Plug 'mattn/gist-vim'
+Plug 'mattn/gist-vim'                                                           " :Gist -l/-ls :Gist -e (add gist name) -s (add description) -d (delete)
 Plug 'mattn/webapi-vim'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/gv.vim'                                                          " Rely on fugitive
@@ -292,16 +289,17 @@ We use `Leaderf` to search files, use `<c-p>` to trigger the plugin, use `<c-]>`
 
 2. Search content of lots of files
 
-We use `far` plugin to search the content in a bunch of files. 
-Using `<space>s/` to triger the command line, using `:F foo file_mask` to
-search. eg, `:F test **/*.py` search test in all `py` file in the folder.
+We use `far` plugin to search the content in a bunch of files.  Using
+`<space>s/` to triger the command line, after than just type the keyword to
+search what ever you want in current folder. You can also use `:F foo
+file_mask` command to search. eg, `:F test **/*.py` search test in all `py`
+file in the folder.
 
 3. Navigate between buffers and functions
 
 we also use `LeaderF` or `Vista` to navigate between buffers and functions. We
 use `<A-b>` to trigger the list of buffers, use `<A-m>` to trigger the
 functions list (also work in markdown files).
-
 
 4. Tabs Controls
 We use `<leader>t` to create a new tab, `<leader>v` to create a new tab

@@ -3,6 +3,7 @@ Collection for my dotfiles
 
 <!-- vim-markdown-toc GitLab -->
 
+* [Mention](#mention)
 * [VIM](#vim)
   * [Requirements](#requirements)
   * [Install Manual](#install-manual)
@@ -18,6 +19,10 @@ Collection for my dotfiles
     * [Manually Install](#manually-install-1)
 
 <!-- vim-markdown-toc -->
+
+## Mention
+doc is outdated
+- [ ] rewrite README
 
 ## VIM
 ### Requirements

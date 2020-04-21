@@ -90,8 +90,8 @@ if [ -f "~/.vimrc" ]; then
   rm ~/.vimrc
 fi
 
-cp -rf ./vim ~/.vim
-cp -rf ./vim/vimrc ~/.vimrc
+cp -rf ../vim ~/.vim
+cp -rf ./vimrc ~/.vimrc
 
 echo "Changing relevant linking"
 
@@ -114,25 +114,6 @@ fi
 echo "Creating link to nvim configfile"
 ln -sf ~/.vim ~/.config/nvim
 ln -sf ~/.vimrc ~/.config/nvim/init.vim
-
-
-if [ $(uname) == "Darwin" ]; then
-  # maychange to install node without sudo
-  brew install --HEAD universal-ctags/universal-ctags/universal-ctags
-
-elif [ $(uname) == "Linux" ]; then
-  echo "Install node for coc"
-  ${SUDO_PREFIX} add-apt-repository ppa:chris-lea/node.js --yes
-  ${SUDO_PREFIX} apt-get update
-  ${SUDO_PREFIX} apt-get install nodejs npm --yes
-  ${SUDO_PREFIX} npm config set registry https://registry.npm.taobao.org
-  ${SUDO_PREFIX} npm config list
-  ${SUDO_PREFIX} npm install n -g
-  ${SUDO_PREFIX} n stable
-  ${SUDO_PREFIX} node -v
-  echo "Install latest node finished"
-
-fi
 
 echo "Installing ctags for Vista"
 if [ $(uname) == "Darwin" ]; then
