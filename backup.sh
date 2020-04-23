@@ -4,9 +4,7 @@
 #  CONFIGURE  #
 ###############
 
-
-DOT_FILE='/Users/deamov/Documents/Github/dotfiles'
-VIMRC_FILE='/Users/deamov/Documents/Github/vimrc'
+DOT_FILE=`pwd`
 
 
 ##########################
@@ -33,8 +31,7 @@ cp -rf ~/.tmux.conf $DOT_FILE/tmux/tmux.conf
 # git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 # git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 cp ~/.zshrc $DOT_FILE/zsh/zshrc
-cp -rf ~/.zsh-config $DOT_FILE/zsh
-mv $DOT_FILE/zsh/.zsh-config $DOT_FILE/zsh/zsh-config
+cp -rf ~/.zsh-config/* $DOT_FILE/zsh/zsh-config/
 
 
 #####################

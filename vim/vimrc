@@ -4,7 +4,6 @@
 call plug#begin('~/.vim/plugged')
 " Need attention
 Plug 'skywind3000/asynctasks.vim'
-Plug 'voldikss/vim-floaterm'
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
@@ -29,6 +28,7 @@ if has('nvim')
 endif
 Plug 'junegunn/goyo.vim', {'for': ['markdown', 'tex']}
 Plug 'junegunn/limelight.vim'
+Plug 'voldikss/vim-floaterm'                                  " floating terminaler you must like it
 
 " Coding
 if has('nvim')
@@ -150,9 +150,7 @@ nnoremap [<space>  :<c-u>put! =repeat(nr2char(10), v:count1)<cr>'[
 nnoremap ]<space>  :<c-u>put =repeat(nr2char(10), v:count1)<cr>
 
 " control term
-" use c+[ to exit term to normal mode
-tnoremap <c-[> <c-\><c-n>
-nnoremap <leader>` :split \| term
+nnoremap <leader>` :FloatermToggle<cr>
 
 " Use <C-L> to clear the highlighting of :set hlsearch
 if maparg('<C-L>', 'n') ==# ''
@@ -585,7 +583,6 @@ let g:ale_linters = {
 \   'c': ['gcc', 'cpplint'],
 \   'java': ['javac','google-java-format'],
 \}
-let g:ale_go_langserver_executable = 'gopls'
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines','trim_whitespace' ],
 \   'python': ['autopep8']
@@ -990,11 +987,6 @@ func! CompileRun()
 
     elseif &filetype == 'html'
         exec "!open -a Safari % &"
-
-    elseif &filetype == 'go'
-        exec "!clear"
-        exec "!go build %<"
-        exec "!time go run %"
 
     elseif &filetype == 'markdown'
         exec "!clear"
