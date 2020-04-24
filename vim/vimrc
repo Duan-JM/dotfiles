@@ -398,14 +398,15 @@ let github_user='Duan-JM'
 let g:indentLine_enabled=0
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
-""LeaderF
+"LeaderF
+let g:Lf_UseCache = 0
+let g:Lf_UseMemoryCache = 0
+" add auto index refresh at every leaderf start
+" https://github.com/Yggdroot/LeaderF/issues/161
 let g:Lf_ShortcutF = '<c-p>'
 let g:Lf_ShortcutB = '<m-n>'
 " let g:Lf_WindowPosition = 'popup'
 " let g:Lf_PreviewInPopup = 1
-" execute 'set <A-m>=\em,'
-" execute 'set <A-b>=\eb'
-" execute 'set <A-m>=\em'
 noremap <c-n> :LeaderfMru<cr>
 noremap <A-m> :LeaderfFunction!<cr>
 noremap <A-b> :LeaderfBuffer<cr>
