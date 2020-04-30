@@ -62,7 +62,7 @@ Plug 'tpope/vim-surround'                               " change surroundings
                                                         " ds[partten]
                                                         " ys(iww)[partten] / yss)
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
-Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python']}                     " show params and functions
+Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown']}         " show params and functions
 
 " Writing Blog
 Plug 'voldikss/vim-translate-me', {'for':['markdown', 'tex']}
@@ -429,7 +429,6 @@ let g:vista#renderer#icons = {
 \   "variable": "\uf71b",
 \  }
 
-
 "LightLine
 let g:lightline = {
       \ 'colorscheme': 'seoul256',
@@ -438,7 +437,6 @@ let g:lightline = {
       \     [ 'mode', 'paste' ],
       \     [ 'filename', 'modified' ],
       \     [ 'gitbranch', 'git_changes' ],
-      \     [ 'vista' ],
       \   ],
       \ 'right': [
       \     ['lineinfo'],
