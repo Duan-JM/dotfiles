@@ -117,13 +117,15 @@ ln -sf ~/.vimrc ~/.config/nvim/init.vim
 
 echo "Installing ctags for Vista"
 if [ $(uname) == "Darwin" ]; then
-  brew install --HEAD universal-ctags/universal-ctags/universal-ctags
+  brew tap universal-ctags/universal-ctags
+  brew install --with-jansson --HEAD universal-ctags/universal-ctags/universal-ctags
 
 elif [ $(uname) == "Linux" ]; then
   echo "install autoconf autogen"
   ${SUDO_PREFIX} apt-get install autoconf autogen
 
   echo "Install ctags"
+  ${SUDO_PREFIX} apt-get install libjansson-dev
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags
   ./autogen.sh ./configure
