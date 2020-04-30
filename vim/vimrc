@@ -3,7 +3,13 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 " Need attention
+Plug 'skywind3000/asyncrun.vim'
 Plug 'skywind3000/asynctasks.vim'
+let g:asyncrun_open=6
+let g:asyncrun_rootmarks = ['.git', '.svn', '.root', '.project', '.hg']
+let g:asynctasks_term_pos = 'bottom'
+let g:asynctasks_term_rows = 10    " 设置纵向切割时，高度为 10
+let g:asynctasks_term_cols = 80    " 设置横向切割时，宽度为 80
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
@@ -60,7 +66,6 @@ Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python']}                     
 
 " Writing Blog
 Plug 'voldikss/vim-translate-me', {'for':['markdown', 'tex']}
-Plug 'rhysd/vim-grammarous', {'for': ['markdown', 'tex']}                       " grammarly checks
 Plug 'hotoo/pangu.vim', {'for': ['markdown']}                                   "to make your document better
 Plug 'godlygeek/tabular', {'for': ['markdown']}
 Plug 'plasticboy/vim-markdown', {'for': ['markdown']}
@@ -91,6 +96,7 @@ Plug 'kristijanhusak/vim-dirvish-git'
 
 " Appearance
 Plug 'itchyny/lightline.vim'
+Plug 'maximbaz/lightline-ale'
 Plug 'flazz/vim-colorschemes'
 Plug 'Yggdroot/indentLine'                                                      " Show indent line
 Plug 'kshenoy/vim-signature'                                                    " Visible Mark
@@ -149,8 +155,6 @@ nnoremap <leader>tn :tabnext<CR>
 nnoremap [<space>  :<c-u>put! =repeat(nr2char(10), v:count1)<cr>'[
 nnoremap ]<space>  :<c-u>put =repeat(nr2char(10), v:count1)<cr>
 
-" control term
-nnoremap <leader>` :FloatermToggle<cr>
 
 " Use <C-L> to clear the highlighting of :set hlsearch
 if maparg('<C-L>', 'n') ==# ''
@@ -162,11 +166,16 @@ nnoremap j gj
 nnoremap k gk
 
 " use <C-l> to correct spell while insert mode
-inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
+" inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
+inoremap <C-l> <Esc>[s1z=`]a
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                               PluginConfigure                                "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" vim-floaterm
+tnoremap <c-[> <c-\><c-n>
+nnoremap <leader>` :FloatermToggle<cr>
+
 " limelight.vim
 " Color name (:help cterm-colors) or ANSI code
 let g:limelight_conceal_ctermfg = 'gray'
@@ -301,25 +310,11 @@ vmap <silent> <Leader>zr <Plug>TranslateRV
 "pathogen
 execute pathogen#infect()
 
-" vim-grammarous
-let g:grammarous#hooks = {}
-let g:grammarous#use_location_list = 1
-function! g:grammarous#hooks.on_check(errs) abort
-    nmap <buffer><C-n> <Plug>(grammarous-move-to-next-error)
-    nmap <buffer><C-p> <Plug>(grammarous-move-to-previous-error)
-    nmap <buffer><C-c><Plug>(grammarous-move-to-info-window)
-endfunction
-
-function! g:grammarous#hooks.on_reset(errs) abort
-    nunmap <buffer><C-n> nunmap <buffer><C-p>
-    nunmap <buffer><C-c>
-endfunction
-
 " rainbow
 let g:rainbow_active = 1
 
-""markdown-preview
-"let g:mkdp_browser = 'Safari'
+"markdown-preview
+let g:mkdp_browser = 'Safari'
 
 " vim-smooth-scroll
 " Distance Duration Speed
@@ -424,10 +419,8 @@ let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
 let g:Lf_UseVersionControlTool = 0
 
 " vista.vim
-" How each level is indented and what to prepend.
-" This could make the display more compact or more spacious.
-" e.g., more compact: ["▸ ", ""]
 let g:vista_icon_indent = ["╰─▸ ", "├─▸ "]
+left g:vista_default_executive = 'ctags'
 let g:vista#renderer#enable_icon = 1
 
 " The default icons can't be suitable for all the filetypes, you can extend it as you wish.
@@ -447,11 +440,11 @@ let g:lightline = {
       \     [ 'gitbranch', 'git_changes' ],
       \     [ 'vista' ],
       \   ],
-      \   'right': [
+      \ 'right': [
       \     ['lineinfo'],
       \     ['percent'],
-      \     ['readonly', 'linter_warnings', 'linter_errors', 'linter_ok'],
-      \   ]
+      \     ['linter_checking', 'linter_errors', 'linter_warnings', 'linter_infos', 'linter_ok' ]
+      \   ],
       \ },
       \ 'component_function': {
       \   'match_count': 'MatchCountStatusline',
@@ -459,14 +452,18 @@ let g:lightline = {
       \   'git_changes': 'LightLineChanges',
       \ },
       \ 'component_expand': {
-      \     'linter_warnings': 'LightlineLinterWarnings',
-      \     'linter_errors':   'LightlineLinterErrors',
-      \     'linter_ok':       'LightlineLinterOK',
+      \     'linter_checking': 'lightline#ale#checking',
+      \     'linter_infos': 'lightline#ale#infos',
+      \     'linter_warnings': 'lightline#ale#warnings',
+      \     'linter_errors': 'lightline#ale#errors',
+      \     'linter_ok': 'lightline#ale#ok',
       \   },
       \ 'component_type': {
       \   'readonly':        'error',
+      \   'linter_infos': 'right',
       \   'linter_warnings': 'warning',
-      \   'linter_errors':   'error'
+      \   'linter_errors': 'error',
+      \   'linter_ok': 'right',
       \ },
       \ 'separator': {
       \   'left': '',
@@ -503,49 +500,6 @@ function! LightLineChanges()
     return '(' . l:output . ')'
   endif
 endfunction
-
-function! LightlineLinterWarnings() abort
-  if (&readonly)
-    return ''
-  endif
-  let l:counts = ale#statusline#Count(bufnr(''))
-  let l:all_errors = l:counts.error + l:counts.style_error
-  let l:all_non_errors = l:counts.total - l:all_errors
-  return l:all_non_errors == 0 ? '' : printf('%d ▲', l:all_non_errors)
-endfunction
-
-function! LightlineLinterErrors() abort
-  if (&readonly)
-    return ''
-  endif
-  let l:counts = ale#statusline#Count(bufnr(''))
-  let l:all_errors = l:counts.error + l:counts.style_error
-  let l:all_non_errors = l:counts.total - l:all_errors
-  return l:all_errors == 0 ? '' : printf('%d ✗', l:all_errors)
-endfunction
-
-function! LightlineLinterOK() abort
-  if (&readonly)
-    return ''
-  endif
-  let l:counts = ale#statusline#Count(bufnr(''))
-  let l:all_errors = l:counts.error + l:counts.style_error
-  let l:all_non_errors = l:counts.total - l:all_errors
-  return l:counts.total == 0 ? '✓' : ''
-endfunction
-
-augroup ale_stuff
-  au!
-  autocmd User ALELint call s:MaybeUpdateLightline()
-augroup END
-
-function! s:MaybeUpdateLightline()
-  " Update and show lightline but only if it's visible (e.g., not in Goyo)
-  if exists('#lightline')
-    call lightline#update()
-  end
-endfunction
-
 
 
 "SirVer/ultisnips
@@ -949,8 +903,8 @@ set background=dark
 noremap <leader>bg :call ToggleBG()<CR>
 
 "CompileConfig
-"按F5运行python"
-map <F10> :w<CR> :call RunPython()<CR>
+"按 F10 运行python"
+nnoremap <F10> :w<CR> :call RunPython()<CR>
 function! RunPython()
     let mp = &makeprg
     let ef = &errorformat
@@ -990,8 +944,7 @@ func! CompileRun()
         exec "!open -a Safari % &"
 
     elseif &filetype == 'markdown'
-        exec "!clear"
-        exec "!open -a Marked %"
+        exec ":MarkdownPreview"
 
     elseif &filetype == 'tex'
         exec "silent! :VimtexCompile"
@@ -1099,7 +1052,7 @@ autocmd WinEnter call SetTabLabel()
 autocmd BufEnter call SetTabLabel()
 autocmd VimEnter * :call SetTabLabel()
 
-autocmd! BufWritePost .vimrc source ~/.vimrc                                " source vimrc immediately
+" autocmd! BufWritePost .vimrc source ~/.vimrc                                " source vimrc immediately / now buging
 
 
 autocmd! FileType gitcommit autocmd! BufEnter COMMIT_EDITMSG
@@ -1125,7 +1078,4 @@ autocmd BufNewFile,BufRead *.plt,.gnuplot setf gnuplot
 autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=red
 autocmd FileType ruby set dictionary+=~/.vim/dict/ruby.dict
 autocmd FileType javascript set dictionary+=$HOME/.vim/dict/node.dict
-
-" configure for term to exit directly
-" autocmd TermClose * call feedkeys("i")
 "}
