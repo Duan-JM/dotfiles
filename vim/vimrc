@@ -186,7 +186,7 @@ let g:limelight_conceal_guifg = 'DarkGray'
 let g:limelight_conceal_guifg = '#777777'
 
 " Default: 0.5
-let g:limelight_default_coefficient = 0.7
+let g:limelight_default_coefficient = 0.5
 
 " Number of preceding/following paragraphs to include (default: 0)
 let g:limelight_paragraph_span = 3
@@ -394,29 +394,34 @@ let g:indentLine_enabled=0
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
 "LeaderF
+let g:Lf_HideHelp = 1
 let g:Lf_UseCache = 0
-let g:Lf_UseMemoryCache = 0
-" add auto index refresh at every leaderf start
-" https://github.com/Yggdroot/LeaderF/issues/161
+let g:Lf_UseVersionControlTool = 0
+let g:Lf_IgnoreCurrentBufferName = 1 " auto refresh index [issue](https://github.com/Yggdroot/LeaderF/issues/161)
 let g:Lf_ShortcutF = '<c-p>'
-let g:Lf_ShortcutB = '<m-n>'
-" let g:Lf_WindowPosition = 'popup'
-" let g:Lf_PreviewInPopup = 1
-noremap <c-n> :LeaderfMru<cr>
-noremap <A-m> :LeaderfFunction!<cr>
-noremap <A-b> :LeaderfBuffer<cr>
-" noremap <A-m> :LeaderfTag<cr>
-let g:Lf_StlSeparator = { 'left': '', 'right': '', 'font': '' }
 
+let g:Lf_StlColorscheme = 'powerline'
+let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2", 'font': "DejaVu Sans Mono for Powerline" }
+let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
+
+let g:Lf_CacheDirectory = expand('~/.vim/cache')
 let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
 let g:Lf_WorkingDirectoryMode = 'Ac'
 let g:Lf_WindowHeight = 0.30
-let g:Lf_CacheDirectory = expand('~/.vim/cache')
 let g:Lf_ShowRelativePath = 0
-let g:Lf_HideHelp = 1
-let g:Lf_StlColorscheme = 'powerline'
-let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
-let g:Lf_UseVersionControlTool = 0
+
+noremap <leader>fb :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
+noremap <leader>fm :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
+noremap <leader>ft :<C-U><C-R>=printf("Leaderf bufTag %s", "")<CR><CR>
+noremap <leader>fl :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
+
+" need install rg
+noremap <C-B> :<C-U><C-R>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<CR>
+noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
+" search visually selected text literally
+xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F -e %s ", leaderf#Rg#visual())<CR>
+noremap go :<C-U>Leaderf! rg --recall<CR>
+
 
 " vista.vim
 let g:vista_icon_indent = ["╰─▸ ", "├─▸ "]
@@ -430,8 +435,9 @@ let g:vista#renderer#icons = {
 \  }
 
 "LightLine
+"ayu_dark / simple black
 let g:lightline = {
-      \ 'colorscheme': 'seoul256',
+      \ 'colorscheme': 'simpleblack',
       \ 'active': {
       \   'left': [ 
       \     [ 'mode', 'paste' ],
@@ -717,14 +723,6 @@ set formatoptions-=t "disable wrap
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                 Functions                                  "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"let W Wq wQ not be error
-command! -bar -nargs=* -complete=file -range=% -bang W         <line1>,<line2>write<bang> <args>
-command! -bar -nargs=* -complete=file -range=% -bang Wq        <line1>,<line2>wq<bang> <args>
-command! -bar -nargs=* -complete=file -range=% -bang WQ        <line1>,<line2>wq<bang> <args>
-command! -bar -nargs=* -complete=file -range=% -bang We        <line1>,<line2>w<bang> | e <args>
-command! -bar -nargs=* -complete=file          -bang E         edit<bang> <args>
-command! -bar                                  -bang Q         quit<bang>
-
 " Set tabstop, softtabstop and shiftwidth to the same value
 command! -nargs=1 Rename let tpname = expand('%:t') | saveas <args> | edit <args> | call delete(expand(tpname))
 command! -nargs=* Stab call Stab()
