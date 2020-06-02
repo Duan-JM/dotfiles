@@ -111,7 +111,6 @@ Plug 'mattn/gist-vim'                                                           
 Plug 'mattn/webapi-vim'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/gv.vim'                                                          " Rely on fugitive
-Plug 'airblade/vim-gitgutter'                                                   " [c ]c jump to prev/next change [C ]C
 
 " Search
 Plug 'tpope/vim-abolish'                                                        "增强版的substitue
@@ -261,18 +260,15 @@ call deoplete#custom#var('tabnine', {
 
 " deoplete
 let g:deoplete#enable_at_startup = 1
+call deoplete#custom#source('_', 'disabled_syntaxes', ['Comment', 'String'])
+call deoplete#custom#option('ignore_sources', {'_': ['buffer', 'around']})
+call deoplete#custom#option('smart_case', v:true)
+
 
 " deoplete-plugins/deoplete-jedi
-let g:deoplete#sources#jedi#show_docstring = 0
-call deoplete#custom#option({
-\ 'deoplete-options-auto_complete': v:false,
-\ 'deoplete-options-max_list': 100,
-\ 'deoplete-options-skip_chars': ['(', ')', ':', ';']
-\ })
-
+let g:deoplete#sources#jedi#show_docstring = 1
 
 " davidhalter/jedi-vim
-
 let g:jedi#completions_enabled = 0
 let g:jedi#auto_vim_configuration = 0
 let g:jedi#goto_assignments_command = '<leader>g'   " dynamically done for
@@ -410,17 +406,17 @@ let g:Lf_WorkingDirectoryMode = 'Ac'
 let g:Lf_WindowHeight = 0.30
 let g:Lf_ShowRelativePath = 0
 
-noremap <leader>fb :<C-U><C-R>=printf("Leaderf buffer %s", "")<CR><CR>
-noremap <leader>fm :<C-U><C-R>=printf("Leaderf mru %s", "")<CR><CR>
-noremap <leader>ft :<C-U><C-R>=printf("Leaderf bufTag %s", "")<CR><CR>
-noremap <leader>fl :<C-U><C-R>=printf("Leaderf line %s", "")<CR><CR>
+noremap <leader>fb :<c-r>=printf("Leaderf buffer %s", "")<cr>
+noremap <leader>fm :<c-r>=printf("leaderf mru %s", "")<cr>
+noremap <leader>ft :<c-r>=printf("Leaderf bufTag %s", "")<cr>
+noremap <leader>fl :<c-r>=printf("Leaderf line %s", "")<cr>
 
 " need install rg
-noremap <C-B> :<C-U><C-R>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<CR>
-noremap <C-F> :<C-U><C-R>=printf("Leaderf! rg -e %s ", expand("<cword>"))<CR>
+noremap <leader><c-b> :<c-r>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<cr>
+noremap <leader><c-f> :<c-r>=printf("Leaderf! rg -e %s ", expand("<cword>"))<cr>
 " search visually selected text literally
-xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F -e %s ", leaderf#Rg#visual())<CR>
-noremap go :<C-U>Leaderf! rg --recall<CR>
+xnoremap gf :<c-r>=printf("Leaderf! rg -F -e %s ", leaderf#Rg#visual())<cr>
+noremap go :Leaderf! rg --recall<cr>
 
 
 " vista.vim
@@ -442,7 +438,7 @@ let g:lightline = {
       \   'left': [ 
       \     [ 'mode', 'paste' ],
       \     [ 'filename', 'modified' ],
-      \     [ 'gitbranch', 'git_changes' ],
+      \     [ 'gitbranch' ],
       \   ],
       \ 'right': [
       \     ['lineinfo'],
@@ -453,7 +449,6 @@ let g:lightline = {
       \ 'component_function': {
       \   'match_count': 'MatchCountStatusline',
       \   'gitbranch': 'fugitive#head',
-      \   'git_changes': 'LightLineChanges',
       \ },
       \ 'component_expand': {
       \     'linter_checking': 'lightline#ale#checking',
@@ -478,32 +473,6 @@ let g:lightline = {
       \   'tabline': 0
       \ }
     \ }
-
-function! LightLineChanges()
-  let l:hunkSummary = v:null
-  if exists('*GitGutterGetHunkSummary')
-    let l:hunkSummary = GitGutterGetHunkSummary()
-  elseif exists('g:loaded_signify') && sy#buffer_is_active()
-    let l:hunkSummary = sy#repo#get_stats()
-  endif
-  if (empty(l:hunkSummary))
-    return ''
-  else
-    let [ l:added, l:modified, l:removed ] = l:hunkSummary
-    let l:total = (l:added + l:modified + l:removed)
-    let l:output = ''
-    if (l:added != 0)
-      let l:output .= printf('+%d ', l:added)
-    endif
-    if (l:modified != 0)
-      let l:output .= printf('~%d ', l:modified)
-    endif
-    if (l:removed != 0)
-      let l:output .= printf('-%d ', l:removed)
-    endif
-    return '(' . l:output . ')'
-  endif
-endfunction
 
 
 "SirVer/ultisnips
@@ -589,7 +558,6 @@ set autoread
 set autowrite
 set autowriteall                                                        " Auto-write all file changes
 set iskeyword-=_,.,=,-,:,
-" set guifont=Source\ Code\ Pro\ for\ Powerline:h16
 set switchbuf=useopen                                                   " reveal already opened files from the
                                                                         " quickfix window instead of opening new buffers
 set wildmenu
@@ -617,7 +585,8 @@ set showcmd                                                             " Show p
 " Selected characters/lines in visual mode
 set viewoptions=folds,options,cursor,unix,slash                         " Better Unix / Windows compatibility
 set virtualedit=onemore                                                 " used with caution of breaking plugins
-set completeopt=menuone,noinsert,menu,preview,longest
+
+set completeopt=menuone,noinsert,menu,preview,longest,noselect
 set completeopt-=preview                                                " avoid preview windows for function docs
 set tags=./tags;/,~/.vimtags
 set dictionary+=/usr/share/dict/words                                   " autocompletion with dictionary help
