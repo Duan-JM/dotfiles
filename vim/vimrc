@@ -46,7 +46,6 @@ else
 endif
 Plug 'davidhalter/jedi-vim'
 Plug 'deoplete-plugins/deoplete-jedi'
-Plug 'tbodt/deoplete-tabnine', { 'do': './install.sh' }
 Plug 'w0rp/ale', {'for': ['cpp', 'python']}             " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'Duan-JM/vdeamov-snippets'
@@ -252,17 +251,22 @@ function! FarSearchCurrentFolder()
     call far#find(far_params, ['--result-preview=0', '--enable-replace=0'])
 endfunction
 
-" deoplete-tabnine
-call deoplete#custom#var('tabnine', {
-\ 'line_limit': 500,
-\ 'max_num_results': 3,
-\ })
 
 " deoplete
 let g:deoplete#enable_at_startup = 1
 call deoplete#custom#source('_', 'disabled_syntaxes', ['Comment', 'String'])
 call deoplete#custom#option('ignore_sources', {'_': ['buffer', 'around']})
 call deoplete#custom#option('smart_case', v:true)
+
+inoremap <silent><expr> <tab>
+    \ pumvisible() ? "\<c-n>" :
+    \ <SID>check_back_space() ? "\<tab>" :
+    \ deoplete#mappings#manual_complete()
+
+function! s:check_back_space() abort "{{{
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1]  =~ '\s'
+endfunction"}}}
 
 
 " deoplete-plugins/deoplete-jedi
@@ -480,7 +484,7 @@ let g:lightline = {
 "ref:https://gist.github.com/lencioni/dff45cd3d1f0e5e23fe6
 "ref:https://stackoverflow.com/questions/14896327/ultisnips-and-youcompleteme
 let g:UltiSnipsUsePythonVersion    = 3
-let g:UltiSnipsExpandTrigger       = "<tab>"
+let g:UltiSnipsExpandTrigger       = "<c-h>"
 let g:UltiSnipsJumpForwardTrigger  = "<c-j>"
 let g:UltiSnipsJumpBackwardTrigger = "<c-k>"
 let g:snips_author = "Duan-JM"
