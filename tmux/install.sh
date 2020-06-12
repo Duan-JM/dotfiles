@@ -44,6 +44,7 @@ elif [ $(uname) == "Linux" ]; then
 fi
 
 # simple script
+# TODO: need to decomple the path in .tmux.conf <13-06-20, Duan-JM> #
 cp -r ./tmux.conf ~/.tmux.conf
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 bash ~/.tmux/plugins/tpm/bin/install_plugins

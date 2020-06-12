@@ -21,6 +21,7 @@ cp ~/.vimrc $DOT_FILE/vim/vimrc
 #  BACKUP TMUX CONFIGURE  #
 ###########################
 cp -rf ~/.tmux.conf $DOT_FILE/tmux/tmux.conf
+cp -rf ~/.tmux $DOT_FILE/tmux/tmux
 
 
 ##############

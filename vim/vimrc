@@ -3,6 +3,7 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 " Need attention
+Plug 'sainnhe/edge'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'skywind3000/asynctasks.vim'
 let g:asyncrun_open=6
@@ -31,6 +32,7 @@ Plug 'Shougo/neoyank.vim'                                     " yank history usi
 
 if has('nvim')
   Plug 'ncm2/float-preview.nvim'                              " showing doc with float windows not preview beside the functions
+  let g:float_preview#docked = 0
 endif
 Plug 'junegunn/goyo.vim', {'for': ['markdown', 'tex']}
 Plug 'junegunn/limelight.vim'
@@ -268,6 +270,8 @@ function! s:check_back_space() abort "{{{
     return !col || getline('.')[col - 1]  =~ '\s'
 endfunction"}}}
 
+" ncm2/float-preview.nvim
+let g:float_preview#docked = 0
 
 " deoplete-plugins/deoplete-jedi
 let g:deoplete#sources#jedi#show_docstring = 1
@@ -410,13 +414,13 @@ let g:Lf_WorkingDirectoryMode = 'Ac'
 let g:Lf_WindowHeight = 0.30
 let g:Lf_ShowRelativePath = 0
 
-noremap <leader>fb :<c-r>=printf("Leaderf buffer %s", "")<cr>
-noremap <leader>fm :<c-r>=printf("leaderf mru %s", "")<cr>
-noremap <leader>ft :<c-r>=printf("Leaderf bufTag %s", "")<cr>
-noremap <leader>fl :<c-r>=printf("Leaderf line %s", "")<cr>
+noremap <leader>fb :<c-r>=printf("Leaderf buffer %s", "")<CR>
+noremap <leader>fm :<c-r>=printf("leaderf mru %s", "")<CR>
+noremap <leader>ft :<c-r>=printf("Leaderf bufTag %s", "")<CR>
+noremap <leader>fl :<c-r>=printf("Leaderf line %s", "")<CR>
 
 " need install rg
-noremap <leader><c-b> :<c-r>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))<cr>
+noremap <leader><c-b> :<c-r>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))
 noremap <leader><c-f> :<c-r>=printf("Leaderf! rg -e %s ", expand("<cword>"))<cr>
 " search visually selected text literally
 xnoremap gf :<c-r>=printf("Leaderf! rg -F -e %s ", leaderf#Rg#visual())<cr>
@@ -437,7 +441,7 @@ let g:vista#renderer#icons = {
 "LightLine
 "ayu_dark / simple black
 let g:lightline = {
-      \ 'colorscheme': 'simpleblack',
+      \ 'colorscheme': 'edge',
       \ 'active': {
       \   'left': [ 
       \     [ 'mode', 'paste' ],
@@ -975,12 +979,17 @@ autocmd! BufNewFile,BufRead *.bat
 " colorscheme Atelier_CaveDark
 " colorscheme vividchalk
 " colorscheme night-owl
-let g:onedark_termcolors=256
-colorscheme onedark
+" let g:onedark_termcolors=256
+" colorscheme onedark
 " colorscheme stellarized
 " colorscheme cosmic_latte
 " colorscheme peaksea
 
+" the configuration options should be placed before `colorscheme edge`
+let g:edge_style = 'neon'
+let g:edge_disable_italic_comment = 1
+let g:edge_transparent_background = 1
+colorscheme edge
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                  AutoCMD                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
