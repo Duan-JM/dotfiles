@@ -28,7 +28,7 @@ if [ $(uname) == "Darwin" ]; then
 
   if [ ! -d "~/.oh-my-zsh" ]; then
     echo 'no exist oh my zsh, installing'
-    git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+    git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
   else
     echo 'oh my zsh detected, skip installing'
   fi
@@ -53,7 +53,7 @@ elif [ $(uname) == "Linux" ]; then
 
   if [ ! -d "~/.oh-my-zsh" ]; then
     echo 'no exist oh my zsh, installing'
-    git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+    git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
   else
     echo 'oh my zsh detected, skip installing'
   fi

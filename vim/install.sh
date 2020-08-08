@@ -95,6 +95,13 @@ cp -rf ./vimrc ~/.vimrc
 
 echo "Changing relevant linking"
 
+if [ -d "~/.config/" ]; then
+  echo "Existinng ~/.config file"
+else
+  echo "No ~/.config dir creating"
+  mkdir ~/.config/
+fi
+
 if [ -f "~/.config/nvim" or -d "~/.config/nvim" ]; then
   echo "deleting existing nvim config file"
   rm -rf ~/.config/nvim
@@ -106,14 +113,9 @@ if [ -f "~/.config/nvim/init.vim" ]; then
   rm ~/.config/nvim/init.vim
 fi
 
-if [ -d "~/.config/" ]; then
-  echo "No ~/.config file creating"
-  mkdir ~/.config/
-fi
-
 echo "Creating link to nvim configfile"
-ln -sf ~/.vim ~/.config/nvim
-ln -sf ~/.vimrc ~/.config/nvim/init.vim
+ln -s ~/.vim ~/.config/nvim
+ln -s ~/.vimrc ~/.config/nvim/init.vim
 
 echo "Installing ctags for Vista"
 if [ $(uname) == "Darwin" ]; then
@@ -122,15 +124,26 @@ if [ $(uname) == "Darwin" ]; then
 
 elif [ $(uname) == "Linux" ]; then
   echo "install autoconf autogen"
-  ${SUDO_PREFIX} apt-get install autoconf autogen
+  ${SUDO_PREFIX} apt-get install autoconf autogen pkg-config
 
   echo "Install ctags"
   ${SUDO_PREFIX} apt-get install libjansson-dev
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags
-  ./autogen.sh ./configure
-  make
+  ${SUDO_PREFIX} ./autogen.sh 
+  ${SUDO_PREFIX} ./configure
+  ${SUDO_PREFIX} make
   ${SUDO_PREFIX} make install
+fi
+
+echo "Installing rg for Leaderf"
+if [ $(uname) == "Darwin" ]; then
+  echo "install ripgrep for MacOS"
+  brew install ripgrep
+
+elif [ $(uname) == "Linux" ]; then
+  echo "install ripgrep for Linux"
+  ${SUDO_PREFIX} apt-get install ripgrep
 fi
 
 echo "Installing Pylint autopep8 jedi flake8"

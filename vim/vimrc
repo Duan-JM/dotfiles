@@ -3,6 +3,10 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 " Need attention
+Plug 'APZelos/blamer.nvim'
+let g:blamer_enabled = 1           " auto enable
+let g:blamer_show_in_visual_modes = 0
+
 Plug 'sainnhe/edge'
 Plug 'skywind3000/asyncrun.vim'
 Plug 'skywind3000/asynctasks.vim'
@@ -120,7 +124,6 @@ Plug 'Yggdroot/LeaderF'                                                         
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
 Plug 'brooth/far.vim'                                                           " search and replace
 call plug#end()
-
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                   Mappings                                   "
