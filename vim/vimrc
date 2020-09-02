@@ -38,8 +38,6 @@ if has('nvim')
   Plug 'ncm2/float-preview.nvim'                              " showing doc with float windows not preview beside the functions
   let g:float_preview#docked = 0
 endif
-Plug 'junegunn/goyo.vim', {'for': ['markdown', 'tex']}
-Plug 'junegunn/limelight.vim'
 Plug 'voldikss/vim-floaterm'                                  " floating terminaler you must like it
 
 " Coding
@@ -50,9 +48,10 @@ else
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
-Plug 'davidhalter/jedi-vim'
 Plug 'deoplete-plugins/deoplete-jedi'
-Plug 'w0rp/ale', {'for': ['cpp', 'python']}             " Syntax Check
+Plug 'tbodt/deoplete-tabnine', { 'do': './install.sh' }
+Plug 'davidhalter/jedi-vim'
+Plug 'dense-analysis/ale', {'for': ['cpp', 'python']}   " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
@@ -70,8 +69,6 @@ Plug 'tpope/vim-repeat'                                 " for use . to repeat fo
 Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown']}         " show params and functions
 
 " Writing Blog
-Plug 'voldikss/vim-translate-me', {'for':['markdown', 'tex']}
-Plug 'hotoo/pangu.vim', {'for': ['markdown']}                                   "to make your document better
 Plug 'godlygeek/tabular', {'for': ['markdown']}
 Plug 'plasticboy/vim-markdown', {'for': ['markdown']}
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
@@ -118,11 +115,9 @@ Plug 'tpope/vim-fugitive'
 Plug 'junegunn/gv.vim'                                                          " Rely on fugitive
 
 " Search
-Plug 'tpope/vim-abolish'                                                        "增强版的substitue
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
                                                                                 " <c-]> open in vertical 
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
-Plug 'brooth/far.vim'                                                           " search and replace
 call plug#end()
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -138,15 +133,14 @@ nmap <leader>q :q<CR>
 
 nnoremap <Leader>eg :e ++enc=gbk<CR>
 nnoremap <Leader>eu :e ++enc=utf8<CR>
+nnoremap <Leader>xd :%!xxd<CR>
+nnoremap <Leader>xr :%!xxd -r<CR>                       " show HEX and return
 
 " nnoremap <leader>sl :set list!<CR>                    " quick config to see or not see special character  
 nnoremap <leader>ll :set conceallevel=0<CR>             " quick change conceal mode
 
 nnoremap <leader>ev :tabe $MYVIMRC<CR>                  " Quickly edit/reload the vimrc file
 
-" show HEX and return
-nnoremap <Leader>xd :%!xxd<CR>
-nnoremap <Leader>xr :%!xxd -r<CR>
 
 " Window control
 nnoremap <leader>t :tabe<CR>                            " open a new tab
@@ -169,8 +163,8 @@ nnoremap j gj
 nnoremap k gk
 
 " use <C-l> to correct spell while insert mode
-" inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
-inoremap <C-l> <Esc>[s1z=`]a
+inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
+
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                               PluginConfigure                                "
@@ -179,35 +173,6 @@ inoremap <C-l> <Esc>[s1z=`]a
 tnoremap <c-[> <c-\><c-n>
 nnoremap <leader>` :FloatermToggle<cr>
 
-" limelight.vim
-" Color name (:help cterm-colors) or ANSI code
-let g:limelight_conceal_ctermfg = 'gray'
-let g:limelight_conceal_ctermfg = 240
-
-" Color name (:help gui-colors) or RGB color
-let g:limelight_conceal_guifg = 'DarkGray'
-let g:limelight_conceal_guifg = '#777777'
-
-" Default: 0.5
-let g:limelight_default_coefficient = 0.5
-
-" Number of preceding/following paragraphs to include (default: 0)
-let g:limelight_paragraph_span = 3
-
-" Beginning/end of paragraph
-"   When there's no empty line between the paragraphs
-"   and each paragraph starts with indentation
-let g:limelight_bop = '^\s'
-let g:limelight_eop = '\ze\n^\s'
-
-" Highlighting priority (default: 10)
-"   Set it to -1 not to overrule hlsearch
-let g:limelight_priority = -1
-autocmd! User GoyoEnter Limelight
-autocmd! User GoyoLeave Limelight!
-
-" Goyo
-let g:goyo_linenr = 1
 
 " Define mappings
 autocmd FileType denite call s:denite_my_settings()
@@ -240,28 +205,15 @@ augroup qs_colors
 augroup END
 
 
-" Far
-set regexpengine=1
-nnoremap <space>s/ :call FarSearchCurrentFolder()<cr>
-function! FarSearchCurrentFolder()
-    "设置缩进
-    let l:pattern = input('keywords=')
-    let far_params = {
-            \   'pattern': pattern,
-            \   'replace_with': pattern,
-            \   'file_mask': '**/*',
-            \   'range': [-1, -1],
-            \   }
-
-    call far#find(far_params, ['--result-preview=0', '--enable-replace=0'])
-endfunction
-
-
 " deoplete
 let g:deoplete#enable_at_startup = 1
 call deoplete#custom#source('_', 'disabled_syntaxes', ['Comment', 'String'])
 call deoplete#custom#option('ignore_sources', {'_': ['buffer', 'around']})
 call deoplete#custom#option('smart_case', v:true)
+call deoplete#custom#var('tabnine', {
+\ 'line_limit': 500,
+\ 'max_num_results': 20,
+\ })
 
 inoremap <silent><expr> <tab>
     \ pumvisible() ? "\<c-n>" :
@@ -354,10 +306,9 @@ let g:startify_list_order = [
             \ ['   Bookmarks'],     'bookmarks',
             \ ['   MRU'],           'files' ,
             \ ['   MRU '.getcwd()], 'dir',
-            \ ['   Sessions'],      'sessions',
             \ ]
 let g:startify_bookmarks = [
-            \ '~/Desktop',
+            \ '~/Desktop/Github',
             \ '~/Documents/Coding/Test']
 let g:startify_change_to_dir          = 0
 let g:startify_enable_special         = 0
@@ -368,7 +319,6 @@ let g:startify_session_persistence    = 1
 let g:startify_use_env                = 1
 
 "scrooloose/nerdtree
-nnoremap <leader>ne :NERDTreeFind<CR>
 nnoremap <leader>nt :NERDTreeToggle<CR>
 let g:NERDTreeShowLineNumbers=1
 let NERDTreeAutoCenter=1
@@ -458,7 +408,6 @@ let g:lightline = {
       \   ],
       \ },
       \ 'component_function': {
-      \   'match_count': 'MatchCountStatusline',
       \   'gitbranch': 'fugitive#head',
       \ },
       \ 'component_expand': {
@@ -497,9 +446,9 @@ let g:UltiSnipsJumpBackwardTrigger = "<c-k>"
 let g:snips_author = "Duan-JM"
 let g:snips_email = "vincent.duan95@outlook.com"
 let g:snips_github = "https://github.com/Duan-JM"
+let g:ultisnips_python_style = "google"
 
-
-"w0rp/ale
+"dense-analysis/ale
 let g:ale_linters_explicit = 1
 let g:ale_completion_delay = 500
 let g:ale_echo_delay = 20
@@ -514,7 +463,7 @@ let g:ale_cpp_cppcheck_options = ''
 let g:ale_sign_eror = 'E'
 let g:ale_sign_warning = 'W'
 let g:ale_linters = {
-\   'python': ['pylint'],
+\   'python': ['mypy', 'flake8', 'pylint'],
 \   'tex': ['lacheck'],
 \   'swift': ['swiftlint'],
 \   'markdown': ['markdownlint'],
@@ -524,10 +473,10 @@ let g:ale_linters = {
 \}
 let g:ale_fixers = {
 \   '*': ['remove_trailing_lines','trim_whitespace' ],
-\   'python': ['autopep8']
+\   'python': ['autopep8', 'yapf']
 \}
-"let g:ale_fix_on_save = 1 "auto Sava
 "Use :ALEFix to fix
+"let g:ale_fix_on_save = 1 "auto Sava
 let g:ale_list_window_size = 5
 
 
@@ -564,7 +513,6 @@ set tabstop=2  softtabstop=2 shiftwidth=2 expandtab textwidth=79
 set history=1000                                                        " save 1000 cmd
 set timeoutlen=500                                                      " give u 500 time to react for cmd
 set list                                                                " show the special character
-set guioptions=e                                                        "only show guitablabel
 set autoread
 set autowrite
 set autowriteall                                                        " Auto-write all file changes
@@ -664,9 +612,6 @@ set foldmethod=indent
 set foldlevel=99
 set foldlevelstart=99
 
-" nnoremap <space> za
-" vnoremap <space> zf 
-
 let gitroot = substitute(system('git rev-parse --show-toplevel'),'[\n\r]', '', 'g')                          " Make tags placed in .git/tags file available in all levels of a repository
 if gitroot != ''
     let &tags = &tags . ',' . gitroot . '/.git/tags'
@@ -750,94 +695,6 @@ function! SummarizeTabs()
     endtry
 endfunction
 
-function! GuiTabLabel()
-    let label = ''
-    let bufnrlist = tabpagebuflist(v:lnum)
-    " Add '+' if one of the buffers in the tab page is modified
-    for bufnr in bufnrlist
-        if getbufvar(bufnr, "&modified")
-            let label = '+'
-            break
-        endif
-    endfor
-    " Append the tab number
-    let label .= v:lnum.': '
-    " Append the buffer name
-    let name = bufname(bufnrlist[tabpagewinnr(v:lnum) - 1])
-    if name == ''
-        " give a name to no-name documents
-        if &buftype=='quickfix'
-            let name = '[Quickfix List]'
-        else
-            let name = '[No Name]'
-        endif
-    else
-        " get only the file name
-        let name = fnamemodify(name,":t")
-    endif
-    let label .= name
-    " Append the number of windows in the tab page
-    let wincount = tabpagewinnr(v:lnum, '$')
-    return label . '  [' . wincount . ']'
-endfunction
-
-function! SetTabLabel()
-    set guitablabel=%{GuiTabLabel()}
-endfunction
-
-" http://vimdoc.sourceforge.net/htmldoc/gui.html
-"echom "May The FORCE be with U!"
-if exists('+showtabline')
-    function! MyTabLine()
-        let s = ''
-        let t = tabpagenr()
-        let i = 1
-        while i <= tabpagenr('$')
-            let buflist = tabpagebuflist(i)
-            let winnr = tabpagewinnr(i)
-            let s .= '%' . i . 'T'
-            let s .= (i == t ? '%1*' : '%2*')
-            let s .= ' '
-            let s .= i . ':'
-            let s .= ' %*'
-            let s .= (i == t ? '%#TabLineSel#' : '%#TabLine#')
-            let file = bufname(buflist[winnr - 1])
-            let file = fnamemodify(file, ':p:t')
-            if file == ''
-                let file = '[No Name]'
-            endif
-            let s .= file
-            let i = i + 1
-        endwhile
-        let s .= '%T%#TabLineFill#%='
-        let s .= (tabpagenr('$') > 1 ? '%999XX' : 'X')
-        return s
-    endfunction
-    set stal=2
-    set tabline=%!MyTabLine()
-endif
-
-"http://vim.wikia.com/wiki/Show_tab_number_in_your_tab_line
-" set up tab tooltips with every buffer name
-function! GuiTabToolTip()
-    let tip = ''
-    let bufnrlist = tabpagebuflist(v:lnum)
-    for bufnr in bufnrlist
-        " separate buffer entries
-        if tip != ''
-            let tip .= " \n "
-        endif
-        " Add name of buffer
-        let name = bufname(bufnr)
-        " add modified/modifiable flags
-        if getbufvar(bufnr, "&modified")
-            let tip .= ' [+]'
-        endif
-    endfor
-    return tip
-endfunction
-set guitabtooltip=%{GuiTabToolTip()}
-
 " url:http://vimcasts.org/episodes/tidying-whitespace/
 function! Preserve(command)
     " Preparation: save last search, and cursor position.
@@ -878,20 +735,6 @@ autocmd ColorScheme * call s:transparent_background()
 set background=dark
 noremap <leader>bg :call ToggleBG()<CR>
 
-"CompileConfig
-"按 F10 运行python"
-nnoremap <F10> :w<CR> :call RunPython()<CR>
-function! RunPython()
-    let mp = &makeprg
-    let ef = &errorformat
-    let exeFile = expand("%:t")
-    setlocal makeprg=python\ -u
-    set efm=%C\ %.%#,%A\ \ File\ \"%f\"\\,\ line\ %l%.%#,%Z%[%^\ ]%\\@=%m
-    silent make %
-    copen
-    let &makeprg = mp
-    let &errorformat = ef
-endfunction
 
 nnoremap <leader>r :call CompileRun()<CR>
 func! CompileRun()
@@ -987,12 +830,13 @@ autocmd! BufNewFile,BufRead *.bat
 " colorscheme stellarized
 " colorscheme cosmic_latte
 " colorscheme peaksea
-
 " the configuration options should be placed before `colorscheme edge`
 let g:edge_style = 'neon'
 let g:edge_disable_italic_comment = 1
 let g:edge_transparent_background = 1
 colorscheme edge
+
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                                  AutoCMD                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -1024,26 +868,18 @@ autocmd BufEnter * if expand("%:p:h") !~ '^/tmp' | silent! lcd %:p:h | endif
 let s:default_path = escape(&path, '\ ') " store default value of 'path'
 
 
-" Automatically open and close the popup menu / preview window
-autocmd CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
-
+autocmd CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif    " Automatically open and close the popup menu / preview window
 
 autocmd FocusGained, BufEnter * :silent! !
-autocmd WinEnter call SetTabLabel()
-autocmd BufEnter call SetTabLabel()
-autocmd VimEnter * :call SetTabLabel()
-
-" autocmd! BufWritePost .vimrc source ~/.vimrc                                " source vimrc immediately / now buging
-
 
 autocmd! FileType gitcommit autocmd! BufEnter COMMIT_EDITMSG
-            \ call setpos('.', [0, 1, 1, 0])                                " set it to the first line when editing a git commit message
+            \ call setpos('.', [0, 1, 1, 0])                                    " set it to the first line when editing a git commit message
 
 " config for tex
-autocmd! FileType tex set spell | 
-            \ set spelllang=en_us | 
-            \ set wrap | 
-            \ set whichwrap=b,s,h,l,<,>,>h,[,]                              " Do not wrap long lines
+autocmd! FileType tex set spell |
+            \ set spelllang=en_us |
+            \ set wrap |
+            \ set whichwrap=b,s,h,l,<,>,>h,[,]                                  " Do not wrap long lines
 
 
 
@@ -1052,11 +888,3 @@ autocmd! FileType tex set spell |
 autocmd! FileType python syn keyword pythonDecorator True None False self
 highlight BadWhitespace guifg=gray guibg=red ctermfg=gray ctermbg=red
 autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
-
-
-" gnuplot syntax highlighting
-autocmd BufNewFile,BufRead *.plt,.gnuplot setf gnuplot
-autocmd ColorScheme * highlight ExtraWhitespace ctermbg=red guibg=red
-autocmd FileType ruby set dictionary+=~/.vim/dict/ruby.dict
-autocmd FileType javascript set dictionary+=$HOME/.vim/dict/node.dict
-"}
