@@ -15,6 +15,7 @@ cp -rf ~/.vim/fonts $DOT_FILE/vim
 cp -rf ~/.vim/colors $DOT_FILE/vim
 cp -rf ~/.vim/autoload $DOT_FILE/vim
 cp ~/.vimrc $DOT_FILE/vim/vimrc
+cp ~/.vim/coc-settings.json $DOT_FILE/vim/coc-settings.json
 
 
 ###########################

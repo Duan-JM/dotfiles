@@ -11,6 +11,16 @@ if [ $(uname) == "Darwin" ]; then
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   fi
 
+  # install node for coc
+  if command -v node > /dev/null 2>&1; then
+    echo 'node existing, plz manually check its version'
+    node -v
+  else
+    echo "installing node >= 10.12"
+    curl -sL install-node.now.sh/lts | bash
+    node -v
+  fi
+
   # installing neovim
   if command -v nvim >/dev/null 2>&1; then
     echo "neovim detected"
@@ -52,6 +62,16 @@ elif [ $(uname) == "Linux" ]; then
     ${SUDO_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
     ${SUDO_PREFIX} apt update
     ${SUDO_PREFIX} apt-get install neovim --yes
+  fi
+
+  # install node for coc
+  if command -v node > /dev/null 2>&1; then
+    echo 'node existing, plz manually check its version'
+    node -v
+  else
+    echo "installing node >= 10.12"
+    curl -sL install-node.now.sh/lts | bash
+    node -v
   fi
 
   if command -v git >/dev/null 2>&1; then 
@@ -147,8 +167,13 @@ elif [ $(uname) == "Linux" ]; then
 fi
 
 echo "Installing Pylint autopep8 jedi flake8"
-pip3 install pylint autopep8 jedi
-pip3 install flake8 flake8-mypy flake8-bugbear flake8-comprehensions flake8-executable flake8-pyi mccabe pycodestyle pyflakes
+pip3 install flake9 mypy pylint pylint-quotes pycodestyle autopep8
 
-echo "We have deprecated coc, so we are Good to Go with simple :PlugInstall"
+echo "Installing Plugins"
+vim -c PlugInstall +qa
+
+echo "Install Coc-plugins"
+vim -c 'CocInstall coc-clangd coc-python coc-json coc-snippets' +qa
+
+echo "We are good to go now, Happy Vimming"
 echo "If configure is not set up correctly, please check out if ~/.config/nvim and ~/.config/nvim/init.vim are generated properly"
