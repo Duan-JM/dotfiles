@@ -6,7 +6,6 @@ alias vimrc='vim ~/.vimrc'
 alias vi='nvim'
 alias vim='nvim'
 alias pg='cd ~/Documents/Coding/Test'
-alias wk='cd ~/Documents/Github/Few-shot-Playground_'
 alias cpv='rsync -ah --info=progress2'
 alias task='asynctask -f'
 

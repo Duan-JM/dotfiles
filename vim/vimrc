@@ -410,7 +410,7 @@ let g:ale_cpp_cppcheck_options = ''
 let g:ale_sign_eror = 'E'
 let g:ale_sign_warning = 'W'
 let g:ale_linters = {
-\   'python': ['mypy', 'flake8', 'pylint'],
+\   'python': ['flake8', 'pylint'],
 \   'tex': ['lacheck'],
 \   'swift': ['swiftlint'],
 \   'markdown': ['markdownlint'],
