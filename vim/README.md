@@ -1,140 +1,43 @@
-Welcome to MyVimrc
+Vim Configuration
 =====================
+## Intro
 
-Special Information
-------------------
-After use neovim for some time, I found neovim is a bit faster than vim, and it 
-support floating window in verison 0.4. So literally, I directly use my vim configure
-for neovim, it works fine.
+这个 VIM 的安装与配置是我个人当前的主力代码开发的工具。日常使用 VIM 结合 TMUX 一起开发，这里总结了 VIM 的安装与配置。
 
-**ps:** if you DO NOT want use vim config in neovim, just ignore the `ln` command while installing
+## NeoVim 安装与配置
 
-### NeoVim Installation & vimrc
-```Bash
-# for mac
-brew install neovim
+我最开始的时候使用的是 Vim 而不是 NeoVim 并且一定程度上在两者之间还没有特别笃定的选择。所以当前的配置是同时支持 NeoVim 和 Vim 的。当前安装脚本只支持 ubuntu 和 MacOS
 
-# `brew install --HEAD neovim` for latest version
-pip3 install pynvim
-ln -sf ~/.vim ~/.config/nvim
-ln -sf ~/.vimrc ~/.config/nvim/init.vim
-
-# for ubuntu
-
-sudo apt-add-repository ppa:neovim-ppa/stable
-# if you want to install latest version change `stable` to `unstable`
-sudo apt update
-sudo apt-get install neovim
-pip3 install pynvim
-ln -sf ~/.vim ~/.config/nvim
-ln -sf ~/.vimrc ~/.config/nvim/init.vim
-
-# It is optional to change zsh alias to use vim as nvim
-# put code below in the ~/.zshrc
-alias vim='nvim'
-alias vi='nvim'
-
-# You can also choice to use the script in this repo to install vim automatically
-# However, we highly recommand you to configure your vim by yourself.
+```bash
+# 找到仓库中 vim 文件夹下的 install.sh
+bash ./install.sh sudo # 加 sudo 就是使用 sudo 权限安装
 ```
 
-PluginInstall
-------------
-1. Git from this repository
+由于这个脚本主要为我个人使用，可能会出现安装不完整的情况。如果允许的话，可以自行查看下 install.sh 脚本，没有什么复杂逻辑很简单的。执行完成后可以手动检查：
+- `~/.config/nvim` 是否软链接到 `~/.vim`。
+- ctags 是否安装。
+- 运行启动 `vim` 后看是否有报错。
+
+
+## Mappings
 ```bash
-git clone https://github.com/VDeamoV/VDeamoV-vimrc.git ~/.vim
-cd ~/.vim
-git clone https://github.com/powerline/fonts.git ~/.vim/fonts
-cd ~/.vim/fonts
-sudo ./install.sh # install fonts for the themes
-cp ~/.vim/vimrc ~/.vimrc
-```
-
-2. Install Plugs
-  - Check requirements
-    ```bash
-    brew install node
-    brew install cquery
-    npm install cnpm -g --registry=https://registry.npm.taobao.org
-    cnpm -g install yarn # apt-get install yarn will not work
-    yarn config set registry 'https://registry.npm.taobao.org'
-    pip3 install autopep8
-    pip3 install pylint
-    pip3 install jedi
-    ```
-
-  - After enter the vim, use the commond below
-    ```bash
-    :PlugInstall
-    ```
-
-  - coc for snippets
-    ```bash
-    :CocInstall coc-ultisnips
-    ```
-
-  - coc-python for python code complete
-    ```bash
-    :CocInstall coc-python
-    ```
-
-  - coc-java for java code complete
-    ```bash
-    :CocInstall coc-java
-    ```
-    For in China, download jdt.ls directly in plugin will be extremely slow.
-    Try download in the offical website [here](http://download.eclipse.org/jdtls/milestones/?d), then place them in the path
-    `~/.config/coc/extension/coc-java-data/server`
-
-  - Configure for YCM (optional try coc.nvim instead)
-    ```bash
-    cd ~/.vim/plugged/YouCompleteMe/
-    git submodule update --init --recursive
-    sudo ./install.py -all
-    ```
-
-
-Need Additional Configure
-------------------------
-1. Startify
-- *You need to modify the startify configure in the vimrc*
-
-2. ColorScheme
-- *Search colorscheme in the vimrc to find my configure*
-- *use `:colorscheme` then tab to see other scheme*
-- *`<leader>bg` to change the daymode and nightmode*
-
-3. ale
-- *You need to ensure you have install the correct lint which you used in the config, such as pylint, autopep8*
-
-4. Utlisnip
-- *Search python to find all the configure for python path, change it to your python path*
-- *Utlisnip with coc*, install extension with cmd `:CocInstall coc-ultisnips`
-
-5. ACK
-- Need to install [the_silver_searcher](https://github.com/ggreer/the_silver_searcher) manually 
-
-Mappings
---------
-```bash
+" Caution: Mapping should place before PluginConfigure
 let mapleader=' '
 
 nmap . .`[
 nmap <leader>w :w<CR>
-nmap <leader>q :q<CR>
 
 
 nnoremap <Leader>eg :e ++enc=gbk<CR>
 nnoremap <Leader>eu :e ++enc=utf8<CR>
+nnoremap <Leader>xd :%!xxd<CR>
+nnoremap <Leader>xr :%!xxd -r<CR>                       " show HEX and return
 
 " nnoremap <leader>sl :set list!<CR>                    " quick config to see or not see special character  
 nnoremap <leader>ll :set conceallevel=0<CR>             " quick change conceal mode
 
 nnoremap <leader>ev :tabe $MYVIMRC<CR>                  " Quickly edit/reload the vimrc file
 
-" show HEX and return
-nnoremap <Leader>xd :%!xxd<CR>
-nnoremap <Leader>xr :%!xxd -r<CR>
 
 " Window control
 nnoremap <leader>t :tabe<CR>                            " open a new tab
@@ -146,10 +49,6 @@ nnoremap <leader>tn :tabnext<CR>
 nnoremap [<space>  :<c-u>put! =repeat(nr2char(10), v:count1)<cr>'[
 nnoremap ]<space>  :<c-u>put =repeat(nr2char(10), v:count1)<cr>
 
-" control term
-" use c+[ to exit term to normal mode
-tnoremap <c-[> <c-\><c-n>
-nnoremap <leader>` :split \| term
 
 " Use <C-L> to clear the highlighting of :set hlsearch
 if maparg('<C-L>', 'n') ==# ''
@@ -167,9 +66,14 @@ inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 PluginList
 ---------
 ```bash
+call plug#begin('~/.vim/plugged')
 " Need attention
-Plug 'skywind3000/asynctasks.vim'
-Plug 'voldikss/vim-floaterm'
+Plug 'APZelos/blamer.nvim'
+let g:blamer_enabled = 1           " auto enable
+let g:blamer_show_in_visual_modes = 0
+Plug 'sainnhe/edge'
+
+
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
@@ -180,33 +84,16 @@ Plug 'ryanoasis/vim-devicons'                           " extensions for icons
 Plug 'brglng/vim-im-select'                             " auto change input methods, needs `imselect` cmd
 Plug 'unblevable/quick-scope'                           " Advance setting for f t search
 Plug 'mbbill/undotree'                                  " history of the undo
-if has('nvim')
-  Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' } " insteresting system
-else
-  Plug 'Shougo/denite.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
-Plug 'Shougo/neoyank.vim'                                     " yank history using denite
 
 if has('nvim')
   Plug 'ncm2/float-preview.nvim'                              " showing doc with float windows not preview beside the functions
+  let g:float_preview#docked = 0
 endif
-Plug 'junegunn/goyo.vim', {'for': ['markdown', 'tex']}
-Plug 'junegunn/limelight.vim'
+Plug 'voldikss/vim-floaterm'                                  " floating terminaler you must like it
 
 " Coding
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', {'do': ':UpdateRemotePlugins'}
-else
-  Plug 'Shougo/deoplete.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
-Plug 'davidhalter/jedi-vim'
-Plug 'deoplete-plugins/deoplete-jedi'
-Plug 'tbodt/deoplete-tabnine', { 'do': './install.sh' }
-Plug 'w0rp/ale', {'for': ['cpp', 'python']}             " Syntax Check
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'dense-analysis/ale', {'for': ['cpp', 'python']}   " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
@@ -221,12 +108,13 @@ Plug 'tpope/vim-surround'                               " change surroundings
                                                         " ds[partten]
                                                         " ys(iww)[partten] / yss)
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
-Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python']}                     " show params and functions
+Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown']}         " show params and functions
+
+Plug 'skywind3000/asyncrun.vim'
+Plug 'skywind3000/asynctasks.vim'  " This combination can change default run
+
 
 " Writing Blog
-Plug 'voldikss/vim-translate-me', {'for':['markdown', 'tex']}
-Plug 'rhysd/vim-grammarous', {'for': ['markdown', 'tex']}                       " grammarly checks
-Plug 'hotoo/pangu.vim', {'for': ['markdown']}                                   "to make your document better
 Plug 'godlygeek/tabular', {'for': ['markdown']}
 Plug 'plasticboy/vim-markdown', {'for': ['markdown']}
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
@@ -242,7 +130,6 @@ Plug 'dhruvasagar/vim-table-mode', {'for': ['markdown']}
 "<leader>tt to change the exist text to format table
 Plug 'xuhdev/vim-latex-live-preview', {'for': ['tex']}                          " Use when you work with cn
 Plug 'lervag/vimtex', {'for': ['tex']}                                          " English is okay, fail with cn
-Plug 'deoplete-plugins/deoplete-dictionary'
 
 
 "FileManage
@@ -256,51 +143,21 @@ Plug 'kristijanhusak/vim-dirvish-git'
 
 " Appearance
 Plug 'itchyny/lightline.vim'
+Plug 'maximbaz/lightline-ale'
 Plug 'flazz/vim-colorschemes'
 Plug 'Yggdroot/indentLine'                                                      " Show indent line
 Plug 'kshenoy/vim-signature'                                                    " Visible Mark
 Plug 'luochen1990/rainbow'                                                      " multi color for Parentheses
-Plug 'vim-scripts/peaksea'
-Plug 'haishanh/night-owl.vim'
-Plug 'nightsense/stellarized'
-Plug 'nightsense/cosmic_latte'
 
 " Github
 Plug 'mattn/gist-vim'                                                           " :Gist -l/-ls :Gist -e (add gist name) -s (add description) -d (delete)
 Plug 'mattn/webapi-vim'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/gv.vim'                                                          " Rely on fugitive
-Plug 'airblade/vim-gitgutter'                                                   " [c ]c jump to prev/next change [C ]C
 
 " Search
-Plug 'tpope/vim-abolish'                                                        "增强版的substitue
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
                                                                                 " <c-]> open in vertical 
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
-Plug 'brooth/far.vim'                                                           " search and replace
+call plug#end()
 ```
-
-TIPS Usage
-----------
-### Searching & Navigating
-1. Search files names
-
-We use `Leaderf` to search files, use `<c-p>` to trigger the plugin, use `<c-]>` to open the file vertially.
-
-2. Search content of lots of files
-
-We use `far` plugin to search the content in a bunch of files.  Using
-`<space>s/` to triger the command line, after than just type the keyword to
-search what ever you want in current folder. You can also use `:F foo
-file_mask` command to search. eg, `:F test **/*.py` search test in all `py`
-file in the folder.
-
-3. Navigate between buffers and functions
-
-we also use `LeaderF` or `Vista` to navigate between buffers and functions. We
-use `<A-b>` to trigger the list of buffers, use `<A-m>` to trigger the
-functions list (also work in markdown files).
-
-4. Tabs Controls
-We use `<leader>t` to create a new tab, `<leader>v` to create a new tab
-vertically and `<leader>tq` to close tabs and `<leader>tn` to switch tabs.
