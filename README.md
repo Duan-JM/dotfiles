@@ -3,60 +3,45 @@ Collection for my dotfiles
 
 <!-- vim-markdown-toc GitLab -->
 
-* [Mention](#mention)
+* [Requirements](#requirements)
 * [VIM](#vim)
-  * [Requirements](#requirements)
-  * [Install Manual](#install-manual)
+  * [Installation](#installation)
 * [Tmux](#tmux)
-  * [Requirements](#requirements-1)
-  * [Install Manual](#install-manual-1)
-    * [Automatically Install](#automatically-install)
-    * [Manually Install](#manually-install)
+  * [Installation](#installation-1)
 * [Zsh](#zsh)
-  * [Requirements](#requirements-2)
-  * [Install Manual](#install-manual-2)
-    * [Automatically Install](#automatically-install-1)
-    * [Manually Install](#manually-install-1)
+  * [Installation](#installation-2)
+    * [Auto Installation](#auto-installation)
+    * [Manually Install](#manually-install)
 
 <!-- vim-markdown-toc -->
+## Requirements 
 
-## Mention
-doc is outdated
-- [ ] rewrite README
+Check the requirements in `requirements-list` folder and install all apps and
+packages.
 
 ## VIM
-### Requirements
-### Install Manual
+### Installation
+
+```bash
+bash ./vim/install.sh
+```
 
 ## Tmux
-### Requirements
-- git
-- tmux (will auto installed)
+### Installation
 
-### Install Manual
-#### Automatically Install
 You can install tmux and config it automatically on ubuntu / Mac OS with
 following command.
 
 ```bash
-bash ./tmux_auto_install.sh
+bash ./tmux/install.sh
 ```
 
-#### Manually Install
-
-
 ## Zsh
-### Requirements
-- git
-- zsh (will auto installed)
-
-### Install Manual
-#### Automatically Install
-You can install zsh and config it automatically on ubuntu / Mac OS with
-following command.
+### Installation
+#### Auto Installation
 
 ```bash
-bash ./oh_my_zsh_auto_install.sh
+bash ./zsh/install.sh
 ```
 
 #### Manually Install
