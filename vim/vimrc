@@ -3,9 +3,6 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 " Need attention
-Plug 'APZelos/blamer.nvim'
-let g:blamer_enabled = 1           " auto enable
-let g:blamer_show_in_visual_modes = 0
 Plug 'sainnhe/edge'
 
 
@@ -16,17 +13,8 @@ Plug 'michaeljsmith/vim-indent-object'                  " used for align
 Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
 Plug 'wellle/targets.vim'                               " text objects
 Plug 'ryanoasis/vim-devicons'                           " extensions for icons
-Plug 'brglng/vim-im-select'                             " auto change input methods, needs `imselect` cmd
 Plug 'unblevable/quick-scope'                           " Advance setting for f t search
 Plug 'mbbill/undotree'                                  " history of the undo
-if has('nvim')
-  Plug 'Shougo/denite.nvim', { 'do': ':UpdateRemotePlugins' } " insteresting system
-else
-  Plug 'Shougo/denite.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
-Plug 'Shougo/neoyank.vim'                                     " yank history using denite
 
 if has('nvim')
   Plug 'ncm2/float-preview.nvim'                              " showing doc with float windows not preview beside the functions
@@ -42,8 +30,7 @@ Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
 Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
                                                         " 补全括号 shift+tab出来
-Plug 'vim-scripts/matchit.zip'                          " %  g% [% ]% a%
-Plug 'andymass/vim-matchup'                             " extence
+Plug 'andymass/vim-matchup'                             " % g% z%
 Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
 Plug 'godlygeek/tabular'                                " align text
 Plug 'tpope/vim-surround'                               " change surroundings
@@ -97,6 +84,7 @@ Plug 'mattn/gist-vim'                                                           
 Plug 'mattn/webapi-vim'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/gv.vim'                                                          " Rely on fugitive
+Plug 'APZelos/blamer.nvim'
 
 " Search
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
@@ -152,6 +140,9 @@ inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                               PluginConfigure                                "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" APZelos/blamer.nvim
+let g:blamer_enabled = 1           " auto enable
+let g:blamer_show_in_visual_modes = 0
 
 " skywind3000/asynctasks.vim
 let g:asyncrun_open=6
@@ -160,32 +151,11 @@ let g:asynctasks_term_pos = 'bottom'
 let g:asynctasks_term_rows = 10    " 设置纵向切割时，高度为 10
 let g:asynctasks_term_cols = 80    " 设置横向切割时，宽度为 80
 nnoremap <leader>r :AsyncTask file-run<cr>
+nnoremap <leader>b :AsyncTask file-build<cr>
 
 " vim-floaterm
 tnoremap <c-[> <c-\><c-n>
 nnoremap <leader>` :FloatermToggle<cr>
-
-
-" Define mappings
-autocmd FileType denite call s:denite_my_settings()
-function! s:denite_my_settings() abort
-  nnoremap <silent><buffer><expr> <CR>
-  \ denite#do_map('do_action')
-  nnoremap <silent><buffer><expr> d
-  \ denite#do_map('do_action', 'delete')
-  nnoremap <silent><buffer><expr> p
-  \ denite#do_map('do_action', 'preview')
-  nnoremap <silent><buffer><expr> q
-  \ denite#do_map('quit')
-  nnoremap <silent><buffer><expr> i
-  \ denite#do_map('open_filter_buffer')
-  nnoremap <silent><buffer><expr> <Space>
-  \ denite#do_map('toggle_select').'j'
-endfunction
-
-" Neoyank
-nnoremap <leader>y :Denite neoyank<cr>
-
 
 " quick-scope
 let g:qs_highlight_on_keys = ['f', 'F', 't', 'T']
@@ -316,9 +286,8 @@ let g:Lf_WorkingDirectoryMode = 'Ac'
 let g:Lf_WindowHeight = 0.30
 let g:Lf_ShowRelativePath = 0
 
-noremap <leader>fb :<c-r>=printf("Leaderf buffer %s", "")<CR>
-noremap <leader>fm :<c-r>=printf("leaderf mru %s", "")<CR>
-noremap <leader>ft :<c-r>=printf("Leaderf bufTag %s", "")<CR>
+noremap <leader>fb :Leaderf buffer<CR>
+noremap <leader>ft :Leaderf function<CR>
 noremap <leader>fl :<c-r>=printf("Leaderf line %s", "")<CR>
 
 " need install rg
@@ -410,7 +379,7 @@ let g:ale_cpp_cppcheck_options = ''
 let g:ale_sign_eror = 'E'
 let g:ale_sign_warning = 'W'
 let g:ale_linters = {
-\   'python': ['flake8', 'pylint'],
+\   'python': ['pylint'],
 \   'tex': ['lacheck'],
 \   'swift': ['swiftlint'],
 \   'markdown': ['markdownlint'],
@@ -770,6 +739,7 @@ function! NeatFoldText()
 endfunction
 set foldtext=NeatFoldText()
 
+
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                             FileType Conifgure                             "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -872,4 +842,3 @@ autocmd! FileType tex set spell |
 autocmd! FileType python syn keyword pythonDecorator True None False self
 highlight BadWhitespace guifg=gray guibg=red ctermfg=gray ctermbg=red
 autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
-

@@ -10,7 +10,7 @@ alias cpv='rsync -ah --info=progress2'
 alias task='asynctask -f'
 
 # Most often
-alias proxy='export all_proxy=socks5://127.0.0.1:1080'
+alias proxy='export all_proxy=socks5://127.0.0.1:7890'
 alias unproxy='unset all_proxy'
 alias sublime='open -a Sublime\ Text'
 alias vscode='open -a Visual\ Studio\ Code'

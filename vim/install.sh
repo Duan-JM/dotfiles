@@ -1,5 +1,5 @@
 #!/bin/bash
-SUDO_PREFIX=$1
+SUDO_PREFIX='sudo'
 
 # We only support neovim here
 if [ $(uname) == "Darwin" ]; then
@@ -60,7 +60,7 @@ elif [ $(uname) == "Linux" ]; then
   else
     echo 'no existing neovim, installing'
     ${SUDO_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
-    ${SUDO_PREFIX} apt update
+    ${SUDO_PREFIX} apt update -y
     ${SUDO_PREFIX} apt-get install neovim --yes
   fi
 
@@ -70,8 +70,10 @@ elif [ $(uname) == "Linux" ]; then
     node -v
   else
     echo "installing node >= 10.12"
-    curl -sL install-node.now.sh/lts | bash
-    node -v
+    ${SUDO_PREFIX} apt-get install nodejs npm -y
+    ${SUDO_PREFIX} npm install n -g --registry https://registry.npm.taobao.org
+    ${SUDO_PREFIX} n stable
+    ${SUDO_PREFIX} node -v
   fi
 
   if command -v git >/dev/null 2>&1; then 
@@ -85,7 +87,7 @@ elif [ $(uname) == "Linux" ]; then
     echo 'pip3 detected, skip install pip'
   else
     echo 'no exists pip, installing'
-    ${SUDO_PREFIX} apt-get install python3-pip
+    ${SUDO_PREFIX} apt-get install python3-pip -y
   fi
 
 else
