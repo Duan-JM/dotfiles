@@ -1,14 +1,41 @@
 #!/bin/bash
+#
+# Author: Duan-JM
+# e-mail: vincent.duan95@gmail.com
+# Install neovim & its relevant dependencies
+
 SUDO_PREFIX='sudo'
 
-# We only support neovim here
-if [ $(uname) == "Darwin" ]; then
-  echo "Dectect MacOS"
+#######################################
+# Output error messages with time
+# Globals:
+#   error messages
+# Arguments:
+#   None
+#######################################
+err() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
+}
+
+#######################################
+# Output info messages with time
+# Globals:
+#   info messages
+# Arguments:
+#   None
+#######################################
+info() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&1
+}
+
+if [[ $(uname) == "Darwin" ]]; then
+  info "Dectect MacOS"
   if command -v brew >/dev/null 2>&1; then 
-    echo 'brew detected, skip install brew' 
+    info 'brew detected, skip install brew' 
   else 
-    echo 'no exists brew, installing' 
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    info 'no exists brew, installing' 
+    /usr/bin/ruby -e \
+      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   fi
 
   # install node for coc
@@ -51,7 +78,7 @@ if [ $(uname) == "Darwin" ]; then
   fi
 
 
-elif [ $(uname) == "Linux" ]; then
+elif [ "$(uname)" == "Linux" ]; then
   echo "Detect Linux"
 
   # installing neovim
@@ -98,60 +125,60 @@ echo "Add python support"
 pip3 install pynvim
 
 echo "Copy the Configure Files"
-if [ -f "~/.vim" ]; then
+if [ -f "${HOME}/.vim" ]; then
   echo "backup existing vim config file"
-  cp -rf ~/.vim ~/.vimrc_bak
+  cp -rf "${HOME}"/.vim "${HOME}"/.vimrc_bak
   echo "deleting existing vim config file"
-  rm -rf ~/.vim
+  rm -rf "${HOME}"/.vim
 fi
 
-if [ -f "~/.vimrc" ]; then
+if [ -f "${HOME}/.vimrc" ]; then
   echo "backup existing vimrc"
-  cp ~/.vimrc ~/.vimrc.bak
+  cp "${HOME}"/.vimrc "${HOME}"/.vimrc.bak
   echo "deleting existing vimrc"
-  rm ~/.vimrc
+  rm "${HOME}"/.vimrc
 fi
 
-cp -rf ../vim ~/.vim
-cp -rf ./vimrc ~/.vimrc
+cp -rf ../vim "${HOME}"/.vim
+cp -rf ./vimrc "${HOME}"/.vimrc
 
 echo "Changing relevant linking"
 
-if [ -d "~/.config/" ]; then
-  echo "Existinng ~/.config file"
+if [ -d "${HOME}/.config/" ]; then
+  echo "Existing ${HOME}/.config file"
 else
-  echo "No ~/.config dir creating"
-  mkdir ~/.config/
+  echo "No ${HOME}/.config dir creating"
+  mkdir "${HOME}"/.config/
 fi
 
-if [ -f "~/.config/nvim" or -d "~/.config/nvim" ]; then
+if [ -f "${HOME}/.config/nvim" ] || [ -d "${HOME}/.config/nvim" ]; then
   echo "deleting existing nvim config file"
-  rm -rf ~/.config/nvim
-  mkdir ~/.config/nvim
+  rm -rf "${HOME}"/.config/nvim
+  mkdir "${HOME}"/.config/nvim
 fi
 
-if [ -f "~/.config/nvim/init.vim" ]; then
+if [ -f "${HOME}/.config/nvim/init.vim" ]; then
   echo "deleting existing nvim config file"
-  rm ~/.config/nvim/init.vim
+  rm "${HOME}"/.config/nvim/init.vim
 fi
 
 echo "Creating link to nvim configfile"
-ln -s ~/.vim ~/.config/nvim
-ln -s ~/.vimrc ~/.config/nvim/init.vim
+ln -s "${HOME}"/.vim "${HOME}"/.config/nvim
+ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim
 
 echo "Installing ctags for Vista"
-if [ $(uname) == "Darwin" ]; then
+if [ "$(uname)" == "Darwin" ]; then
   brew tap universal-ctags/universal-ctags
   brew install --with-jansson --HEAD universal-ctags/universal-ctags/universal-ctags
 
-elif [ $(uname) == "Linux" ]; then
+elif [ "$(uname)" == "Linux" ]; then
   echo "install autoconf autogen"
   ${SUDO_PREFIX} apt-get install autoconf autogen pkg-config
 
   echo "Install ctags"
   ${SUDO_PREFIX} apt-get install libjansson-dev
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
-  cd /tmp/ctags
+  cd /tmp/ctags || exit
   ${SUDO_PREFIX} ./autogen.sh 
   ${SUDO_PREFIX} ./configure
   ${SUDO_PREFIX} make
@@ -159,11 +186,11 @@ elif [ $(uname) == "Linux" ]; then
 fi
 
 echo "Installing rg for Leaderf"
-if [ $(uname) == "Darwin" ]; then
+if [ "$(uname)" == "Darwin" ]; then
   echo "install ripgrep for MacOS"
   brew install ripgrep
 
-elif [ $(uname) == "Linux" ]; then
+elif [ "$(uname)" == "Linux" ]; then
   echo "install ripgrep for Linux"
   ${SUDO_PREFIX} apt-get install ripgrep
 fi
@@ -178,4 +205,4 @@ echo "Install Coc-plugins"
 vim -c 'CocInstall coc-clangd coc-python coc-json coc-snippets' +qa
 
 echo "We are good to go now, Happy Vimming"
-echo "If configure is not set up correctly, please check out if ~/.config/nvim and ~/.config/nvim/init.vim are generated properly"
+echo "If configure is not set up correctly, please check out if ${HOME}/.config/nvim and ${HOME}/.config/nvim/init.vim are generated properly"
