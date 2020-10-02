@@ -44,12 +44,6 @@ autocmd! FileType tex set spell |
             \ set whichwrap=b,s,h,l,<,>,>h,[,]                                  " Do not wrap long lines
 
 
-" config for python
-" Let external space be red for python
-autocmd! FileType python syn keyword pythonDecorator True None False self
-highlight BadWhitespace guifg=gray guibg=red ctermfg=gray ctermbg=red
-autocmd BufRead,BufNewFile *.py,*.pyw,*.c,*.h match BadWhitespace /\s\+$/
-
 func! autocmds#init_autocmds()
   echom "custom autocmds activated"
 endfunc

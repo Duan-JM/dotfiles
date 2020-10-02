@@ -2,7 +2,7 @@
 " Coc Configurations
 " ===================
 " Need Manually Config
-" :CocInstall coc-clangd coc-python coc-json coc-snippets
+" :CocInstall coc-clangd coc-python coc-json coc-snippets coc-tabnine
 
 " If not found clangd try manual link clangd to path
 " ln -s /usr/local/Cellar/llvm/10.0.1/bin/clangd /usr/local/bin/clangd

@@ -3,12 +3,13 @@
 " ======================
 set nocompatible                                                        " not compatible for vi
 set nospell                                                             " close spell examine
-set number                                                              " show number 
+set number                                                              " show number
 set relativenumber                                                      "show relative line number
 set hlsearch                                                            " Highlight the matching part
 set incsearch                                                           " Shows the match while typing
 set ignorecase
 set smartcase
+set matchtime=0
 set showmatch                                                           " Show matching brackets/parenthesis
 set encoding=utf-8                                                      " configure the encoding
 set fileencodings=utf-8,gbk,utf-16le,cp1252,iso-8859-15,ucs-bom
@@ -16,6 +17,7 @@ set fileformats=unix,dos,mac
 set linespace=0                                                         " No extra spaces between rows
 set confirm                                                             " Confirm before vim exit
 set nobackup
+set nowritebackup
 set noswapfile
 set lazyredraw                                                          " don't update the display while executing macros
 set backspace=eol,start,indent                                          " use backspace for delete space line
@@ -25,6 +27,7 @@ set noshowmode                                                          " do not
 set mouse=a                                                             " allow mouse select and etc operation
 set autoindent                                                          " config the indent
 set smartindent
+set cindent
 set smarttab
 set copyindent
 set tabstop=2  softtabstop=2 shiftwidth=2 expandtab textwidth=79
@@ -38,8 +41,8 @@ set iskeyword-=_,.,=,-,:,
 set switchbuf=useopen                                                   " reveal already opened files from the
                                                                         " quickfix window instead of opening new buffers
 set wildmenu
-" set cursorcolumn                                                        " highlight column
-" set cursorline                                                          " highlight row
+set cursorcolumn                                                        " highlight column
+set cursorline                                                          " highlight row
 if has('nvim')                                                          " Use floating windows to complete the commond, only neovim support
   set wildoptions=pum
   set termguicolors                                                     " With out this settings, transparable float-win will not work normally
@@ -64,14 +67,18 @@ set showcmd                                                             " Show p
 set viewoptions=folds,options,cursor,unix,slash                         " Better Unix / Windows compatibility
 set virtualedit=onemore                                                 " used with caution of breaking plugins
 
-set completeopt=menuone,noinsert,menu,preview,longest,noselect
-set completeopt-=preview                                                " avoid preview windows for function docs
+set completeopt=menu,menuone,longest
+set complete=.,w,b,u,t
 set tags=./tags;/,~/.vimtags
 set dictionary+=/usr/share/dict/words                                   " autocompletion with dictionary help
 set dictionary+=~/.vim/dict/
 set statusline+=%*
 set statusline+=%#warningmsg#
-set shortmess+=filmnrxoOtT                                              " Abbrev. of messages (avoids 'hit enter')
+if has('patch-7.4.314')
+  " don't give ins-completion-menu messages.
+  set shortmess+=c
+endif
+set shortmess+=s
 
 set undofile                                                            " enable undo after close the file
 set undodir=$HOME/.vim/undo
@@ -82,7 +89,13 @@ set splitbelow
 set splitright
 
 set updatetime=300                                                      " setup according to coc.nvim example
-set shortmess+=c                                                        " Don't pass messages to ins-completion-menu
+
+set ttimeout                                                            " from SpaceVim
+set ttimeoutlen=50
+set nrformats-=octal
+set listchars=tab:→\ ,trail:·,extends:↷,precedes:↶
+set fillchars=vert:│,fold:·
+set pumheight=15
 
 filetype on
 filetype plugin indent on
@@ -135,13 +148,12 @@ set colorcolumn=+1                                                      " color 
 " expr use `foldexpr` to config fold logic
 " indent fold base on indent
 " manual use zf zF or :Fold to fold, zfa(,
-"                     :mkview to save 
+"                     :mkview to save
 "                     :loadview to reload
 " mark ....
 " syntax
 set foldmethod=indent
 set foldlevel=99
-set foldlevelstart=99
 
 let gitroot = substitute(system('git rev-parse --show-toplevel'),'[\n\r]', '', 'g')                          " Make tags placed in .git/tags file available in all levels of a repository
 if gitroot != ''
@@ -155,7 +167,7 @@ set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
 
 " wrap config (not recommend
 " formation options
-" default is tcq 
+" default is tcq
 " t: 根据 textwidth 自动折行
 " c: 在（程序源代码中的）注释中自动折行，插入合适的注释起始字符
 " r: 插入模式下在注释中键入回车时，插入合适的注释起始字符
@@ -165,7 +177,7 @@ set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
 " l: 在当前行长度超过 textwidth 时，不自动重新格式化；
 " m: 在多字节字符处可以折行，对中文特别有效（否则只在空白字符处折行）；
 " M: 在拼接两行时（重新格式化，或者是手工使用“J”命令），如果前一行的结尾或后一行的开头是多字节字符，则不插入空格，非常适合中文
-" 
+"
 " set textwidth=80 "最大字符长度
 " set formatoptions+=t
 set formatoptions-=t "disable wrap

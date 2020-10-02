@@ -1,7 +1,5 @@
 " ==========================================
 " Autoload predefined Functions
-"     ChangeLog:
-"         2020-09-25: init functions
 " ==========================================
 
 " Set tabline
@@ -137,19 +135,6 @@ function! SummarizeTabs()
     endtry
 endfunction
 
-" url:http://vimcasts.org/episodes/tidying-whitespace/
-function! Preserve(command)
-    " Preparation: save last search, and cursor position.
-    let _s=@/
-    let l = line('.')
-    let c = col('.')
-    " Do the business:
-    execute a:command
-    " Clean up: restore previous search history, and cursor position
-    let @/=_s
-    call cursor(l, c)
-endfunction
-
 "Allow to toggle background
 function!  ToggleBG()
     let s:tbg = &background
@@ -180,12 +165,6 @@ command! -nargs=* Stab call Stab()
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                            Set custom Shortcuts                             "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-" clean space in the end of line
-nnoremap _$ :call Preserve("%s/\\s\\+$//e")<CR>
-" clean extra whitespace in whole docs
-nnoremap _= :call Preserve("normal gg=G")<CR>
-
 " set background is dark at the startup
 set background=dark
 noremap <leader>bg :call ToggleBG()<CR>

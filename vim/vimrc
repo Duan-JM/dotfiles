@@ -7,12 +7,16 @@ Plug 'sainnhe/edge'
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
-Plug 'michaeljsmith/vim-indent-object'                  " used for align
-Plug 'terryma/vim-smooth-scroll'                        " smooth scroll
 Plug 'wellle/targets.vim'                               " text objects
 Plug 'ryanoasis/vim-devicons'                           " extensions for icons
 Plug 'unblevable/quick-scope'                           " Advance setting for f t search
 Plug 'mbbill/undotree'                                  " history of the undo
+Plug 'Shougo/context_filetype.vim'
+Plug 'kana/vim-textobj-entire'
+Plug 'kana/vim-textobj-indent'
+Plug 'kana/vim-textobj-line'
+Plug 'kana/vim-textobj-user'
+Plug 'terryma/vim-expand-region'                        " Use + / _ to expand or shrink selected region
 
 if has('nvim')
   Plug 'ncm2/float-preview.nvim'                              " showing doc with float windows not preview beside the functions
@@ -40,6 +44,7 @@ Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown']}         
 
 Plug 'skywind3000/asyncrun.vim'
 Plug 'skywind3000/asynctasks.vim'  " This combination can change default run
+Plug 'ntpeters/vim-better-whitespace'
 
 
 " Writing Blog
@@ -59,15 +64,17 @@ Plug 'dhruvasagar/vim-table-mode', {'for': ['markdown']}
 Plug 'xuhdev/vim-latex-live-preview', {'for': ['tex']}                          " Use when you work with cn
 Plug 'lervag/vimtex', {'for': ['tex']}                                          " English is okay, fail with cn
 
-
 "FileManage
-Plug 'scrooloose/nerdtree'
-Plug 'Xuyuanp/nerdtree-git-Plugin'
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'mhinz/vim-startify'
-Plug 'justinmk/vim-dirvish'
-Plug 'kristijanhusak/vim-dirvish-git'
-
+if has('nvim')
+  Plug 'Shougo/defx.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/defx.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+Plug 'kristijanhusak/defx-git'
+Plug 'kristijanhusak/defx-icons'
 
 " Appearance
 Plug 'itchyny/lightline.vim'
@@ -86,7 +93,7 @@ Plug 'APZelos/blamer.nvim'
 
 " Search
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
-                                                                                " <c-]> open in vertical 
+                                                                                " <c-]> open in vertical
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
 call plug#end()
 
@@ -94,7 +101,6 @@ call plug#end()
 " load configs
 silent call vim_settings#init_settings()
 silent call mappings#init_mappings()                                           " need to place before plugin configs
-silent call addon_filetypes#init_filetypes()
 silent call coc_configuration#init_coc_config()
 silent call plugin_configs#init_plugin_configs()
 silent call functions#init_functions()

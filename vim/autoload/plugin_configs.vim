@@ -47,22 +47,11 @@ vmap <silent> <Leader>zw <Plug>TranslateWV
 nmap <silent> <Leader>zr <Plug>TranslateR
 vmap <silent> <Leader>zr <Plug>TranslateRV
 
-"pathogen
-execute pathogen#infect()
-
 " rainbow
 let g:rainbow_active = 1
 
 "markdown-preview
 let g:mkdp_browser = 'Safari'
-
-" vim-smooth-scroll
-" Distance Duration Speed
-noremap <silent> <c-u> :call smooth_scroll#up(&scroll, 8, 2)<CR>
-noremap <silent> <c-d> :call smooth_scroll#down(&scroll, 8, 2)<CR>
-noremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 8, 4)<CR>
-noremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 8, 4)<CR>
-
 
 " junegunn/vim-slash
 noremap <plug>(slash-after) zz
@@ -99,15 +88,59 @@ let g:startify_session_delete_buffers = 1
 let g:startify_session_persistence    = 1
 let g:startify_use_env                = 1
 
-"scrooloose/nerdtree
-nnoremap <leader>nt :NERDTreeToggle<CR>
-let g:NERDTreeShowLineNumbers=1
-let NERDTreeAutoCenter=1
-let g:NERDTreeChDirMode=2
-let NERDTreeWinPos="left"
-let g:nerdtree_tabs_open_on_console_startup=1
-let g:NERDTreeShowBookmarks=1
-let g:NERDTreeIgnore=['\.pyc','\~$','\.swp','\.DS_Store']
+"Shougo/vimfiler.vim
+" nnoremap <leader>nt :VimFilerSimple<CR>
+" let g:vimfiler_as_default_explorer = 1
+
+" ntpeters/vim-better-whitespace
+let g:better_whitespace_enabled = 1
+let g:strip_whitespace_on_save = 1
+
+"Shougo/defx
+nnoremap <leader>nt :Defx -columns=git:indent:icon:filename -split=vertical -winwidth=50 -direction=topleft <cr>
+nnoremap - :Defx -columns=git:indent:icon:filename:time <cr>
+call defx#custom#column('git', 'column_length', 1)
+call defx#custom#column('git', 'max_indicator_width', 1)
+call defx#custom#column('git', 'indicators', {
+  \ 'Modified'  : 'M',
+  \ 'Staged'    : 'S',
+  \ 'Untracked' : 'U',
+  \ 'Renamed'   : '➜',
+  \ 'Unmerged'  : '═',
+  \ 'Ignored'   : '☒',
+  \ 'Deleted'   : '✖',
+  \ 'Unknown'   : '?'
+  \ })
+hi Defx_git_Untracked guifg=#FF0000
+hi Defx_git_Ignored guibg=NONE guifg=NONE ctermbg=NONE ctermfg=NONE
+hi Defx_git_Unknown guibg=NONE guifg=NONE ctermbg=NONE ctermfg=NONE
+hi Defx_git_Renamed ctermfg=214 guifg=#fabd2f
+hi Defx_git_Modified ctermfg=214 guifg=#fabd2f
+hi Defx_git_Unmerged ctermfg=167 guifg=#fb4934
+hi Defx_git_Deleted ctermfg=167 guifg=#fb4934
+hi Defx_git_Staged ctermfg=142 guifg=#b8bb26
+
+autocmd FileType defx call s:defx_my_settings()
+function! s:defx_my_settings() abort
+  " Define mappings
+  nnoremap <silent><buffer><expr> <CR>
+  \ defx#do_action('open')
+  nnoremap <silent><buffer><expr> v
+  \ defx#do_action('open', 'vsplit')
+  nnoremap <silent><buffer><expr> o
+  \ defx#do_action('open_tree', 'toggle')
+  nnoremap <silent><buffer><expr> C
+  \ defx#do_action('toggle_columns',
+  \                'git:mark:indent:icon:filename:size:time')
+  nnoremap <silent><buffer><expr> yy
+  \ defx#do_action('yank_path')
+  nnoremap <silent><buffer><expr> .
+  \ defx#do_action('toggle_ignored_files')
+  nnoremap <silent><buffer><expr> h
+  \ defx#do_action('cd', ['..'])
+  nnoremap <silent><buffer><expr> q
+  \ defx#do_action('quit')
+endfunction
 
 "vim-table-mode
 let g:table_mode_corner = '|'
@@ -176,7 +209,7 @@ let g:vista#renderer#icons = {
 let g:lightline = {
      \ 'colorscheme': 'edge',
      \ 'active': {
-     \   'left': [ 
+     \   'left': [
      \     [ 'mode', 'paste' ],
      \     [ 'filename', 'modified' ],
      \     [ 'gitbranch' ],
@@ -219,20 +252,24 @@ let g:lightline = {
 "SirVer/ultisnips
 "customize python and keymapping
 "ref:https://gist.github.com/lencioni/dff45cd3d1f0e5e23fe6
-"ref:https://stackoverflow.com/questions/14896327/ultisnips-and-youcompleteme
 let g:snips_author = 'Duan-JM'
 let g:snips_email = 'vincent.duan95@outlook.com'
 let g:snips_github = 'https://github.com/Duan-JM'
 let g:ultisnips_python_style = 'google'
 
 "dense-analysis/ale
+let g:ale_lint_on_enter = 0
+let g:ale_lint_on_save = 0
+let g:ale_lint_on_insert_leave = 0
+let g:ale_lint_on_filetype_changed = 0
+let g:ale_lint_on_text_changed = 'never'
+
 let g:ale_linters_explicit = 1
 let g:ale_completion_delay = 500
+
 let g:ale_echo_delay = 20
 let g:ale_lint_delay = 500
 let g:ale_echo_msg_format = '[%linter%] %code: %%s'
-let g:ale_lint_on_text_changed = 'normal'
-let g:ale_lint_on_insert_leave = 1
 let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
 let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++14'
 let g:ale_c_cppcheck_options = ''

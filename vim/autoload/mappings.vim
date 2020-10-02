@@ -13,7 +13,7 @@ nnoremap <Leader>eu :e ++enc=utf8<CR>
 nnoremap <Leader>xd :%!xxd<CR>
 nnoremap <Leader>xr :%!xxd -r<CR>                       " show HEX and return
 
-" nnoremap <leader>sl :set list!<CR>                    " quick config to see or not see special character  
+" nnoremap <leader>sl :set list!<CR>                    " quick config to see or not see special character
 nnoremap <leader>ll :set conceallevel=0<CR>             " quick change conceal mode
 
 nnoremap <leader>ev :tabe $MYVIMRC<CR>                  " Quickly edit/reload the vimrc file
