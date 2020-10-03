@@ -135,24 +135,6 @@ function! SummarizeTabs()
     endtry
 endfunction
 
-"Allow to toggle background
-function!  ToggleBG()
-    let s:tbg = &background
-    " Inversion
-    if s:tbg == 'light'
-        set background=dark
-    else
-        set background=light
-    endif
-endfunction
-
-" set background transparable
-func! s:transparent_background()
-    highlight Normal guibg=NONE ctermbg=NONE
-    highlight NonText guibg=NONE ctermbg=NONE
-endf
-autocmd ColorScheme * call s:transparent_background()
-
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                             Set Custom Commands                             "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -165,9 +147,6 @@ command! -nargs=* Stab call Stab()
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                            Set custom Shortcuts                             "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-" set background is dark at the startup
-set background=dark
-noremap <leader>bg :call ToggleBG()<CR>
 
 function! functions#init_functions()
   echom "functions activated"

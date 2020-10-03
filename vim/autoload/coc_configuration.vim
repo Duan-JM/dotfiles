@@ -35,7 +35,7 @@ nmap <leader>f  <Plug>(coc-format-selected)
 
 " Remap keys for applying codeAction to the current buffer.
 " Apply AutoFix to problem on the current line. DONOT change to nnoremap
-nmap <leader>ac  <Plug>(coc-codeaction) 
+nmap <leader>ac  <Plug>(coc-codeaction)
 nmap <leader>qf  <Plug>(coc-fix-current)
 
 " ====> Custom Commands
@@ -53,7 +53,7 @@ function! s:show_documentation()
 endfunction
 
 " Highlight the symbol and its references when holding the cursor.
-autocmd CursorHold * silent call CocActionAsync('highlight')
+" autocmd CursorHold * silent call CocActionAsync('highlight')
 
 
 
