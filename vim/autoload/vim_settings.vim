@@ -38,8 +38,7 @@ set autoread
 set autowrite
 set autowriteall                                                        " Auto-write all file changes
 set iskeyword-=_,.,=,-,:,
-set switchbuf=useopen                                                   " reveal already opened files from the
-                                                                        " quickfix window instead of opening new buffers
+set switchbuf=useopen                                                   " reveal already opened files from the quickfix window instead of opening new buffers
 set wildmenu
 set cursorcolumn                                                        " highlight column
 set cursorline                                                          " highlight row
@@ -161,9 +160,9 @@ if gitroot != ''
 endif
 
 " set colorful cursors
-set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
-  \,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor
-  \,sm:block-blinkwait175-blinkoff150-blinkon175
+" set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
+"   \,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor
+"   \,sm:block-blinkwait175-blinkoff150-blinkon175
 
 " wrap config (not recommend
 " formation options
@@ -187,11 +186,6 @@ set formatoptions-=t "disable wrap
 " endif
 " set wrapmargin=2 " 2 chars wrap margin from the right window border, hard wrap
 
-" Appearance Settings
-let g:edge_style = 'neon'
-let g:edge_disable_italic_comment = 1
-let g:edge_transparent_background = 1
-colorscheme edge
 
 func! vim_settings#init_settings()
   echom "custom vim settings activated"

@@ -5,7 +5,7 @@ alias zshrc='vim ~/.zshrc'
 alias vimrc='vim ~/.vimrc'
 alias vi='nvim'
 alias vim='nvim'
-alias pg='cd ~/Documents/Coding/Test'
+alias pg='cd ~/Downloads/CodeTest'
 alias cpv='rsync -ah --info=progress2'
 alias task='asynctask -f'
 

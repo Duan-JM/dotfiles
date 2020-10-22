@@ -44,6 +44,11 @@ autocmd! FileType tex set spell |
             \ set whichwrap=b,s,h,l,<,>,>h,[,]                                  " Do not wrap long lines
 
 
+autocmd vimenter * hi Normal guibg=NONE ctermbg=NONE " transparent bg
+
+" config for python
+autocmd! FileType python set tabstop=2  softtabstop=2 shiftwidth=2 expandtab textwidth=79
+
 func! autocmds#init_autocmds()
   echom "custom autocmds activated"
 endfunc

@@ -1,3 +1,104 @@
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"                                   Pluglist                                   "
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+call plug#begin('~/.vim/plugged')
+" Need attention
+Plug 'sainnhe/edge'
+Plug 'wadackel/vim-dogrun'
+
+" System
+Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
+Plug 'wellle/targets.vim'                               " text objects
+Plug 'ryanoasis/vim-devicons'                           " extensions for icons
+Plug 'unblevable/quick-scope'                           " Advance setting for f t search
+Plug 'mbbill/undotree'                                  " history of the undo
+Plug 'Shougo/context_filetype.vim'
+Plug 'kana/vim-textobj-entire'
+Plug 'kana/vim-textobj-indent'
+Plug 'kana/vim-textobj-line'
+Plug 'kana/vim-textobj-user'
+Plug 'terryma/vim-expand-region'                        " Use + / _ to expand or shrink selected region
+
+if has('nvim')
+  Plug 'ncm2/float-preview.nvim'                              " showing doc with float windows not preview beside the functions
+  let g:float_preview#docked = 0
+endif
+Plug 'voldikss/vim-floaterm'                                  " floating terminaler you must like it
+
+" Coding
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'dense-analysis/ale', {'for': ['cpp', 'python']}   " Syntax Check
+Plug 'SirVer/ultisnips'                                 " snippets
+Plug 'Duan-JM/vdeamov-snippets'
+Plug 'tpope/vim-commentary'
+Plug 'Raimondi/delimitMate'                             " Brackets Jump 智能补全括号和跳转
+                                                        " 补全括号 shift+tab出来
+Plug 'andymass/vim-matchup'                             " % g% z%
+Plug 'octol/vim-cpp-enhanced-highlight', {'for':['c', 'cpp']}
+Plug 'godlygeek/tabular'                                " Use command Tabulize to align text
+Plug 'tpope/vim-surround'                               " change surroundings
+                                                        " c[ange]s[old parttern] [new partten]
+                                                        " ds[partten]
+                                                        " ys(iww)[partten] / yss)
+Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
+Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown']}         " show params and functions
+
+Plug 'skywind3000/asyncrun.vim'
+Plug 'skywind3000/asynctasks.vim'  " This combination can change default run
+Plug 'ntpeters/vim-better-whitespace'
+
+
+" Writing Blog
+Plug 'plasticboy/vim-markdown', {'for': ['markdown']}
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'mzlogin/vim-markdown-toc', {'for': ['markdown']}
+" :GenTocGFM/:GenTocRedcarpet
+":UpdateToc 更新目录
+Plug 'dhruvasagar/vim-table-mode', {'for': ['markdown']}
+"<leader>tm to enable
+"|| in the insert mode to create a horizontal line
+"| match the | up row
+"<leader>tdd to delete the row
+"<leader>tdc to delete the coloum
+"<leader>tt to change the exist text to format table
+Plug 'xuhdev/vim-latex-live-preview', {'for': ['tex']}                          " Use when you work with cn
+Plug 'lervag/vimtex', {'for': ['tex']}                                          " English is okay, fail with cn
+
+"FileManage
+Plug 'mhinz/vim-startify'
+if has('nvim')
+  Plug 'Shougo/defx.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/defx.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+Plug 'kristijanhusak/defx-git'
+Plug 'kristijanhusak/defx-icons'
+
+" Appearance
+Plug 'itchyny/lightline.vim'
+Plug 'maximbaz/lightline-ale'
+Plug 'flazz/vim-colorschemes'
+Plug 'Yggdroot/indentLine'                                                      " Show indent line
+Plug 'kshenoy/vim-signature'                                                    " Visible Mark
+Plug 'luochen1990/rainbow'                                                      " multi color for Parentheses
+
+" Github
+Plug 'mattn/gist-vim'                                                           " :Gist -l/-ls :Gist -e (add gist name) -s (add description) -d (delete)
+Plug 'mattn/webapi-vim'
+Plug 'tpope/vim-fugitive'
+Plug 'junegunn/gv.vim'                                                          " Rely on fugitive
+Plug 'APZelos/blamer.nvim'
+
+" Search
+Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
+                                                                                " <c-]> open in vertical
+                                                                                " <leader><c-b>/fb/ft
+Plug 'junegunn/vim-slash'                                                       " clean hightline after search
+call plug#end()
+
+
 " ==================
 " Plugin Configures
 " ==================
@@ -14,7 +115,6 @@ let g:asynctasks_term_rows = 10    " 设置纵向切割时，高度为 10
 let g:asynctasks_term_cols = 80    " 设置横向切割时，宽度为 80
 nnoremap <leader>r :AsyncTask file-run<cr>
 nnoremap <leader>b :AsyncTask file-build<cr>
-
 " vim-floaterm
 tnoremap <c-[> <c-\><c-n>
 nnoremap <leader>` :FloatermToggle<cr>
@@ -166,7 +266,7 @@ let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
 "LeaderF
 let g:Lf_HideHelp = 1
-let g:Lf_UseCache = 0
+let g:Lf_UseCache = 1
 let g:Lf_UseVersionControlTool = 0
 let g:Lf_IgnoreCurrentBufferName = 1 " auto refresh index [issue](https://github.com/Yggdroot/LeaderF/issues/161)
 let g:Lf_ShortcutF = '<c-p>'
@@ -183,7 +283,6 @@ let g:Lf_ShowRelativePath = 0
 
 noremap <leader>fb :Leaderf buffer<CR>
 noremap <leader>ft :Leaderf function<CR>
-noremap <leader>fl :<c-r>=printf("Leaderf line %s", "")<CR>
 
 " need install rg
 noremap <leader><c-b> :<c-r>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))
@@ -207,7 +306,7 @@ let g:vista#renderer#icons = {
 "LightLine
 "ayu_dark / simple black
 let g:lightline = {
-     \ 'colorscheme': 'edge',
+     \ 'colorscheme': 'dogrun',
      \ 'active': {
      \   'left': [
      \     [ 'mode', 'paste' ],
@@ -286,12 +385,15 @@ let g:ale_linters = {
 \   'java': ['javac','google-java-format'],
 \}
 let g:ale_fixers = {
-\   '*': ['remove_trailing_lines','trim_whitespace' ],
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
 \   'python': ['autopep8', 'yapf']
 \}
 "Use :ALEFix to fix
 "let g:ale_fix_on_save = 1 "auto Sava
 let g:ale_list_window_size = 5
+
+" Appearance Settings
+colorscheme dogrun
 
 func plugin_configs#init_plugin_configs()
   echom "plugin configs activated"
