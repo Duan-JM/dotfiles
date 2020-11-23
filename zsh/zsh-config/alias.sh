@@ -86,3 +86,11 @@ function gd() {
   fi
 }
 
+
+# change github source to boost up download speed
+function gcn() {
+  git_url=${1}
+  remain_str=${git_url##*https://github.com/}
+  head_str="https://github.com.cnpmjs.org/"
+  `git clone ${head_str}${remain_str}`
+}
