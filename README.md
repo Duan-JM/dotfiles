@@ -88,3 +88,5 @@ cp astro.zsh-theme ~/.oh-my-zsh/themes/
   # set zsh-syntax-highlighting in the plugin configure int ~/.zshrc
   # default this configure have completed with my vimrc
   ```
+
+  test
