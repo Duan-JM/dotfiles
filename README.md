@@ -21,6 +21,7 @@ packages.
 
 ## VIM
 ### Installation
+test
 
 ```bash
 bash ./vim/install.sh
