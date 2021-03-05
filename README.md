@@ -89,4 +89,3 @@ cp astro.zsh-theme ~/.oh-my-zsh/themes/
   # default this configure have completed with my vimrc
   ```
 
-  test
