@@ -4,7 +4,7 @@
 #  CONFIGURE  #
 ###############
 
-DOT_FILE=`pwd`
+DOT_FILE=`pwd`/../
 
 
 ##########################
@@ -40,5 +40,5 @@ cp -rf ~/.zsh-config/* $DOT_FILE/zsh/zsh-config/
 #####################
 #  Pylint & flake8  #
 #####################
-cp ~/.pylintrc $DOT_FILE/rc-files/pylintrc
+# cp ~/.pylintrc $DOT_FILE/rc-files/pylintrc
 

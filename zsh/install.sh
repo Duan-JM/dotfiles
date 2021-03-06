@@ -4,17 +4,17 @@ SUDO_PREFIX=$1
 if [ $(uname) == "Darwin" ]; then
   echo "Dectect MacOS"
 
-  if command -v brew >/dev/null 2>&1; then 
-    echo 'brew detected, skip install brew' 
-  else 
-    echo 'no exists brew, installing' 
+  if command -v brew >/dev/null 2>&1; then
+    echo 'brew detected, skip install brew'
+  else
+    echo 'no exists brew, installing'
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   fi
 
-  if command -v git >/dev/null 2>&1; then 
-    echo 'git detected, skip install git' 
-  else 
-    echo 'no exists git, installing' 
+  if command -v git >/dev/null 2>&1; then
+    echo 'git detected, skip install git'
+  else
+    echo 'no exists git, installing'
     brew install git
   fi
 
@@ -36,10 +36,10 @@ if [ $(uname) == "Darwin" ]; then
 elif [ $(uname) == "Linux" ]; then
   echo "Detect Linux"
 
-  if command -v git >/dev/null 2>&1; then 
-    echo 'git detected, skip install git' 
-  else 
-    echo 'no exists git, installing' 
+  if command -v git >/dev/null 2>&1; then
+    echo 'git detected, skip install git'
+  else
+    echo 'no exists git, installing'
     ${SUDO_PREFIX} apt install git
   fi
 

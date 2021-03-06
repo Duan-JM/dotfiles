@@ -30,10 +30,10 @@ info() {
 
 if [[ $(uname) == "Darwin" ]]; then
   info "Dectect MacOS"
-  if command -v brew >/dev/null 2>&1; then 
-    info 'brew detected, skip install brew' 
-  else 
-    info 'no exists brew, installing' 
+  if command -v brew >/dev/null 2>&1; then
+    info 'brew detected, skip install brew'
+  else
+    info 'no exists brew, installing'
     /usr/bin/ruby -e \
       "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   fi
@@ -58,10 +58,10 @@ if [[ $(uname) == "Darwin" ]]; then
     brew install --HEAD neovim
   fi
 
-  if command -v git >/dev/null 2>&1; then 
-    echo 'git detected, skip install git' 
-  else 
-    echo 'no exists git, installing' 
+  if command -v git >/dev/null 2>&1; then
+    echo 'git detected, skip install git'
+  else
+    echo 'no exists git, installing'
     brew install git
   fi
 
@@ -103,10 +103,10 @@ elif [ "$(uname)" == "Linux" ]; then
     ${SUDO_PREFIX} node -v
   fi
 
-  if command -v git >/dev/null 2>&1; then 
-    echo 'git detected, skip install git' 
-  else 
-    echo 'no exists git, installing' 
+  if command -v git >/dev/null 2>&1; then
+    echo 'git detected, skip install git'
+  else
+    echo 'no exists git, installing'
     brew install git
   fi
 
@@ -179,7 +179,7 @@ elif [ "$(uname)" == "Linux" ]; then
   ${SUDO_PREFIX} apt-get install libjansson-dev
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags || exit
-  ${SUDO_PREFIX} ./autogen.sh 
+  ${SUDO_PREFIX} ./autogen.sh
   ${SUDO_PREFIX} ./configure
   ${SUDO_PREFIX} make
   ${SUDO_PREFIX} make install
