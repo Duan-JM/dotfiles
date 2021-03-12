@@ -53,13 +53,14 @@ fFtT <char>   # 行内跳转，使用 QuickScope 进行辅助高亮
 <leader> ` # 呼叫 Floaterm 终端
 
 <leader>fb # buffer list
-<leader>fm # mru list
 <leader>ft # buftags
 <leader>fl # search line
 <c-b>      # search in current buffer
 <c-f>      # search the content in the current dir
 go         # recall rg operations
 <leader> <c-f> <search-parttern> # search target pattern current files 
+
+<c-y>     # confirm snippet from tabnine
 ```
 
 ### Unfrequency Command Shortcuts
