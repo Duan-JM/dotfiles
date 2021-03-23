@@ -44,7 +44,7 @@ if [[ $(uname) == "Darwin" ]]; then
     node -v
   else
     echo "installing node >= 10.12"
-    curl -sL install-node.now.sh/lts | bash
+    brew install node
     node -v
   fi
 
@@ -53,7 +53,7 @@ if [[ $(uname) == "Darwin" ]]; then
     echo "neovim detected"
   else
     echo 'no existing neovim, installing'
-    brew install update
+    brew update
     brew install utf8proc
     brew install --HEAD neovim
   fi
@@ -169,7 +169,7 @@ ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim
 echo "Installing ctags for Vista"
 if [ "$(uname)" == "Darwin" ]; then
   brew tap universal-ctags/universal-ctags
-  brew install --with-jansson --HEAD universal-ctags/universal-ctags/universal-ctags
+  brew install --HEAD universal-ctags/universal-ctags/universal-ctags
 
 elif [ "$(uname)" == "Linux" ]; then
   echo "install autoconf autogen"
@@ -196,7 +196,7 @@ elif [ "$(uname)" == "Linux" ]; then
 fi
 
 echo "Installing Pylint autopep8 jedi flake8"
-pip3 install flake9 mypy pylint pylint-quotes pycodestyle autopep8
+pip3 install flake9 mypy pylint pylint-quotes pycodestyle autopep8 jedi
 
 echo "Installing Plugins"
 vim -c PlugInstall +qa
