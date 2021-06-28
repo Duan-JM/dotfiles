@@ -122,7 +122,7 @@ else
 fi
 
 echo "Add python support"
-pip3 install pynvim
+pip3 install --user pynvim
 
 echo "Copy the Configure Files"
 if [ -f "${HOME}/.vim" ]; then
@@ -196,7 +196,7 @@ elif [ "$(uname)" == "Linux" ]; then
 fi
 
 echo "Installing Pylint autopep8 jedi flake8"
-pip3 install flake9 mypy pylint pylint-quotes pycodestyle autopep8 jedi
+pip3 install --user flake9 mypy pylint pylint-quotes pycodestyle autopep8 jedi
 
 echo "Installing Plugins"
 vim -c PlugInstall +qa
