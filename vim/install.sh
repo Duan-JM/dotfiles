@@ -28,6 +28,10 @@ info() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&1
 }
 
+
+info "===========> -------------------------------------------- <============"
+info "===========> Start Installing Vim and Other Prerequisites <============"
+info "===========> -------------------------------------------- <============"
 if [[ $(uname) == "Darwin" ]]; then
   info "Dectect MacOS"
   if command -v brew >/dev/null 2>&1; then
@@ -40,35 +44,35 @@ if [[ $(uname) == "Darwin" ]]; then
 
   # install node for coc
   if command -v node > /dev/null 2>&1; then
-    echo 'node existing, plz manually check its version'
+    info 'node existing, plz manually check its version'
     node -v
   else
-    echo "installing node >= 10.12"
+    info "installing node >= 10.12"
     brew install node
     node -v
   fi
 
   # installing neovim
   if command -v nvim >/dev/null 2>&1; then
-    echo "neovim detected"
+    info "neovim detected"
   else
-    echo 'no existing neovim, installing'
+    info 'no existing neovim, installing'
     brew update
     brew install utf8proc
     brew install --HEAD neovim
   fi
 
   if command -v git >/dev/null 2>&1; then
-    echo 'git detected, skip install git'
+    info 'git detected, skip install git'
   else
-    echo 'no exists git, installing'
+    info 'no exists git, installing'
     brew install git
   fi
 
   if command -v pip3 >/dev/null 2>&1 || command -v pip >/dev/null 2>&1; then
-    echo 'pip3 detected, skip install pip'
+    info 'pip3 detected, skip install pip'
   else
-    echo 'no exists pip, installing'
+    info 'no exists pip, installing'
     if command -v python3 >/dev/null 2>&1; then
       python3 get-pip.py
     fi
@@ -77,15 +81,22 @@ if [[ $(uname) == "Darwin" ]]; then
     fi
   fi
 
+  info "Installing ctags for Vista"
+  brew tap universal-ctags/universal-ctags
+  brew install --HEAD universal-ctags/universal-ctags/universal-ctags
+
+  info "Installing ripgrep for MacOS"
+  brew install ripgrep
+fi
 
 elif [ "$(uname)" == "Linux" ]; then
-  echo "Detect Linux"
+  info "Detect Linux"
 
   # installing neovim
   if command -v nvim >/dev/null 2>&1; then
-    echo "neovim detected"
+    info "neovim detected"
   else
-    echo 'no existing neovim, installing'
+    info 'no existing neovim, installing'
     ${SUDO_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
     ${SUDO_PREFIX} apt update -y
     ${SUDO_PREFIX} apt-get install neovim --yes
@@ -93,10 +104,10 @@ elif [ "$(uname)" == "Linux" ]; then
 
   # install node for coc
   if command -v node > /dev/null 2>&1; then
-    echo 'node existing, plz manually check its version'
+    info 'node existing, plz manually check its version'
     node -v
   else
-    echo "installing node >= 10.12"
+    info "installing node >= 10.12"
     ${SUDO_PREFIX} apt-get install nodejs npm -y
     ${SUDO_PREFIX} npm install n -g --registry https://registry.npm.taobao.org
     ${SUDO_PREFIX} n stable
@@ -104,78 +115,22 @@ elif [ "$(uname)" == "Linux" ]; then
   fi
 
   if command -v git >/dev/null 2>&1; then
-    echo 'git detected, skip install git'
+    info 'git detected, skip install git'
   else
-    echo 'no exists git, installing'
+    info 'no exists git, installing'
     brew install git
   fi
 
   if command -v pip3 >/dev/null 2>&1; then
-    echo 'pip3 detected, skip install pip'
+    info 'pip3 detected, skip install pip'
   else
-    echo 'no exists pip, installing'
+    info 'no exists pip, installing'
     ${SUDO_PREFIX} apt-get install python3-pip -y
   fi
 
-else
-  echo "Scripts do not support $(uname)"
-fi
-
-echo "Add python support"
-pip3 install --user pynvim
-
-echo "Copy the Configure Files"
-if [ -f "${HOME}/.vim" ]; then
-  echo "backup existing vim config file"
-  cp -rf "${HOME}"/.vim "${HOME}"/.vimrc_bak
-  echo "deleting existing vim config file"
-  rm -rf "${HOME}"/.vim
-fi
-
-if [ -f "${HOME}/.vimrc" ]; then
-  echo "backup existing vimrc"
-  cp "${HOME}"/.vimrc "${HOME}"/.vimrc.bak
-  echo "deleting existing vimrc"
-  rm "${HOME}"/.vimrc
-fi
-
-cp -rf ../vim "${HOME}"/.vim
-cp -rf ./vimrc "${HOME}"/.vimrc
-
-echo "Changing relevant linking"
-
-if [ -d "${HOME}/.config/" ]; then
-  echo "Existing ${HOME}/.config file"
-else
-  echo "No ${HOME}/.config dir creating"
-  mkdir "${HOME}"/.config/
-fi
-
-if [ -f "${HOME}/.config/nvim" ] || [ -d "${HOME}/.config/nvim" ]; then
-  echo "deleting existing nvim config file"
-  rm -rf "${HOME}"/.config/nvim
-  mkdir "${HOME}"/.config/nvim
-fi
-
-if [ -f "${HOME}/.config/nvim/init.vim" ]; then
-  echo "deleting existing nvim config file"
-  rm "${HOME}"/.config/nvim/init.vim
-fi
-
-echo "Creating link to nvim configfile"
-ln -s "${HOME}"/.vim "${HOME}"/.config/nvim
-ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim
-
-echo "Installing ctags for Vista"
-if [ "$(uname)" == "Darwin" ]; then
-  brew tap universal-ctags/universal-ctags
-  brew install --HEAD universal-ctags/universal-ctags/universal-ctags
-
-elif [ "$(uname)" == "Linux" ]; then
-  echo "install autoconf autogen"
+  info "Installing autoconf autogen"
   ${SUDO_PREFIX} apt-get install autoconf autogen pkg-config
-
-  echo "Install ctags"
+  info "Installing ctags for Vista"
   ${SUDO_PREFIX} apt-get install libjansson-dev
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags || exit
@@ -183,26 +138,80 @@ elif [ "$(uname)" == "Linux" ]; then
   ${SUDO_PREFIX} ./configure
   ${SUDO_PREFIX} make
   ${SUDO_PREFIX} make install
-fi
 
-echo "Installing rg for Leaderf"
-if [ "$(uname)" == "Darwin" ]; then
-  echo "install ripgrep for MacOS"
-  brew install ripgrep
-
-elif [ "$(uname)" == "Linux" ]; then
-  echo "install ripgrep for Linux"
+  info "Installing ripgrep for Linux"
   ${SUDO_PREFIX} apt-get install ripgrep
+
+else
+  err "Scripts do not support $(uname)"
 fi
 
-echo "Installing Pylint autopep8 jedi flake8"
-pip3 install --user flake9 mypy pylint pylint-quotes pycodestyle autopep8 jedi
 
-echo "Installing Plugins"
+info "===========> ------------------------------------- <============"
+info "===========> Start Installing Python Prerequisites <============"
+info "===========> ------------------------------------- <============"
+
+info "Add python support"
+pip3 install --user pynvim
+
+info "Installing Pylint autopep8 jedi flake8"
+pip3 install --user flake8 autopep8 jedi
+
+
+info "===========> --------------------- <============"
+info "===========> Start Configuring Vim <============"
+info "===========> --------------------- <============"
+info "Copy the Configure Files"
+if [ -f "${HOME}/.vim" ]; then
+  info "backup existing vim config file"
+  cp -rf "${HOME}"/.vim "${HOME}"/.vimrc_bak
+  info "deleting existing vim config file"
+  rm -rf "${HOME}"/.vim
+fi
+
+if [ -f "${HOME}/.vimrc" ]; then
+  info "backup existing vimrc"
+  cp "${HOME}"/.vimrc "${HOME}"/.vimrc.bak
+  info "deleting existing vimrc"
+  rm "${HOME}"/.vimrc
+fi
+
+cp -rf ../vim "${HOME}"/.vim
+cp -rf ./vimrc "${HOME}"/.vimrc
+
+info "Changing relevant linking"
+
+if [ -d "${HOME}/.config/" ]; then
+  info "Existing ${HOME}/.config file"
+else
+  info "No ${HOME}/.config dir creating"
+  mkdir "${HOME}"/.config/
+fi
+
+if [ -f "${HOME}/.config/nvim" ] || [ -d "${HOME}/.config/nvim" ]; then
+  info "deleting existing nvim config file"
+  rm -rf "${HOME}"/.config/nvim
+  mkdir "${HOME}"/.config/nvim
+fi
+
+if [ -f "${HOME}/.config/nvim/init.vim" ]; then
+  info "deleting existing nvim config file"
+  rm "${HOME}"/.config/nvim/init.vim
+fi
+
+info "Creating link to nvim configfile"
+ln -s "${HOME}"/.vim "${HOME}"/.config/nvim
+ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim
+
+
+info "Installing Plugins"
 vim -c PlugInstall +qa
 
-echo "Install Coc-plugins"
-vim -c 'CocInstall coc-clangd coc-python coc-json coc-snippets' +qa
+info "Install Coc-plugins"
+vim -c 'CocInstall coc-clangd coc-pyright coc-json coc-snippets' +qa
 
-echo "We are good to go now, Happy Vimming"
-echo "If configure is not set up correctly, please check out if ${HOME}/.config/nvim and ${HOME}/.config/nvim/init.vim are generated properly"
+info "===========> --------------- <============"
+info "===========> One More things <============"
+info "===========> --------------- <============"
+info "We are good to go now, Happy Vimming"
+info "If configure is not set up correctly, please check out if ${HOME}/.config/nvim and ${HOME}/.config/nvim/init.vim are generated properly"
