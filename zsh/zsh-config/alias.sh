@@ -1,5 +1,4 @@
 # Temporary Settings
-alias blog='cd ~/Documents/Github/VDeamoV.github.io'
 alias github='cd ~/Documents/Github'
 alias zshrc='vim ~/.zshrc'
 alias vimrc='vim ~/.vimrc'
@@ -8,11 +7,11 @@ alias vim='nvim'
 alias pg='cd ~/Downloads/CodeTest'
 alias cpv='rsync -ah --info=progress2'
 alias task='asynctask -f'
+alias gch='git branch -a | fzf| tr -d "[:space:]"'
 
 # Most often
-alias proxy='export all_proxy=socks5://127.0.0.1:7890'
+alias proxy='export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890'
 alias unproxy='unset all_proxy'
-alias sublime='open -a Sublime\ Text'
 alias vscode='open -a Visual\ Studio\ Code'
 alias xc='open -a "Xcode"'
 alias ggrep='git grep --break --heading -n'

@@ -1,4 +1,5 @@
 {
+  "python.pythonPath":"/opt/homebrew/bin/python3",
   "python.linting.enabled":false,
   "clangd.disableDiagnostics":true,
   "languageserver": {

@@ -127,4 +127,18 @@ export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
 export PATH="/usr/local/opt/ruby/bin:$PATH"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# llvm settings
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+
+# curl settings
+export PATH="/opt/homebrew/opt/curl/bin:$PATH"
+
+# icu4c settings
+export PATH="/opt/homebrew/opt/icu4c/bin:$PATH"
+export PATH="/opt/homebrew/opt/icu4c/sbin:$PATH"
+
+# cloud sdk
+export PATH="/Users/duan-jm/Documents/third_party_sdk/google-cloud-sdk/bin:$PATH"
