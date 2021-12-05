@@ -89,7 +89,7 @@ if [[ $(uname) == "Darwin" ]]; then
   brew install ripgrep
 fi
 
-elif [ "$(uname)" == "Linux" ]; then
+if [ "$(uname)" == "Linux" ]; then
   info "Detect Linux"
 
   # installing neovim
