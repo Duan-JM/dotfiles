@@ -53,10 +53,10 @@ alias -g NE="2> /dev/null"
 alias -g NUL="> /dev/null 2>&1"
 alias -g P="2>&1| pygmentize -l pytb"
 
-alias dud='du -d 1 -h'
-alias duf='du -sh *'
-alias fd='find . -type d -name'
-alias ff='find . -type f -name'
+# alias dud='du -d 1 -h'
+# alias duf='du -sh *'
+# alias fd='find . -type d -name'
+# alias ff='find . -type f -name'
 
 alias h='history'
 alias hgrep="fc -El 0 | grep"
@@ -72,7 +72,7 @@ alias mvi='mv -i'
 #Git self configure
 
 #change gd(git diff) need to manually change in the zsh git plugin
-function gd() {
+function gdd() {
 	params="$@"
   params=`scmpuff expand "$@" 2>/dev/null`
 
