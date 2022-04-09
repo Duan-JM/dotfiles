@@ -3,9 +3,6 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 " Need attention
-Plug 'sainnhe/edge'
-Plug 'wadackel/vim-dogrun'
-
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
 Plug 'wellle/targets.vim'                               " text objects
@@ -61,11 +58,11 @@ Plug 'dhruvasagar/vim-table-mode', {'for': ['markdown']}
 "<leader>tdd to delete the row
 "<leader>tdc to delete the coloum
 "<leader>tt to change the exist text to format table
-Plug 'xuhdev/vim-latex-live-preview', {'for': ['tex']}                          " Use when you work with cn
-Plug 'lervag/vimtex', {'for': ['tex']}                                          " English is okay, fail with cn
+" Plug 'xuhdev/vim-latex-live-preview', {'for': ['tex']}                          " Use when you work with cn
+" Plug 'lervag/vimtex', {'for': ['tex']}                                          " English is okay, fail with cn
 
 "FileManage
-Plug 'mhinz/vim-startify'
+" Plug 'mhinz/vim-startify'
 if has('nvim')
   Plug 'Shougo/defx.nvim', { 'do': ':UpdateRemotePlugins' }
 else
@@ -83,9 +80,11 @@ Plug 'flazz/vim-colorschemes'
 Plug 'Yggdroot/indentLine'                                                      " Show indent line
 Plug 'kshenoy/vim-signature'                                                    " Visible Mark
 Plug 'luochen1990/rainbow'                                                      " multi color for Parentheses
+Plug 'sainnhe/edge'
+Plug 'wadackel/vim-dogrun'
 
 " Github
-Plug 'mattn/gist-vim'                                                           " :Gist -l/-ls :Gist -e (add gist name) -s (add description) -d (delete)
+" Plug 'mattn/gist-vim'                                                           " :Gist -l/-ls :Gist -e (add gist name) -s (add description) -d (delete)
 Plug 'mattn/webapi-vim'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/gv.vim'                                                          " Rely on fugitive
@@ -94,6 +93,7 @@ Plug 'APZelos/blamer.nvim'
 " Search
 Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
                                                                                 " <c-]> open in vertical
+                                                                                " <c-x> open in split
                                                                                 " <leader><c-b>/fb/ft
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
 call plug#end()
@@ -160,33 +160,35 @@ if has('timers')
   noremap <expr> <plug>(slash-after) slash#blink(2, 50)
 endif
 
-"vim-latex-live-preview
-autocmd Filetype tex setl updatetime=1
-let g:livepreview_previewer = 'open -a Preview'
+" TODO(Duan-JM): No Longer use Latex, However these plugs are perfect
+""vim-latex-live-preview
+"autocmd Filetype tex setl updatetime=1
+"let g:livepreview_previewer = 'open -a Preview'
 
-"vimtex
-let g:tex_flavor='latex'
-let g:vimtex_view_method='skim'
-let g:vimtex_quickfix_mode=0
-set conceallevel=1
-let g:tex_conceal='abdmg'
+""vimtex
+"let g:tex_flavor='latex'
+"let g:vimtex_view_method='skim'
+"let g:vimtex_quickfix_mode=0
+"set conceallevel=1
+"let g:tex_conceal='abdmg'
 
-"mhinz/vim-startify
-let g:startify_list_order = [
-            \ ['   Bookmarks'],     'bookmarks',
-            \ ['   MRU'],           'files' ,
-            \ ['   MRU '.getcwd()], 'dir',
-            \ ]
-let g:startify_bookmarks = [
-            \ '~/Desktop/Github',
-            \ '~/Documents/Coding/Test']
-let g:startify_change_to_dir          = 0
-let g:startify_enable_special         = 0
-let g:startify_files_number           = 8
-let g:startify_session_autoload       = 1
-let g:startify_session_delete_buffers = 1
-let g:startify_session_persistence    = 1
-let g:startify_use_env                = 1
+" TODO(Duan-JM): No need for this
+""mhinz/vim-startify
+"let g:startify_list_order = [
+"            \ ['   Bookmarks'],     'bookmarks',
+"            \ ['   MRU'],           'files' ,
+"            \ ['   MRU '.getcwd()], 'dir',
+"            \ ]
+"let g:startify_bookmarks = [
+"            \ '~/Desktop/Github',
+"            \ '~/Documents/Coding/Test']
+"let g:startify_change_to_dir          = 0
+"let g:startify_enable_special         = 0
+"let g:startify_files_number           = 8
+"let g:startify_session_autoload       = 1
+"let g:startify_session_delete_buffers = 1
+"let g:startify_session_persistence    = 1
+"let g:startify_use_env                = 1
 
 "Shougo/vimfiler.vim
 " nnoremap <leader>nt :VimFilerSimple<CR>
@@ -256,8 +258,8 @@ let g:vim_markdown_math=1
 let g:vmt_auto_update_on_save=1 "update toc when save
 let g:vmt_dont_insert_fence=0 "if equals to 1, can't update toc when save
 
-"gist-vim
-let github_user='Duan-JM'
+""gist-vim
+"let github_user='Duan-JM'
 
 
 "Yggdroot/indentLine
