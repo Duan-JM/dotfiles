@@ -8,12 +8,11 @@ alias pg='cd ~/Downloads/CodeTest'
 alias cpv='rsync -ah --info=progress2'
 alias task='asynctask -f'
 alias gch='git branch -a | fzf| tr -d "[:space:]"'
+alias python3='/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/python3.9'
 
 # Most often
 alias proxy='export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890'
 alias unproxy='unset all_proxy'
-alias vscode='open -a Visual\ Studio\ Code'
-alias xc='open -a "Xcode"'
 alias ggrep='git grep --break --heading -n'
 alias mnt='mount | grep -E ^/dev | column -t'
 alias count='find . -type f | wc -l'
@@ -23,12 +22,10 @@ alias count='find . -type f | wc -l'
 # Advanced Aliases.
 
 # ls, the common ones I use a lot shortened for rapid fire usage
-alias cls='logo-ls'
-alias cl='logo-ls -lh'     #size,show type,human readable
+alias ls='exa -l'
 alias la='ls -lAFh'   #long list,show almost all,show type,human readable
 alias lr='ls -tRFh'   #sorted by date,recursive,show type,human readable
 alias lt='ls -ltFh'   #long list,sorted by date,show type,human readable
-alias ll='ls -l'      #long list
 alias ldot='ls -ld .*'
 alias lS='ls -1FSsh'
 alias lart='ls -1Fcart'
@@ -52,11 +49,6 @@ alias -g CA="2>&1 | cat -A"
 alias -g NE="2> /dev/null"
 alias -g NUL="> /dev/null 2>&1"
 alias -g P="2>&1| pygmentize -l pytb"
-
-# alias dud='du -d 1 -h'
-# alias duf='du -sh *'
-# alias fd='find . -type d -name'
-# alias ff='find . -type f -name'
 
 alias h='history'
 alias hgrep="fc -El 0 | grep"

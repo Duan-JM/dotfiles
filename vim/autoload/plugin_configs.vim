@@ -2,7 +2,6 @@
 "                                   Pluglist                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
-" Need attention
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
 Plug 'wellle/targets.vim'                               " text objects
@@ -327,7 +326,7 @@ let g:lightline = {
      \   'right': ''
      \ },
      \ 'component_function': {
-     \   'gitbranch': 'fugitive#head',
+     \   'gitbranch': 'FugitiveHead',
      \   'cocstatus': 'coc#status',
      \ },
      \ 'component_type': {

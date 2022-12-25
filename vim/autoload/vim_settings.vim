@@ -30,7 +30,7 @@ set smartindent
 set cindent
 set smarttab
 set copyindent
-set tabstop=2  softtabstop=2 shiftwidth=2 expandtab textwidth=79
+set tabstop=4  softtabstop=4 shiftwidth=4 expandtab textwidth=79
 set history=1000                                                        " save 1000 cmd
 set timeoutlen=500                                                      " give u 500 time to react for cmd
 set list                                                                " show the special character

@@ -120,11 +120,14 @@ function gi() { curl -sLw n https://www.gitignore.io/api/$@ ;}
 # For compilers to find ruby you may need to set:
 export LDFLAGS="-L/usr/local/opt/ruby/lib"
 export CPPFLAGS="-I/usr/local/opt/ruby/include"
+export PATH="/Users/duan-jm/.gem/ruby/2.6.0/bin:$PATH"
+export PATH="/Users/duan-jm/.rbenv/versions/3.0.0/bin:$PATH"
+eval "$(rbenv init - zsh)"
+# export PATH="/usr/local/opt/ruby/bin:$PATH"
 
 # For pkg-config to find ruby you may need to set:
-export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
 export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
-export PATH="/usr/local/opt/ruby/bin:$PATH"
+export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
@@ -142,3 +145,7 @@ export PATH="/opt/homebrew/opt/icu4c/sbin:$PATH"
 
 # cloud sdk
 export PATH="/Users/duan-jm/Documents/third_party_sdk/google-cloud-sdk/bin:$PATH"
+
+# python bin
+export PATH="/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin:$PATH"
+export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
