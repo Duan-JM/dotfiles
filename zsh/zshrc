@@ -148,4 +148,5 @@ export PATH="/Users/duan-jm/Documents/third_party_sdk/google-cloud-sdk/bin:$PATH
 
 # python bin
 export PATH="/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin:$PATH"
+export PYTHONPATH="/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/pydoc3.9"
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
