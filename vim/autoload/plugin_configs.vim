@@ -23,7 +23,6 @@ Plug 'voldikss/vim-floaterm'                                  " floating termina
 
 " Coding
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'dense-analysis/ale', {'for': ['cpp', 'python']}   " Syntax Check
 Plug 'SirVer/ultisnips'                                 " snippets
 Plug 'Duan-JM/vdeamov-snippets'
 Plug 'tpope/vim-commentary'
@@ -262,7 +261,7 @@ let g:vmt_dont_insert_fence=0 "if equals to 1, can't update toc when save
 
 
 "Yggdroot/indentLine
-let g:indentLine_enabled=0
+let g:indentLine_enabled=1
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
 "LeaderF
@@ -336,13 +335,6 @@ let g:lightline = {
      \   'linter_errors': 'error',
      \   'linter_ok': 'right',
      \ },
-     \ 'component_expand': {
-     \     'linter_checking': 'lightline#ale#checking',
-     \     'linter_infos': 'lightline#ale#infos',
-     \     'linter_warnings': 'lightline#ale#warnings',
-     \     'linter_errors': 'lightline#ale#errors',
-     \     'linter_ok': 'lightline#ale#ok',
-     \   },
      \ 'enable': {
      \   'statusline': 1,
      \   'tabline': 0
@@ -356,42 +348,6 @@ let g:snips_author = 'Duan-JM'
 let g:snips_email = 'vincent.duan95@outlook.com'
 let g:snips_github = 'https://github.com/Duan-JM'
 let g:ultisnips_python_style = 'google'
-
-"dense-analysis/ale
-let g:ale_lint_on_enter = 0
-let g:ale_lint_on_save = 0
-let g:ale_lint_on_insert_leave = 0
-let g:ale_lint_on_filetype_changed = 0
-let g:ale_lint_on_text_changed = 'never'
-
-let g:ale_linters_explicit = 1
-let g:ale_completion_delay = 500
-
-let g:ale_echo_delay = 20
-let g:ale_lint_delay = 500
-let g:ale_echo_msg_format = '[%linter%] %code: %%s'
-let g:ale_c_gcc_options = '-Wall -O2 -std=c99'
-let g:ale_cpp_gcc_options = '-Wall -O2 -std=c++14'
-let g:ale_c_cppcheck_options = ''
-let g:ale_cpp_cppcheck_options = ''
-let g:ale_sign_eror = 'E'
-let g:ale_sign_warning = 'W'
-let g:ale_linters = {
-\   'python': ['pylint'],
-\   'tex': ['lacheck'],
-\   'swift': ['swiftlint'],
-\   'markdown': ['markdownlint'],
-\   'cpp': ['gcc', 'cpplint'],
-\   'c': ['gcc', 'cpplint'],
-\   'java': ['javac','google-java-format'],
-\}
-let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['autopep8', 'yapf']
-\}
-"Use :ALEFix to fix
-"let g:ale_fix_on_save = 1 "auto Sava
-let g:ale_list_window_size = 5
 
 " Appearance Settings
 colorscheme dogrun
