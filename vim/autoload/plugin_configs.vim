@@ -271,6 +271,7 @@ let g:Lf_UseVersionControlTool = 0
 let g:Lf_IgnoreCurrentBufferName = 1 " auto refresh index [issue](https://github.com/Yggdroot/LeaderF/issues/161)
 let g:Lf_ShortcutF = '<c-p>'
 
+let g:Lf_DefaultExternalTool = "rg"
 let g:Lf_StlColorscheme = 'gruvbox_material'
 let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2", 'font': "DejaVu Sans Mono for Powerline" }
 let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
