@@ -50,7 +50,7 @@ macos_basic_env_install() {
   else
     info "installing node >= 10.12"
     curl -sL install-node.vercel.app/lts | bash
-    node -v || !err "node install failed" || exit
+    node -v || ! err "node install failed" || exit
   fi
 
   # installing neovim
@@ -61,6 +61,7 @@ macos_basic_env_install() {
     brew update
     brew install utf8proc
     brew install --HEAD neovim
+    nvim -v || ! err "neovim installed failed" || exit
   fi
 
   if command -v git >/dev/null 2>&1; then
@@ -68,6 +69,7 @@ macos_basic_env_install() {
   else
     info 'no exists git, installing'
     brew install git
+    git -v || ! err "git install failed" || exit
   fi
 
   if command -v pip3 >/dev/null 2>&1 || command -v pip >/dev/null 2>&1; then
@@ -115,7 +117,7 @@ ubuntu_basic_env_install() {
   else
     info "installing node >= 10.12"
     curl -sL install-node.vercel.app/lts | bash
-    node -v || !err "node install failed" || exit
+    node -v || ! err "node install failed" || exit
   fi
 
   if command -v git >/dev/null 2>&1; then
