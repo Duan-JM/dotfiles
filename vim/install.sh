@@ -4,7 +4,7 @@
 # e-mail: vincent.duan95@gmail.com
 # Install neovim & its relevant dependencies
 
-SUDO_PREFIX='sudo'
+COMMAND_PREFIX=$1
 
 #######################################
 # Output error messages with time
@@ -28,11 +28,12 @@ info() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&1
 }
 
-
-info "===========> -------------------------------------------- <============"
-info "===========> Start Installing Vim and Other Prerequisites <============"
-info "===========> -------------------------------------------- <============"
-if [[ $(uname) == "Darwin" ]]; then
+#######################################
+# Prepare env for MacOS
+# Arguments:
+#   None
+#######################################
+macos_basic_env_install() {
   info "Dectect MacOS"
   if command -v brew >/dev/null 2>&1; then
     info 'brew detected, skip install brew'
@@ -48,8 +49,8 @@ if [[ $(uname) == "Darwin" ]]; then
     node -v
   else
     info "installing node >= 10.12"
-    brew install node
-    node -v
+    curl -sL install-node.vercel.app/lts | bash
+    node -v || !err "node install failed" || exit
   fi
 
   # installing neovim
@@ -87,9 +88,14 @@ if [[ $(uname) == "Darwin" ]]; then
 
   info "Installing ripgrep for MacOS"
   brew install ripgrep
-fi
+}
 
-if [ "$(uname)" == "Linux" ]; then
+#######################################
+# Prepare env for MacOS
+# Arguments:
+#   None
+#######################################
+ubuntu_basic_env_install() {
   info "Detect Linux"
 
   # installing neovim
@@ -97,9 +103,9 @@ if [ "$(uname)" == "Linux" ]; then
     info "neovim detected"
   else
     info 'no existing neovim, installing'
-    ${SUDO_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
-    ${SUDO_PREFIX} apt update -y
-    ${SUDO_PREFIX} apt-get install neovim --yes
+    ${COMMAND_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
+    ${COMMAND_PREFIX} apt update --yes
+    ${COMMAND_PREFIX} apt-get install neovim --yes
   fi
 
   # install node for coc
@@ -108,10 +114,8 @@ if [ "$(uname)" == "Linux" ]; then
     node -v
   else
     info "installing node >= 10.12"
-    ${SUDO_PREFIX} apt-get install nodejs npm -y
-    ${SUDO_PREFIX} npm install n -g --registry https://registry.npm.taobao.org
-    ${SUDO_PREFIX} n stable
-    ${SUDO_PREFIX} node -v
+    curl -sL install-node.vercel.app/lts | bash
+    node -v || !err "node install failed" || exit
   fi
 
   if command -v git >/dev/null 2>&1; then
@@ -125,23 +129,35 @@ if [ "$(uname)" == "Linux" ]; then
     info 'pip3 detected, skip install pip'
   else
     info 'no exists pip, installing'
-    ${SUDO_PREFIX} apt-get install python3-pip -y
+    ${COMMAND_PREFIX} apt-get install python3-pip -y
   fi
 
   info "Installing autoconf autogen"
-  ${SUDO_PREFIX} apt-get install autoconf autogen pkg-config
+  ${COMMAND_PREFIX} apt-get install autoconf autogen pkg-config
   info "Installing ctags for Vista"
-  ${SUDO_PREFIX} apt-get install libjansson-dev
+  ${COMMAND_PREFIX} apt-get install libjansson-dev
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags || exit
-  ${SUDO_PREFIX} ./autogen.sh
-  ${SUDO_PREFIX} ./configure
-  ${SUDO_PREFIX} make
-  ${SUDO_PREFIX} make install
+  ${COMMAND_PREFIX} ./autogen.sh
+  ${COMMAND_PREFIX} ./configure
+  ${COMMAND_PREFIX} make
+  ${COMMAND_PREFIX} make install
 
   info "Installing ripgrep for Linux"
-  ${SUDO_PREFIX} apt-get install ripgrep
+  ${COMMAND_PREFIX} apt-get install ripgrep
 
+}
+
+
+info "===========> -------------------------------------------- <============"
+info "===========> Start Installing Vim and Other Prerequisites <============"
+info "===========> -------------------------------------------- <============"
+if [[ $(uname) == "Darwin" ]]; then
+    macos_basic_env_install
+fi
+
+if [ "$(uname)" == "Linux" ]; then
+    ubuntu_basic_env_install
 else
   err "Scripts do not support $(uname)"
 fi
