@@ -100,6 +100,13 @@ macos_basic_env_install() {
 ubuntu_basic_env_install() {
   info "Detect Linux"
 
+  # installing basic tools
+  if command -v curl >/dev/null 2>&1; then
+    info 'curl exist, skipping'
+  else
+    info 'no curl found, installing'
+    ${COMMAND_PREFIX} apt-get install curl --yes
+
   # installing neovim
   if command -v nvim >/dev/null 2>&1; then
     info "neovim detected"

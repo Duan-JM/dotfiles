@@ -26,10 +26,10 @@ bash ./install.sh
 ```bash
 # 自定义快捷键
 <space>       # leader
-<leader> r    # run current script below
 
-<leader> p    # leaderF 当前目录内搜索文件，
-              # <c-n> 或 <c-p> 选中要的文件后，<c-]> 或 <c-x> 新窗口打开
+<leader> r    # run current script below
+<c-p>         # leaderF 当前目录内搜索文件，
+              # <c-j> 或 <c-k> 选中要的文件后，<c-]> 或 <c-x> 新窗口打开
 
 <leader> nt   # 左侧打开文件目录
 <leader> jd   # 函数跳转，一般用 <c-o> 返回
