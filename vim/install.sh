@@ -124,7 +124,7 @@ ubuntu_basic_env_install() {
     node -v
   else
     info "installing node >= 10.12"
-    curl -sL install-node.vercel.app/lts | bash
+    ${COMMAND_PREFIX} install nodejs --yes
     node -v || ! err "node install failed" || exit
   fi
 
