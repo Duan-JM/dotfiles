@@ -1,5 +1,7 @@
 #!/bin/bash
 SUDO_PREFIX=$1
+SCRIPT=$(readlink -f $0)
+SCRIPTPATH=`dirname $SCRIPT`
 
 if [ $(uname) == "Darwin" ]; then
   echo "Dectect MacOS"
@@ -44,8 +46,7 @@ elif [ $(uname) == "Linux" ]; then
 fi
 
 # simple script
-# TODO: need to decomple the path in .tmux.conf <13-06-20, Duan-JM> #
-cp -rf ./tmux.conf ~/.tmux.conf
-cp -rf ./tmux ~/.tmux
-git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-bash ~/.tmux/plugins/tpm/bin/install_plugins
+cp -rf ${SCRIPTPATH}/tmux.conf ${HOME}/.tmux.conf
+cp -rf ${SCRIPTPATH}/tmux ${HOME}/.tmux
+git clone https://github.com/tmux-plugins/tpm ${HOME}/.tmux/plugins/tpm
+bash ${HOME}/.tmux/plugins/tpm/bin/install_plugins
