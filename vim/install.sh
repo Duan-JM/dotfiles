@@ -5,6 +5,8 @@
 # Install neovim & its relevant dependencies
 
 COMMAND_PREFIX=$1
+SCRIPT=$(readlink -f $0)
+SCRIPTPATH=`dirname $SCRIPT`
 
 #######################################
 # Output error messages with time
@@ -187,31 +189,38 @@ pip3 install --user flake8 autopep8 jedi
 info "===========> --------------------- <============"
 info "===========> Start Configuring Vim <============"
 info "===========> --------------------- <============"
-info "Copy the Configure Files"
+info "Backup the Original VIM Configure Files"
 if [ -f "${HOME}/.vim" ]; then
   info "backup existing vim config file"
-  cp -rf "${HOME}"/.vim "${HOME}"/.vimrc_bak
+  cp -rf "${HOME}"/.vim "${HOME}"/.vimrc_bak || ! err "Backup failed interrupt" || exit
   info "deleting existing vim config file"
   rm -rf "${HOME}"/.vim
 fi
 
 if [ -f "${HOME}/.vimrc" ]; then
   info "backup existing vimrc"
-  cp "${HOME}"/.vimrc "${HOME}"/.vimrc.bak
+  cp "${HOME}"/.vimrc "${HOME}"/.vimrc.bak || ! err "Backup failed interrupt" || exit
   info "deleting existing vimrc"
   rm "${HOME}"/.vimrc
 fi
 
-cp -rf ../vim "${HOME}"/.vim
-cp -rf ./vimrc "${HOME}"/.vimrc
+info "Backup the NeoVIM Configure Files"
+if [ -f "${HOME}/.config/vnim" ]; then
+  info "backup existing vim config file"
+  cp -rf "${HOME}"/.config/nvim "${HOME}"/.nvim_bak || ! err "Backup failed interrupt" || exit
+  info "deleting existing vim config file"
+  rm -rf "${HOME}"/.config/nvim
+fi
+
+cp -rf ${SCRIPTPATH}/../vim "${HOME}"/.vim || ! err "Copy vim config folder failed" || exit
+cp -rf ${SCRIPTPATH}/vimrc "${HOME}"/.vimrc || ! err "Copy vim config folder failed" || exit
 
 info "Changing relevant linking"
-
 if [ -d "${HOME}/.config/" ]; then
   info "Existing ${HOME}/.config file"
 else
   info "No ${HOME}/.config dir creating"
-  mkdir "${HOME}"/.config/
+  ${COMMAND_PREFIX} mkdir "${HOME}"/.config/
 fi
 
 if [ -f "${HOME}/.config/nvim" ] || [ -d "${HOME}/.config/nvim" ]; then
