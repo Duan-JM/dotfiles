@@ -126,7 +126,11 @@ ubuntu_basic_env_install() {
     info 'node existing, plz manually check its version'
     node -v
   else
-    info "installing node >= 10.12"
+    info "installing node == 16.x"
+    # deb settings from Digital Ocean
+    # https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-20-04
+    curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
+    ${COMMAND_PREFIX} bash /tmp/nodesource_setup.sh
     ${COMMAND_PREFIX} apt-get install nodejs --yes
     node -v || ! err "node install failed" || exit
   fi
