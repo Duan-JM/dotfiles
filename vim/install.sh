@@ -112,12 +112,12 @@ ubuntu_basic_env_install() {
   fi
 
   # installing neovim
+  ${COMMAND_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
+  ${COMMAND_PREFIX} apt update --yes
   if command -v nvim >/dev/null 2>&1; then
     info "neovim detected"
   else
     info 'no existing neovim, installing'
-    ${COMMAND_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
-    ${COMMAND_PREFIX} apt update --yes
     ${COMMAND_PREFIX} apt-get install neovim --yes
   fi
 
