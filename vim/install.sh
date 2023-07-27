@@ -51,7 +51,7 @@ macos_basic_env_install() {
     node -v
   else
     info "installing node >= 10.12"
-    curl -sL install-node.vercel.app/lts | bash
+    brew install nodejs
     node -v || ! err "node install failed" || exit
   fi
 
@@ -127,7 +127,7 @@ ubuntu_basic_env_install() {
     node -v
   else
     info "installing node >= 10.12"
-    ${COMMAND_PREFIX} install nodejs --yes
+    ${COMMAND_PREFIX} apt-get install nodejs --yes
     node -v || ! err "node install failed" || exit
   fi
 
