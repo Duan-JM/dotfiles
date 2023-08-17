@@ -2,10 +2,17 @@
 "                                   Pluglist                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.2' }
+Plug 'mrjones2014/dash.nvim' , { 'do': 'make install' }
+Plug 'mrjones2014/lighthaus.nvim'
+
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
 Plug 'wellle/targets.vim'                               " text objects
 Plug 'ryanoasis/vim-devicons'                           " extensions for icons
+Plug 'lambdalisue/nerdfont.vim'
+
 Plug 'unblevable/quick-scope'                           " Advance setting for f t search
 Plug 'mbbill/undotree'                                  " history of the undo
 Plug 'Shougo/context_filetype.vim'
@@ -36,7 +43,7 @@ Plug 'tpope/vim-surround'                               " change surroundings
                                                         " ds[partten]
                                                         " ys(iww)[partten] / yss)
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
-Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown']}         " show params and functions
+Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown', 'ts', 'tsx']}         " show params and functions
 
 Plug 'skywind3000/asyncrun.vim'
 Plug 'skywind3000/asynctasks.vim'  " This combination can change default run
@@ -296,13 +303,7 @@ noremap go :Leaderf! rg --recall<cr>
 " vista.vim
 let g:vista_icon_indent = ["╰─▸ ", "├─▸ "]
 left g:vista_default_executive = 'ctags'
-let g:vista#renderer#enable_icon = 1
-
-" The default icons can't be suitable for all the filetypes, you can extend it as you wish.
-let g:vista#renderer#icons = {
-\   "function": "\uf794",
-\   "variable": "\uf71b",
-\  }
+let g:vista#renderer#enable_icon = 0
 
 "LightLine
 "ayu_dark / simple black
@@ -351,7 +352,8 @@ let g:snips_github = 'https://github.com/Duan-JM'
 let g:ultisnips_python_style = 'google'
 
 " Appearance Settings
-colorscheme dogrun
+colorscheme lighthaus_dark
+
 
 func plugin_configs#init_plugin_configs()
   echom "plugin configs activated"
