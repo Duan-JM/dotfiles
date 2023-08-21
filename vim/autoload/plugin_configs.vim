@@ -2,10 +2,6 @@
 "                                   Pluglist                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
-Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.2' }
-Plug 'mrjones2014/dash.nvim' , { 'do': 'make install' }
-Plug 'mrjones2014/lighthaus.nvim'
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
@@ -87,6 +83,8 @@ Plug 'kshenoy/vim-signature'                                                    
 Plug 'luochen1990/rainbow'                                                      " multi color for Parentheses
 Plug 'sainnhe/edge'
 Plug 'wadackel/vim-dogrun'
+Plug 'mrjones2014/lighthaus.nvim'
+Plug 'lighthaus-theme/vim-lighthaus'
 
 " Github
 " Plug 'mattn/gist-vim'                                                           " :Gist -l/-ls :Gist -e (add gist name) -s (add description) -d (delete)
@@ -96,10 +94,9 @@ Plug 'junegunn/gv.vim'                                                          
 Plug 'APZelos/blamer.nvim'
 
 " Search
-Plug 'Yggdroot/LeaderF'                                                         " Ultra search tools
-                                                                                " <c-]> open in vertical
-                                                                                " <c-x> open in split
-                                                                                " <leader><c-b>/fb/ft
+Plug 'nvim-lua/plenary.nvim'
+Plug 'mrjones2014/dash.nvim' , { 'do': 'make install' }
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.2' }
 Plug 'junegunn/vim-slash'                                                       " clean hightline after search
 call plug#end()
 
@@ -271,34 +268,11 @@ let g:vmt_dont_insert_fence=0 "if equals to 1, can't update toc when save
 let g:indentLine_enabled=1
 let g:indentLine_char_list = ['|', '¦', '┆', '┊']
 
-"LeaderF
-let g:Lf_HideHelp = 1
-let g:Lf_UseCache = 1
-let g:Lf_UseVersionControlTool = 0
-let g:Lf_IgnoreCurrentBufferName = 1 " auto refresh index [issue](https://github.com/Yggdroot/LeaderF/issues/161)
-let g:Lf_ShortcutF = '<c-p>'
-
-let g:Lf_DefaultExternalTool = "rg"
-let g:Lf_StlColorscheme = 'gruvbox_material'
-let g:Lf_StlSeparator = { 'left': "\ue0b0", 'right': "\ue0b2", 'font': "DejaVu Sans Mono for Powerline" }
-let g:Lf_PreviewResult = {'Function': 0, 'BufTag': 0 }
-let g:Lf_SpinSymbols = ['△', '▲', '▷', '▶', '▽', '▼', '◁', '◀']
-let g:Lf_CacheDirectory = expand('~/.vim/cache')
-let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
-let g:Lf_WorkingDirectoryMode = 'Ac'
-let g:Lf_WindowHeight = 0.30
-let g:Lf_ShowRelativePath = 0
-
-noremap <leader>fb :Leaderf buffer<CR>
-noremap <leader>ft :Leaderf function<CR>
-
-" need install rg
-noremap <leader><c-b> :<c-r>=printf("Leaderf! rg --current-buffer -e %s ", expand("<cword>"))
-noremap <leader><c-f> :<c-r>=printf("Leaderf! rg -e %s ", expand("<cword>"))<cr>
-" search visually selected text literally
-xnoremap gf :<c-r>=printf("Leaderf! rg -F -e %s ", leaderf#Rg#visual())<cr>
-noremap go :Leaderf! rg --recall<cr>
-
+" Telescope
+" Find files using Telescope command-line sugar.
+nnoremap <leader>ff <cmd>Telescope find_files<cr>
+nnoremap <leader>fg <cmd>Telescope live_grep<cr>
+nnoremap <leader>fb <cmd>Telescope buffers<cr>
 
 " vista.vim
 let g:vista_icon_indent = ["╰─▸ ", "├─▸ "]
@@ -308,7 +282,7 @@ let g:vista#renderer#enable_icon = 0
 "LightLine
 "ayu_dark / simple black
 let g:lightline = {
-     \ 'colorscheme': 'dogrun',
+     \ 'colorscheme': 'lighthaus',
      \ 'active': {
      \   'left': [
      \     [ 'mode', 'paste' ],

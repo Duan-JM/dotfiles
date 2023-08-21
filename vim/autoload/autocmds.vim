@@ -49,6 +49,9 @@ autocmd vimenter * hi Normal guibg=NONE ctermbg=NONE " transparent bg
 " config for python
 autocmd! FileType python set tabstop=4  softtabstop=4 shiftwidth=4 expandtab textwidth=79
 
+" config for yaml
+autocmd! FileType yaml set tabstop=2  softtabstop=2 shiftwidth=2 expandtab textwidth=79
+
 func! autocmds#init_autocmds()
   echom "custom autocmds activated"
 endfunc

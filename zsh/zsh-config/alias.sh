@@ -13,7 +13,7 @@ alias python3='/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions
 
 # Most often
 alias proxy='export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890'
-alias unproxy='unset all_proxy'
+alias unproxy='unset all_proxy https_proxy http_proxy'
 alias ggrep='git grep --break --heading -n'
 alias mnt='mount | grep -E ^/dev | column -t'
 alias count='find . -type f | wc -l'
@@ -23,7 +23,6 @@ alias count='find . -type f | wc -l'
 # Advanced Aliases.
 
 # ls, the common ones I use a lot shortened for rapid fire usage
-alias ls='exa -l'
 alias grep='grep --color'
 alias sgrep='grep -R -n -H -C 5 --exclude-dir={.git,.svn,CVS} '
 alias t='tail -f'
