@@ -108,7 +108,7 @@ ubuntu_basic_env_install() {
     info 'curl exist, skipping'
   else
     info 'no curl found, installing'
-    ${COMMAND_PREFIX} apt-get install curl --yes
+    ${COMMAND_PREFIX} apt-get install curl make --yes
   fi
 
   # installing neovim

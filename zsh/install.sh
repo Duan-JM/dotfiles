@@ -43,7 +43,7 @@ elif [ $(uname) == "Linux" ]; then
     echo 'git detected, skip install git'
   else
     echo 'no exists git, installing'
-    ${SUDO_PREFIX} apt install git
+    ${SUDO_PREFIX} apt install git make
   fi
 
   if command -v zsh >/dev/null 2>&1; then
