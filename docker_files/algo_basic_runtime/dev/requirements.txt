@@ -1,0 +1,5 @@
+transformers
+langchain
+fastapi
+uvicorn
+rasa
