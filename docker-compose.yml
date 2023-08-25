@@ -1,0 +1,20 @@
+version: "1"
+services:
+  algo-dev:
+    container_name: deamov_algo_dev
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    build:
+      context: ./
+      dockerfile: ./docker_files/dev/Dockerfile
+    ports:
+      - 5055:22
+    networks:
+      - dev-network
+    stdin_open: true
+    tty: true
+
+networks:
+  dev-network:
+    driver: bridge
