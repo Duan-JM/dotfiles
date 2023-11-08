@@ -112,7 +112,7 @@ ubuntu_basic_env_install() {
   fi
 
   # installing neovim
-  ${COMMAND_PREFIX} apt-add-repository ppa:neovim-ppa/unstable --yes # if you want to install latest version change `stable` to `unstable`
+  ${COMMAND_PREFIX} apt-add-repository ppa:neovim-ppa/stable --yes # if you want to install latest version change `stable` to `unstable`
   ${COMMAND_PREFIX} apt update --yes
   if command -v nvim >/dev/null 2>&1; then
     info "neovim detected"
@@ -246,9 +246,11 @@ ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim
 
 
 info "Installing Plugins"
-vim -c PlugInstall +qa
+echo "Please manual run :PlugInstall"
+# vim -c PlugInstall +qa
 
 info "Install Coc-plugins"
+echo "Please manually run CocInstall coc-clangd coc-pyright coc-json coc-snippets"
 vim -c 'CocInstall coc-clangd coc-pyright coc-json coc-snippets' +qa
 
 info "===========> --------------- <============"

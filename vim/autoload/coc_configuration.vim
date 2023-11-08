@@ -50,7 +50,9 @@ endfunction
 " autocmd CursorHold * silent call CocActionAsync('highlight')
 
 
-
 func! coc_configuration#init_coc_config()
   echom "coc config actiaved"
 endfunc
+
+autocmd BufWritePre *
+        \ if &filetype == "python" | call CocAction('format') | call CocAction('runCommand', 'editor.action.organizeImport') | endif

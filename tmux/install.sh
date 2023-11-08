@@ -33,15 +33,14 @@ elif [ $(uname) == "Linux" ]; then
   if command -v git >/dev/null 2>&1; then
     echo 'git detected, skip install git'
   else
-    echo 'no exists git, installing'
-    ${SUDO_PREFIX} apt install git make
+    ${SUDO_PREFIX} apt install git --yes
   fi
 
   if command -v tmux >/dev/null 2>&1; then
     echo 'tmux detected, skip install tmux'
   else
     echo 'no exist tmux, installing'
-    ${SUDO_PREFIX} apt install tmux
+    ${SUDO_PREFIX} apt install tmux --yes
   fi
 fi
 

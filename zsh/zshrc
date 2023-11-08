@@ -64,7 +64,7 @@ plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
-)
+ web-search)
 bindkey ';' autosuggest-execute # bindkey to the auto suggestion
 
 source $ZSH/oh-my-zsh.sh
@@ -117,17 +117,17 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 function gi() { curl -sLw n https://www.gitignore.io/api/$@ ;}
 
 # Ruby settings
+#  TODO(Duan-JM): Warning i do not use ruby yet Fix by 25-08-23 (bug ####)
 # For compilers to find ruby you may need to set:
-export LDFLAGS="-L/usr/local/opt/ruby/lib"
-export CPPFLAGS="-I/usr/local/opt/ruby/include"
-export PATH="/Users/duan-jm/.gem/ruby/2.6.0/bin:$PATH"
-export PATH="/Users/duan-jm/.rbenv/versions/3.0.0/bin:$PATH"
-eval "$(rbenv init - zsh)"
+# export LDFLAGS="-L/usr/local/opt/ruby/lib"
+# export CPPFLAGS="-I/usr/local/opt/ruby/include"
+# export PATH="/Users/duan-jm/.gem/ruby/2.6.0/bin:$PATH"
+# export PATH="/Users/duan-jm/.rbenv/versions/3.0.0/bin:$PATH"
+# eval "$(rbenv init - zsh)"
 # export PATH="/usr/local/opt/ruby/bin:$PATH"
-
 # For pkg-config to find ruby you may need to set:
-export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
-export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
+# export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
+# export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
@@ -164,3 +164,6 @@ export DYLD_FALLBACK_LIBRARY_PATH="DYLD_FALLBACK_LIBRARY_PATH:/usr/lib:/usr/loca
 if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi
+
+export RASA_TELEMETRY_ENABLED=false
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"

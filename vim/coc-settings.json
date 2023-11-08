@@ -1,6 +1,6 @@
 {
-  "python.pythonPath":"/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/python3.9",
-  "python.linting.enabled":false,
+  "python.pythonPath":"python3",
+  "python.linting.enabled":true,
   "clangd.disableDiagnostics":true,
   "languageserver": {
     "ccls": {
@@ -25,5 +25,6 @@
       }
     }
   },
-  "snippets.ultisnips.pythonPrompt": false
+  "python.formatting.provider": "black",
+  "snippets.ultisnips.pythonPrompt": false,
 }
