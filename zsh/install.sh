@@ -43,14 +43,14 @@ elif [ $(uname) == "Linux" ]; then
     echo 'git detected, skip install git'
   else
     echo 'no exists git, installing'
-    ${SUDO_PREFIX} apt install git
+    ${SUDO_PREFIX} apt install git --yes
   fi
 
   if command -v zsh >/dev/null 2>&1; then
     echo 'zsh detected, skip install zsh'
   else
     echo 'no exist zsh, installing'
-    ${SUDO_PREFIX} apt install zsh
+    ${SUDO_PREFIX} apt install zsh ruby --yes
     chsh -s /bin/zsh
   fi
 
@@ -78,4 +78,5 @@ echo "Installing Themes"
 git clone https://github.com/iplaces/astro-zsh-theme.git /tmp/astro-zsh-theme
 cp /tmp/astro-zsh-theme/astro.zsh-theme ${HOME}/.oh-my-zsh/themes/
 
-echo "Install Finished, Please manually change default bash to zsh"
+echo "Install Finished, Change to zsh"
+zsh

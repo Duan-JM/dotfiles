@@ -1,10 +1,14 @@
-version: "1"
+version: "3.3"
 services:
-  algo-dev:
+  algo_dev:
     container_name: deamov_algo_dev
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=all
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: 'nvidia'
+            count: 1
+            capabilities: [gpu]
     build:
       context: ./
       dockerfile: ./docker_files/dev/Dockerfile
@@ -12,6 +16,8 @@ services:
       - 5055:22
     networks:
       - dev-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     stdin_open: true
     tty: true
 

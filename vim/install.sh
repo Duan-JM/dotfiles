@@ -112,14 +112,10 @@ ubuntu_basic_env_install() {
   fi
 
   # installing neovim
-  ${COMMAND_PREFIX} apt-add-repository ppa:neovim-ppa/stable --yes # if you want to install latest version change `stable` to `unstable`
+  # Need specific add out side scrip due to the proxy setting
+  # ${COMMAND_PREFIX} apt-add-repository ppa:neovim-ppa/stable --yes # if you want to install latest version change `stable` to `unstable`
   ${COMMAND_PREFIX} apt update --yes
-  if command -v nvim >/dev/null 2>&1; then
-    info "neovim detected"
-  else
-    info 'no existing neovim, installing'
-    ${COMMAND_PREFIX} apt-get install neovim --yes
-  fi
+  ${COMMAND_PREFIX} apt-get upgrade neovim --yes
 
   # install node for coc
   if command -v node > /dev/null 2>&1; then
@@ -150,9 +146,9 @@ ubuntu_basic_env_install() {
   fi
 
   info "Installing autoconf autogen"
-  ${COMMAND_PREFIX} apt-get install autoconf autogen pkg-config
+  ${COMMAND_PREFIX} apt-get install autoconf autogen pkg-config --yes
   info "Installing ctags for Vista"
-  ${COMMAND_PREFIX} apt-get install libjansson-dev
+  ${COMMAND_PREFIX} apt-get install libjansson-dev --yes
   git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
   cd /tmp/ctags || exit
   ${COMMAND_PREFIX} ./autogen.sh
@@ -162,7 +158,7 @@ ubuntu_basic_env_install() {
   ctags --version || ! err "ctags installed failed" || exit
 
   info "Installing ripgrep for Linux"
-  ${COMMAND_PREFIX} apt-get install ripgrep
+  ${COMMAND_PREFIX} apt-get install ripgrep --yes
 
 }
 
@@ -251,7 +247,7 @@ echo "Please manual run :PlugInstall"
 
 info "Install Coc-plugins"
 echo "Please manually run CocInstall coc-clangd coc-pyright coc-json coc-snippets"
-vim -c 'CocInstall coc-clangd coc-pyright coc-json coc-snippets' +qa
+# vim -c 'CocInstall coc-clangd coc-pyright coc-json coc-snippets' +qa
 
 info "===========> --------------- <============"
 info "===========> One More things <============"
