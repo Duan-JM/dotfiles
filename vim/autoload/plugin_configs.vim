@@ -2,10 +2,6 @@
 "                                   Pluglist                                   "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
-" exp
-Plug 'tyru/open-browser.vim'
-Plug 'aklt/plantuml-syntax'
-Plug 'weirongxu/plantuml-previewer.vim'
 
 " System
 Plug 'vim-scripts/LargeFile'                            " Fast Load for Large files
@@ -43,7 +39,7 @@ Plug 'tpope/vim-surround'                               " change surroundings
                                                         " ds[partten]
                                                         " ys(iww)[partten] / yss)
 Plug 'tpope/vim-repeat'                                 " for use . to repeat for surround
-Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown', 'ts', 'tsx', 'vue']}         " show params and functions
+Plug 'liuchengxu/vista.vim', {'for':['c', 'cpp', 'python', 'markdown', 'ts', 'tsx']}         " show params and functions
 
 Plug 'skywind3000/asyncrun.vim'
 Plug 'skywind3000/asynctasks.vim'  " This combination can change default run

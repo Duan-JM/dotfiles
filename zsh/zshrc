@@ -64,7 +64,7 @@ plugins=(
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
- web-search)
+)
 bindkey ';' autosuggest-execute # bindkey to the auto suggestion
 
 source $ZSH/oh-my-zsh.sh
@@ -108,26 +108,13 @@ source ~/.zsh-config/fzf.sh
 export PATH="/usr/local/sbin:$PATH"
 export PATH="/usr/local/bin:$PATH"
 export PATH="/usr/bin/local:$PATH"
-export PATH="/Users/duan-jm/bin:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"
 
 # export LC_ALL=zh_CN.UTF-8
 export LANG_ALL=en_US.UTF-8
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 function gi() { curl -sLw n https://www.gitignore.io/api/$@ ;}
-
-# Ruby settings
-#  TODO(Duan-JM): Warning i do not use ruby yet Fix by 25-08-23 (bug ####)
-# For compilers to find ruby you may need to set:
-# export LDFLAGS="-L/usr/local/opt/ruby/lib"
-# export CPPFLAGS="-I/usr/local/opt/ruby/include"
-# export PATH="/Users/duan-jm/.gem/ruby/2.6.0/bin:$PATH"
-# export PATH="/Users/duan-jm/.rbenv/versions/3.0.0/bin:$PATH"
-# eval "$(rbenv init - zsh)"
-# export PATH="/usr/local/opt/ruby/bin:$PATH"
-# For pkg-config to find ruby you may need to set:
-# export PATH="/usr/local/opt/imagemagick@6/bin:$PATH"
-# export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
@@ -136,15 +123,9 @@ export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
 export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
 
-# curl settings
-export PATH="/opt/homebrew/opt/curl/bin:$PATH"
-
 # icu4c settings
 export PATH="/opt/homebrew/opt/icu4c/bin:$PATH"
 export PATH="/opt/homebrew/opt/icu4c/sbin:$PATH"
-
-# cloud sdk
-export PATH="/Users/duan-jm/Documents/third_party_sdk/google-cloud-sdk/bin:$PATH"
 
 # python bin
 export PATH="/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin:$PATH"
@@ -164,6 +145,3 @@ export DYLD_FALLBACK_LIBRARY_PATH="DYLD_FALLBACK_LIBRARY_PATH:/usr/lib:/usr/loca
 if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi
-
-export RASA_TELEMETRY_ENABLED=false
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"

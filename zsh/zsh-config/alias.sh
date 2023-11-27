@@ -5,12 +5,11 @@ alias vimrc='vim ~/.vimrc'
 alias vi='nvim'
 alias vim='nvim'
 alias wk='/Users/duan-jm/Documents/Records/工作'
-alias pg='cd ~/Downloads/CodeTest'
+alias pg='cd ~/Documents/CodeTest'
 alias cpv='rsync -ah --info=progress2'
 alias task='asynctask -f'
 alias gch='git branch -a | fzf| tr -d "[:space:]"'
 # alias python3='/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/python3.9'
-alias docker-compose='docker compose'
 
 # Most often
 alias proxy='export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890'
@@ -47,7 +46,7 @@ alias p='ps -f'
 alias sortnr='sort -n -r'
 alias unexport='unset'
 
-alias rm='trash'
+alias rmi='rm -i'
 alias cpi='cp -i'
 alias mvi='mv -i'
 
