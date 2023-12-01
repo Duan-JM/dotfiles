@@ -218,6 +218,7 @@ if [ -f "${HOME}/.config/vnim" ]; then
   rm -rf "${HOME}"/.config/nvim
 fi
 
+info "Copy Config file to ~/.vim ~/.vimrc"
 cp -rf ${SCRIPTPATH}/../vim "${HOME}"/.vim || ! err "Copy vim config folder failed" || exit
 cp -rf ${SCRIPTPATH}/vimrc "${HOME}"/.vimrc || ! err "Copy vim config folder failed" || exit
 
@@ -235,15 +236,9 @@ if [ -f "${HOME}/.config/nvim" ] || [ -d "${HOME}/.config/nvim" ]; then
   mkdir "${HOME}"/.config/nvim
 fi
 
-if [ -f "${HOME}/.config/nvim/init.vim" ]; then
-  info "deleting existing nvim config file"
-  rm "${HOME}"/.config/nvim/init.vim
-fi
-
 info "Creating link to nvim configfile"
-ln -s "${HOME}"/.vim "${HOME}"/.config/nvim
-ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim
-
+ln -s "${HOME}"/.vim "${HOME}"/.config/nvim || ! err "Creating nvim link failed" || exit
+ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim || ! err "Creating init.vim link failed" || exit
 
 info "Installing Plugins"
 echo "Please manual run :PlugInstall"
