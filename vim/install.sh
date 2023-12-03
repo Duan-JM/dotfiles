@@ -90,9 +90,6 @@ macos_basic_env_install() {
   brew tap universal-ctags/universal-ctags
   brew install --HEAD universal-ctags/universal-ctags/universal-ctags
   ctags --version || ! err "ctags installed failed" || exit
-
-  info "Installing ripgrep for MacOS"
-  brew install ripgrep
 }
 
 #######################################
@@ -160,10 +157,6 @@ ubuntu_basic_env_install() {
   ${COMMAND_PREFIX} make
   ${COMMAND_PREFIX} make install
   ctags --version || ! err "ctags installed failed" || exit
-
-  info "Installing ripgrep for Linux"
-  ${COMMAND_PREFIX} apt-get install ripgrep
-
 }
 
 
