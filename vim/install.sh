@@ -179,10 +179,10 @@ info "===========> Start Installing Python Prerequisites <============"
 info "===========> ------------------------------------- <============"
 
 info "Add python support"
-pip3 install --user pynvim
+python3 -m pip install --user pynvim --break-system-packages
 
 info "Installing Pylint autopep8 jedi flake8"
-pip3 install --user flake8 autopep8 jedi
+python3 -m pip install --user flake8 autopep8 jedi --break-system-packages
 
 
 info "===========> --------------------- <============"
@@ -204,7 +204,7 @@ if [ -f "${HOME}/.vimrc" ]; then
 fi
 
 info "Backup the NeoVIM Configure Files"
-if [ -f "${HOME}/.config/vnim" ]; then
+if [ -f "${HOME}/.config/nvim" ]; then
   info "backup existing vim config file"
   cp -rf "${HOME}"/.config/nvim "${HOME}"/.nvim_bak || ! err "Backup failed interrupt" || exit
   info "deleting existing vim config file"
@@ -212,8 +212,8 @@ if [ -f "${HOME}/.config/vnim" ]; then
 fi
 
 info "Copy Config file to ~/.vim ~/.vimrc"
-cp -rf ${SCRIPTPATH}/../vim "${HOME}"/.vim || ! err "Copy vim config folder failed" || exit
-cp -rf ${SCRIPTPATH}/vimrc "${HOME}"/.vimrc || ! err "Copy vim config folder failed" || exit
+cp -rf ${SCRIPTPATH}/../vim "${HOME}"/.vim   || ! err "Copy vim config folder failed" || exit
+cp -rf ${SCRIPTPATH}/vimrc "${HOME}"/.vimrc  || ! err "Copy vim config folder failed" || exit
 
 info "Changing relevant linking"
 if [ -d "${HOME}/.config/" ]; then
@@ -226,7 +226,6 @@ fi
 if [ -f "${HOME}/.config/nvim" ] || [ -d "${HOME}/.config/nvim" ]; then
   info "deleting existing nvim config file"
   rm -rf "${HOME}"/.config/nvim
-  mkdir "${HOME}"/.config/nvim
 fi
 
 info "Creating link to nvim configfile"
@@ -235,7 +234,7 @@ ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim || ! err "Creating init.v
 
 info "Installing Plugins"
 echo "Please manual run :PlugInstall"
-# vim -c PlugInstall +qa
+vim -c PlugInstall +qa
 
 info "Install Coc-plugins"
 echo "Please manually run CocInstall coc-clangd coc-pyright coc-json coc-snippets"
