@@ -1,0 +1,6 @@
+require("config.lazy")
+require("config.autocmds")
+require("config.basic_settings")
+require("config.mappings")
+require("config.functions")
+require("config.addon_filetypes")

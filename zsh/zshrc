@@ -61,6 +61,7 @@ ZSH_THEME_RANDOM_CANDIDATES=( "wezm" "risto" "rkj-repos" "fino-time" )
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
+  poetry
   git
   zsh-autosuggestions
   zsh-syntax-highlighting
@@ -117,6 +118,7 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 function gi() { curl -sLw n https://www.gitignore.io/api/$@ ;}
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source <(fzf --zsh)
 
 # llvm settings
 export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
@@ -128,8 +130,9 @@ export PATH="/opt/homebrew/opt/icu4c/bin:$PATH"
 export PATH="/opt/homebrew/opt/icu4c/sbin:$PATH"
 
 # python bin
-export PATH="/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin:$PATH"
-export PYTHONPATH="/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/pydoc3.9"
+export PATH="/Users/duan-jm/Library/Python/3.12/bin:$PATH"
+
+# java
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
 
 # curl settings
@@ -138,6 +141,9 @@ export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/curl/lib/pkgconfig"
 
+# rust
+export PATH="/Users/duan-jm/.cargo/bin:$PATH"
+
 # milvus
 export DYLD_FALLBACK_LIBRARY_PATH="DYLD_FALLBACK_LIBRARY_PATH:/usr/lib:/usr/local/lib:/var/bin/e-milvus/lib/"
 
@@ -145,3 +151,35 @@ export DYLD_FALLBACK_LIBRARY_PATH="DYLD_FALLBACK_LIBRARY_PATH:/usr/lib:/usr/loca
 if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi
+
+# Avante
+export AZURE_OPENAI_API_KEY="azuer api key"
+
+# tushare
+export TUSHARE_TOKEN="tushare token"
+
+# ruby settings
+export PATH="/opt/homebrew/opt/ruby@3.2/bin:$PATH"
+
+# java settings
+export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
+export CPPFLAGS="-I/opt/homebrew/opt/openjdk@11/include"
+export JAVA_HOME="$(/usr/libexec/java_home -v 11)"
+
+# gpg settings
+export GPG_TTY=$(tty)
+
+# openblas
+# For compilers to find openblas you may need to set:
+export PATH="/opt/homebrew/opt/openblas/lib:/opt/homebrew/opt/openblas/include:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/openblas/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/openblas/include"
+
+# For pkg-config to find openblas you may need to set:
+export PKG_CONFIG_PATH="/opt/homebrew/opt/openblas/lib/pkgconfig"
+
+# pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"

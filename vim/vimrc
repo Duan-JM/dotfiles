@@ -1,7 +1,0 @@
-silent call vim_settings#init_settings()
-silent call mappings#init_mappings()                                          " need to place before plugin configs
-silent call plugin_configs#init_plugin_configs()
-silent call coc_configuration#init_coc_config()                               " I don't like may delete later
-silent call functions#init_functions()
-silent call autocmds#init_autocmds()
-" silent call google_python_style#init_settings()

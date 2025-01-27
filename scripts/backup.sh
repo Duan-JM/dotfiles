@@ -12,10 +12,8 @@ DOT_FILE=`pwd`
 ##########################
 # back up to dotfiles
 cp -rf ~/.vim/fonts $DOT_FILE/vim
-cp -rf ~/.vim/colors $DOT_FILE/vim
-cp -rf ~/.vim/autoload $DOT_FILE/vim
-cp ~/.vimrc $DOT_FILE/vim/vimrc
-cp ~/.vim/coc-settings.json $DOT_FILE/vim/coc-settings.json
+cp -rf ~/.vim/lua $DOT_FILE/vim
+cp ~/.vim/init.lua $DOT_FILE/vim/init.lua
 
 
 ###########################
@@ -34,7 +32,7 @@ cp -rf ~/.tmux $DOT_FILE/tmux/tmux
 # git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 # git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 cp ~/.zshrc $DOT_FILE/zsh/zshrc
-cp -rf ~/.zsh-config/* $DOT_FILE/zsh/zsh-config/
+cp -rf ~/.zsh-config $DOT_FILE/zsh
 
 
 #####################
