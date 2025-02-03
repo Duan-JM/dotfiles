@@ -213,7 +213,6 @@ fi
 
 info "Copy Config file to ~/.vim ~/.vimrc"
 cp -rf ${SCRIPTPATH}/../vim "${HOME}"/.vim   || ! err "Copy vim config folder failed" || exit
-cp -rf ${SCRIPTPATH}/vimrc "${HOME}"/.vimrc  || ! err "Copy vim config folder failed" || exit
 
 info "Changing relevant linking"
 if [ -d "${HOME}/.config/" ]; then
@@ -230,18 +229,9 @@ fi
 
 info "Creating link to nvim configfile"
 ln -s "${HOME}"/.vim "${HOME}"/.config/nvim || ! err "Creating nvim link failed" || exit
-ln -s "${HOME}"/.vimrc "${HOME}"/.config/nvim/init.vim || ! err "Creating init.vim link failed" || exit
-
-info "Installing Plugins"
-echo "Please manual run :PlugInstall"
-vim -c PlugInstall +qa
-
-info "Install Coc-plugins"
-echo "Please manually run CocInstall coc-clangd coc-pyright coc-json coc-snippets"
-vim -c 'CocInstall coc-clangd coc-pyright coc-json coc-snippets' +qa
 
 info "===========> --------------- <============"
 info "===========> One More things <============"
 info "===========> --------------- <============"
 info "We are good to go now, Happy Vimming"
-info "If configure is not set up correctly, please check out if ${HOME}/.config/nvim and ${HOME}/.config/nvim/init.vim are generated properly"
+info "If configure is not set up correctly, please check out if ${HOME}/.config/nvim and ${HOME}/.config/nvim/init.lua are generated properly"
