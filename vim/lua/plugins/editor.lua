@@ -68,10 +68,19 @@ return {
 			"nvim-lua/plenary.nvim",
 			"nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
 			"MunifTanjim/nui.nvim",
-			-- "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
+			"3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
 		},
 		keys = {
-			{ "<leader>nt", "<cmd>Neotree<cr>", desc = "Open Neotree" },
+			{ "<leader>nt", "<cmd>:Neotree filesystem reveal left<cr>", desc = "Open Neotree" },
+		},
+		default_component_configs = {
+			filesystem = {
+				follow_current_file = {
+					enabled = true, -- This will find and focus the file in the active buffer every time
+					--               -- the current file is changed while the tree is open.
+					leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
+				},
+			},
 		},
 		window = {
 			mappings = {
@@ -81,7 +90,6 @@ return {
 				["/"] = "fuzzy_finder",
 				["D"] = "fuzzy_finder_directory",
 				["#"] = "fuzzy_sorter", -- fuzzy sorting using the fzy algorithm
-				-- ["D"] = "fuzzy_sorter_directory",
 				["f"] = "filter_on_submit",
 				["<c-x>"] = "clear_filter",
 				["[g"] = "prev_git_modified",
@@ -94,13 +102,14 @@ return {
 				["on"] = { "order_by_name", nowait = false },
 				["os"] = { "order_by_size", nowait = false },
 				["ot"] = { "order_by_type", nowait = false },
+				-- ["D"] = "fuzzy_sorter_directory",
 				-- ['<key>'] = function(state) ... end,
 			},
 			fuzzy_finder_mappings = { -- define keymaps for filter popup window in fuzzy_finder_mode
-				["<down>"] = "move_cursor_down",
 				["<C-n>"] = "move_cursor_down",
-				["<up>"] = "move_cursor_up",
 				["<C-p>"] = "move_cursor_up",
+				-- ["<down>"] = "move_cursor_down",
+				-- ["<up>"] = "move_cursor_up",
 				-- ['<key>'] = function(state, scroll_padding) ... end,
 			},
 		},

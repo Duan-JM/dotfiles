@@ -19,6 +19,7 @@ return {
 				graphql = { "prettier" },
 				lua = { "stylua" },
 				python = { "isort", "black" },
+				java = { "google-java-format" },
 			},
 			format_on_save = {
 				-- These options will be passed to conform.format()

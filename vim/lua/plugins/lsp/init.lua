@@ -9,7 +9,7 @@ return {
 				config = function()
 					require("mason").setup()
 					require("mason-lspconfig").setup({
-						ensure_installed = { "pyright", "jedi-language-server" },
+						ensure_installed = { "pyright", "jdtls" },
 					})
 				end,
 			},
@@ -48,6 +48,17 @@ return {
 			})
 		end,
 	},
+	{ -- java lsp
+		"mfussenegger/nvim-jdtls",
+		ft = "java",
+		config = function()
+			local config = {
+				cmd = { "/opt/homebrew/bin/jdtls" },
+				root_dir = require("jdtls.setup").find_root({ ".git", "mvnw", "gradlew" }),
+			}
+			require("jdtls").start_or_attach(config)
+		end,
+	},
 	{ -- Autocompletion
 		"hrsh7th/nvim-cmp",
 		lazy = false,
@@ -57,11 +68,15 @@ return {
 			"saadparwaiz1/cmp_luasnip",
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-buffer",
+			"luozhiya/fittencode.nvim",
 		},
 		config = function()
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			luasnip.config.setup({})
+			require("fittencode").setup({
+				completion_mode = "source",
+			})
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -76,30 +91,13 @@ return {
 						behavior = cmp.ConfirmBehavior.Replace,
 						select = true,
 					}),
-					["<Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_next_item()
-						elseif luasnip.expand_or_jumpable() then
-							luasnip.expand_or_jump()
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
-					["<S-Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_prev_item()
-						elseif luasnip.jumpable(-1) then
-							luasnip.jump(-1)
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
 				}),
 				sources = {
 					{ name = "nvim_lsp" },
 					{ name = "luasnip" },
 					{ name = "path" },
 					{ name = "buffer" },
+					{ name = "fittencode", group_index = 1 },
 				},
 			})
 		end,
