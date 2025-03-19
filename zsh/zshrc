@@ -152,19 +152,23 @@ if command -v ngrok &>/dev/null; then
   eval "$(ngrok completion)"
 fi
 
-# Avante
-export AZURE_OPENAI_API_KEY="azuer api key"
-
-# tushare
-export TUSHARE_TOKEN="tushare token"
+# gpt server
+export GPT_TEMPERATURE=0.9
+export OPENAI_API_BASE="http://10.170.138.230:8888/v1"
+export OPENAI_API_VERSION="2023-03-15-preview"
+export OPENAI_API_KEY="none"
+export OPENAI_DEPLOYMENT_NAME="devapi35"
+export OPENAI_API_TYPE='local'
+export OPENAI_MODEL_NAME='/root/local_gpt'
 
 # ruby settings
 export PATH="/opt/homebrew/opt/ruby@3.2/bin:$PATH"
 
-# java settings
+java settings
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
 export CPPFLAGS="-I/opt/homebrew/opt/openjdk@11/include"
 export JAVA_HOME="$(/usr/libexec/java_home -v 11)"
+export JDTLS_JVM_ARGS="-javaagent:/Users/duan-jm/.m2/repository/org/projectlombok/lombok/1.16.18/lombok-1.16.18.jar"
 
 # gpg settings
 export GPG_TTY=$(tty)
