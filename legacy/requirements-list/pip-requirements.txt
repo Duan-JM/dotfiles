@@ -1,7 +1,0 @@
-jedi
-flake8
-mypy
-pylint
-pylint-quotes
-pycodestyle
-autopep8
