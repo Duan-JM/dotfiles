@@ -68,15 +68,11 @@ return {
 			"saadparwaiz1/cmp_luasnip",
 			"hrsh7th/cmp-path",
 			"hrsh7th/cmp-buffer",
-			"luozhiya/fittencode.nvim",
 		},
 		config = function()
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			luasnip.config.setup({})
-			require("fittencode").setup({
-				completion_mode = "source",
-			})
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -97,7 +93,6 @@ return {
 					{ name = "luasnip" },
 					{ name = "path" },
 					{ name = "buffer" },
-					{ name = "fittencode", group_index = 1 },
 				},
 			})
 		end,
