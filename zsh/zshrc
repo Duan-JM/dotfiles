@@ -144,17 +144,14 @@ export PKG_CONFIG_PATH="/opt/homebrew/opt/curl/lib/pkgconfig"
 # rust
 export PATH="/Users/duan-jm/.cargo/bin:$PATH"
 
-# openai-4o
+# gpt server
 export GPT_TEMPERATURE=0.9
-export OPENAI_API_BASE=""
-export OPENAI_API_KEY=""
-export OPENAI_DEPLOYMENT_NAME=""
-export OPENAI_API_VERSION="2024-02-15-preview"
-export OPENAI_API_TYPE='azure'
-export OPENAI_MODEL_NAME='gpt-4o'
-
-# Avante
-export AZURE_OPENAI_API_KEY=""
+export OPENAI_API_BASE="http://10.170.138.230:8888/v1"
+export OPENAI_API_VERSION="2023-03-15-preview"
+export OPENAI_API_KEY="none"
+export OPENAI_DEPLOYMENT_NAME="devapi35"
+export OPENAI_API_TYPE='local'
+export OPENAI_MODEL_NAME='/root/local_gpt'
 
 # ruby settings
 export PATH="/opt/homebrew/opt/ruby@3.2/bin:$PATH"
