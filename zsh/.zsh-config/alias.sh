@@ -1,11 +1,11 @@
 # Temporary Settings
-alias github='cd ~/Documents/Github'
+alias github='cd ~/Downloads/github-repos'
 alias zshrc='vim ~/.zshrc'
 alias vimrc='vim ~/.vimrc'
 alias vi='nvim'
 alias vim='nvim'
 alias wk='/Users/duan-jm/Documents/Records/工作'
-alias pg='cd ~/Documents/CodeTest'
+alias pg='cd ~/Downloads/code-test'
 alias cpv='rsync -ah --info=progress2'
 alias task='asynctask -f'
 alias gch='git branch -a | fzf| tr -d "[:space:]"'
