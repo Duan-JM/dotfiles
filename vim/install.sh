@@ -90,10 +90,13 @@ macos_basic_env_install() {
   brew tap universal-ctags/universal-ctags
   brew install --HEAD universal-ctags/universal-ctags/universal-ctags
   ctags --version || ! err "ctags installed failed" || exit
+
+  info "Installing for code format"
+  brew install prettier isort stylua black goolge-java-format
 }
 
 #######################################
-# Prepare env for MacOS
+# Prepare env for Linux
 # Arguments:
 #   None
 #######################################
