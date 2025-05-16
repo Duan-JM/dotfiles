@@ -40,3 +40,9 @@ cp -rf ~/.zsh-config $DOT_FILE/zsh
 #####################
 # cp ~/.pylintrc $DOT_FILE/rc-files/pylintrc
 
+
+#########
+# Kitty #
+#########
+cp ~/.config/kitty/kitty.conf $DOT_FILE//kitty/kitty.conf
+
