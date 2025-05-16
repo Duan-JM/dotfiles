@@ -16,3 +16,4 @@ Tuxera
 MacTex
 Cubox
 Obsidian
+PDF Squeezer
