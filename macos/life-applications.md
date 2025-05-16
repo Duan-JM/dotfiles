@@ -1,9 +1,7 @@
 Notion
-1Password
 Bartendar
 Clash
 Lemon
-PixPin
 Launchbar  
 Choice
 Tiger
