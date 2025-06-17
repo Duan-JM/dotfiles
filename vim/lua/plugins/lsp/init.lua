@@ -46,6 +46,24 @@ return {
 					},
 				},
 			})
+			-- ✅ 配置 lua_ls，避免 vim 报 undefined
+			require("lspconfig").lua_ls.setup({
+				settings = {
+					Lua = {
+						diagnostics = {
+							globals = { "vim" },
+						},
+						workspace = {
+							checkThirdParty = false,
+							library = {
+								vim.env.VIMRUNTIME,
+								require("lspconfig.util").path.join(vim.fn.stdpath("data"), "lazy", "nvim-lspconfig"),
+							},
+						},
+						telemetry = { enable = false },
+					},
+				},
+			})
 		end,
 	},
 	{ -- java lsp

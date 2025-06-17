@@ -123,4 +123,10 @@ if gitroot ~= "" then
 	vim.o.tags = vim.o.tags .. "," .. gitroot .. "/.git/tags"
 end
 
+-- Python pynvim 设置
+vim.g.python3_host_prog = "python3"
+
+-- diable no need provider 设置
+vim.g.loaded_perl_provider = 0
+vim.g.loaded_ruby_provider = 0
 print("Neovim settings loaded!")
