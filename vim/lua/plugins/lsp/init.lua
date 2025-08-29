@@ -1,5 +1,5 @@
 return {
-	{ -- lsp
+	{ -- LSP
 		"neovim/nvim-lspconfig",
 		lazy = false,
 		dependencies = {
@@ -9,50 +9,59 @@ return {
 				config = function()
 					require("mason").setup()
 					require("mason-lspconfig").setup({
-						ensure_installed = { "pyright", "jdtls" },
+						ensure_installed = { "jdtls", "ruff" },
 					})
 				end,
 			},
 		},
 		config = function()
-			util = require("lspconfig.util")
-			function set_poetry_python()
-				local handle = io.popen("poetry run which python")
+			local lspconfig = require("lspconfig")
+
+			-- 自动获取 Poetry Python，如果不是 Poetry 项目返回 nil
+			local function get_poetry_python()
+				local handle = io.popen("poetry run which python 2>/dev/null")
+				if not handle then
+					return nil
+				end
 				local path = handle:read("*a")
-				path = path:match("^(.-)\n?$")
 				handle:close()
-				local clients = util.get_lsp_clients({
-					bufnr = vim.api.nvim_get_current_buf(),
-					name = "pyright",
-				})
-				for _, client in ipairs(clients) do
-					if client.settings then
-						client.settings.python =
-							vim.tbl_deep_extend("force", client.settings.python, { pythonPath = path })
-					else
-						client.config.settings =
-							vim.tbl_deep_extend("force", client.config.settings, { python = { pythonPath = path } })
+				path = path:match("^(.-)\n?$")
+				if path == "" then
+					return nil
+				end
+				return path
+			end
+
+			local function on_attach(client, bufnr)
+				if client.name == "pyright" then
+					local active_clients = vim.lsp.get_clients({ bufnr = bufnr })
+					for _, c in ipairs(active_clients) do
+						if c.name == "pyright" and c.id ~= client.id then
+							-- vim.notify("Killing duplicate pyright (id=" .. c.id .. ")", vim.log.levels.DEBUG)
+							c:stop()
+						end
 					end
-					-- debug
-					-- print(vim.inspect(client.settings))
-					client.notify("workspace/didChangeConfiguration", { settings = nil })
 				end
 			end
-			require("lspconfig").pyright.setup({
-				commands = {
-					PyrightSetPoetrySetup = {
-						set_poetry_python,
-						description = "Use repo poetry python to setup pyright",
-					},
-				},
+
+			-- Pyright 配置
+			lspconfig.pyright.setup({
+				on_attach = on_attach,
+				before_init = function(_, config)
+					local python_path = get_poetry_python()
+					if python_path then
+						config.settings = config.settings or {}
+						config.settings.python = config.settings.python or {}
+						config.settings.python.pythonPath = python_path
+					end
+				end,
 			})
-			-- ✅ 配置 lua_ls，避免 vim 报 undefined
-			require("lspconfig").lua_ls.setup({
+
+			-- Lua LSP
+			lspconfig.lua_ls.setup({
 				settings = {
 					Lua = {
-						diagnostics = {
-							globals = { "vim" },
-						},
+						diagnostics = { globals = { "vim" } },
 						workspace = {
 							checkThirdParty = false,
 							library = {
@@ -66,7 +75,8 @@ return {
 			})
 		end,
 	},
-	{ -- java lsp
+
+	{ -- Java LSP
 		"mfussenegger/nvim-jdtls",
 		ft = "java",
 		config = function()
@@ -77,6 +87,7 @@ return {
 			require("jdtls").start_or_attach(config)
 		end,
 	},
+
 	{ -- Autocompletion
 		"hrsh7th/nvim-cmp",
 		lazy = false,
@@ -91,6 +102,7 @@ return {
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			luasnip.config.setup({})
+
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -101,10 +113,35 @@ return {
 					["<C-d>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<C-Space>"] = cmp.mapping.complete({}),
-					["<CR>"] = cmp.mapping.confirm({
-						behavior = cmp.ConfirmBehavior.Replace,
-						select = true,
-					}),
+					["<CR>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							if luasnip.expandable() then
+								luasnip.expand()
+							else
+								cmp.confirm({ select = true })
+							end
+						else
+							fallback()
+						end
+					end),
+					["<Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_next_item()
+						elseif luasnip.locally_jumpable(1) then
+							luasnip.jump(1)
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
+					["<S-Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_prev_item()
+						elseif luasnip.locally_jumpable(-1) then
+							luasnip.jump(-1)
+						else
+							fallback()
+						end
+					end, { "i", "s" }),
 				}),
 				sources = {
 					{ name = "nvim_lsp" },
@@ -115,11 +152,11 @@ return {
 			})
 		end,
 	},
-	{
+
+	{ -- LuaSnip snippets
 		"mireq/luasnip-snippets",
 		dependencies = { "L3MON4D3/LuaSnip" },
 		init = function()
-			-- Mandatory setup function
 			require("luasnip_snippets.common.snip_utils").setup()
 		end,
 	},

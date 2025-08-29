@@ -12,7 +12,7 @@ alias gch='git branch -a | fzf| tr -d "[:space:]"'
 # alias python3='/opt/homebrew/opt/python@3.9/Frameworks/Python.framework/Versions/3.9/bin/python3.9'
 
 # Most often
-alias proxy='export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890'
+alias proxy='export https_proxy=http://127.0.0.1:8234;export http_proxy=http://127.0.0.1:8234;export all_proxy=socks5://127.0.0.1:8235'
 alias unproxy='unset all_proxy https_proxy http_proxy'
 alias ggrep='git grep --break --heading -n'
 alias mnt='mount | grep -E ^/dev | column -t'
