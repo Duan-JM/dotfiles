@@ -8,6 +8,7 @@ alias wk='/Users/duan-jm/Documents/Records/工作'
 alias pg='cd ~/Downloads/code-test'
 alias cpv='rsync -ah --info=progress2'
 alias gch='git branch -a | fzf| tr -d "[:space:]"'
+alias vscode='open -a Visual\ Studio\ Code'
 
 # Most often
 alias proxy='export https_proxy=http://127.0.0.1:8234;export http_proxy=http://127.0.0.1:8234;export all_proxy=socks5://127.0.0.1:8235'

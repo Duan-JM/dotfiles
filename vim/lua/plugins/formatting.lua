@@ -18,7 +18,7 @@ return {
 				markdown = { "prettier" },
 				graphql = { "prettier" },
 				lua = { "stylua" },
-				python = { "black", "isort" },
+				python = { "isort", "black" },
 				java = { "google-java-format" },
 			},
 			format_on_save = {

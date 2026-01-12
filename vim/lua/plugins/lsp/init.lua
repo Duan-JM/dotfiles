@@ -43,6 +43,11 @@ return {
 					end
 				end
 			end
+			lspconfig.ruff.setup({
+				on_attach = function(client, bufnr)
+					client.server_capabilities.documentFormattingProvider = false
+				end,
+			})
 
 			-- Pyright 配置
 			lspconfig.pyright.setup({
