@@ -9,7 +9,10 @@ return {
 				config = function()
 					require("mason").setup()
 					require("mason-lspconfig").setup({
-						ensure_installed = { "jdtls", "ruff" },
+						ensure_installed = { "jdtls", "ruff", "rust_analyzer" },
+						handlers = {
+							function() end, -- 默认不自动启动，由下面手动 setup
+						},
 					})
 				end,
 			},
@@ -33,11 +36,21 @@ return {
 			end
 
 			local function on_attach(client, bufnr)
+				local opts = { buffer = bufnr }
+				vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+				vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+				vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
+				vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+				vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+				vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
+				vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
+				vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
+
 				if client.name == "pyright" then
 					local active_clients = vim.lsp.get_clients({ bufnr = bufnr })
 					for _, c in ipairs(active_clients) do
 						if c.name == "pyright" and c.id ~= client.id then
-							-- vim.notify("Killing duplicate pyright (id=" .. c.id .. ")", vim.log.levels.DEBUG)
 							c:stop()
 						end
 					end
@@ -61,6 +74,19 @@ return {
 					end
 				end,
 			})
+
+			-- Rust LSP (Neovim 0.11+ 自动启动，用 vim.lsp.config 配置)
+			vim.lsp.config("rust_analyzer", {
+				on_attach = on_attach,
+				settings = {
+					["rust-analyzer"] = {
+						checkOnSave = true,
+						check = { command = "clippy" },
+						cargo = { allFeatures = true },
+					},
+				},
+			})
+			vim.lsp.enable("rust_analyzer")
 
 			-- Lua LSP
 			lspconfig.lua_ls.setup({

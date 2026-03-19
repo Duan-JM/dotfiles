@@ -20,6 +20,7 @@ return {
 				lua = { "stylua" },
 				python = { "isort", "black" },
 				java = { "google-java-format" },
+				rust = { "rustfmt" },
 			},
 			format_on_save = {
 				-- These options will be passed to conform.format()
