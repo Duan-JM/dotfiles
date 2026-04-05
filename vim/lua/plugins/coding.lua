@@ -10,7 +10,7 @@ return {
 		config = function()
 			vim.g.snips_author = "Duan-JM"
 			vim.g.snips_email = "vincent.duan95@outlook.com"
-			vim.g.ultisnips_python_style = "google"
+			vim.g.ultisnips_python_style = "goole"
 			-- Optional: Add any custom configuration here for vista.vim
 		end,
 	},

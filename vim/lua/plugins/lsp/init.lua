@@ -1,5 +1,5 @@
 return {
-	{ -- LSP
+	{ -- lsp
 		"neovim/nvim-lspconfig",
 		lazy = false,
 		dependencies = {
@@ -9,105 +9,55 @@ return {
 				config = function()
 					require("mason").setup()
 					require("mason-lspconfig").setup({
-						ensure_installed = { "jdtls", "ruff", "rust_analyzer" },
-						handlers = {
-							function() end, -- 默认不自动启动，由下面手动 setup
-						},
+						ensure_installed = { "pyright", "jdtls" },
 					})
 				end,
 			},
 		},
 		config = function()
-			local lspconfig = require("lspconfig")
-
-			-- 自动获取 Poetry Python，如果不是 Poetry 项目返回 nil
-			local function get_poetry_python()
-				local handle = io.popen("poetry run which python 2>/dev/null")
-				if not handle then
-					return nil
-				end
+			local function set_poetry_python()
+				local handle = io.popen("poetry run which python")
 				local path = handle:read("*a")
-				handle:close()
 				path = path:match("^(.-)\n?$")
-				if path == "" then
-					return nil
-				end
-				return path
-			end
-
-			local function on_attach(client, bufnr)
-				local opts = { buffer = bufnr }
-				vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-				vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
-				vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-				vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
-				vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-				vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
-				vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-				vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts)
-				vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
-
-				if client.name == "pyright" then
-					local active_clients = vim.lsp.get_clients({ bufnr = bufnr })
-					for _, c in ipairs(active_clients) do
-						if c.name == "pyright" and c.id ~= client.id then
-							c:stop()
-						end
+				handle:close()
+				local clients = vim.lsp.get_clients({
+					bufnr = vim.api.nvim_get_current_buf(),
+					name = "pyright",
+				})
+				for _, client in ipairs(clients) do
+					if client.settings then
+						client.settings.python =
+							vim.tbl_deep_extend("force", client.settings.python, { pythonPath = path })
+					else
+						client.config.settings =
+							vim.tbl_deep_extend("force", client.config.settings, { python = { pythonPath = path } })
 					end
+					vim.lsp.buf_notify(0, "workspace/didChangeConfiguration", { settings = nil })
 				end
 			end
-			lspconfig.ruff.setup({
-				on_attach = function(client, bufnr)
-					client.server_capabilities.documentFormattingProvider = false
+
+			-- New API for Neovim 0.11+
+			vim.lsp.config.pyright = {
+				cmd = { "pyright-langserver", "--stdio" },
+				filetypes = { "python" },
+				root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", ".git" },
+				settings = {},
+			}
+
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "python",
+				callback = function()
+					vim.lsp.enable("pyright")
 				end,
 			})
 
-			-- Pyright 配置
-			lspconfig.pyright.setup({
-				on_attach = on_attach,
-				before_init = function(_, config)
-					local python_path = get_poetry_python()
-					if python_path then
-						config.settings = config.settings or {}
-						config.settings.python = config.settings.python or {}
-						config.settings.python.pythonPath = python_path
-					end
-				end,
-			})
-
-			-- Rust LSP (Neovim 0.11+ 自动启动，用 vim.lsp.config 配置)
-			vim.lsp.config("rust_analyzer", {
-				on_attach = on_attach,
-				settings = {
-					["rust-analyzer"] = {
-						checkOnSave = true,
-						check = { command = "clippy" },
-						cargo = { allFeatures = true },
-					},
-				},
-			})
-			vim.lsp.enable("rust_analyzer")
-
-			-- Lua LSP
-			lspconfig.lua_ls.setup({
-				settings = {
-					Lua = {
-						diagnostics = { globals = { "vim" } },
-						workspace = {
-							checkThirdParty = false,
-							library = {
-								vim.env.VIMRUNTIME,
-								require("lspconfig.util").path.join(vim.fn.stdpath("data"), "lazy", "nvim-lspconfig"),
-							},
-						},
-						telemetry = { enable = false },
-					},
-				},
+			-- Register custom command
+			vim.api.nvim_create_user_command("PyrightSetPoetrySetup", set_poetry_python, {
+				desc = "Use repo poetry python to setup pyright",
 			})
 		end,
 	},
-
-	{ -- Java LSP
+	{ -- java lsp
 		"mfussenegger/nvim-jdtls",
 		ft = "java",
 		config = function()
@@ -118,7 +68,6 @@ return {
 			require("jdtls").start_or_attach(config)
 		end,
 	},
-
 	{ -- Autocompletion
 		"hrsh7th/nvim-cmp",
 		lazy = false,
@@ -133,7 +82,6 @@ return {
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
 			luasnip.config.setup({})
-
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -144,35 +92,10 @@ return {
 					["<C-d>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<C-Space>"] = cmp.mapping.complete({}),
-					["<CR>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							if luasnip.expandable() then
-								luasnip.expand()
-							else
-								cmp.confirm({ select = true })
-							end
-						else
-							fallback()
-						end
-					end),
-					["<Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_next_item()
-						elseif luasnip.locally_jumpable(1) then
-							luasnip.jump(1)
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
-					["<S-Tab>"] = cmp.mapping(function(fallback)
-						if cmp.visible() then
-							cmp.select_prev_item()
-						elseif luasnip.locally_jumpable(-1) then
-							luasnip.jump(-1)
-						else
-							fallback()
-						end
-					end, { "i", "s" }),
+					["<CR>"] = cmp.mapping.confirm({
+						behavior = cmp.ConfirmBehavior.Replace,
+						select = true,
+					}),
 				}),
 				sources = {
 					{ name = "nvim_lsp" },
@@ -183,11 +106,11 @@ return {
 			})
 		end,
 	},
-
-	{ -- LuaSnip snippets
+	{
 		"mireq/luasnip-snippets",
 		dependencies = { "L3MON4D3/LuaSnip" },
 		init = function()
+			-- Mandatory setup function
 			require("luasnip_snippets.common.snip_utils").setup()
 		end,
 	},
