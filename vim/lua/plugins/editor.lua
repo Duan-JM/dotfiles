@@ -54,14 +54,6 @@ return {
 		end,
 	},
 	{
-		"andymass/vim-matchup",
-		lazy = false,
-		priority = 1000,
-		config = function()
-			-- ...
-		end,
-	},
-	{
 		"nvim-neo-tree/neo-tree.nvim",
 		branch = "v3.x",
 		dependencies = {
