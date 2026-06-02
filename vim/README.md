@@ -1,110 +1,148 @@
-Vim Configuration
-=================
-This is my vim configuration and always update to my latest used.
+# Neovim Configuration
 
-### Plugins
-Plugins can be seen in file `./autoload/plugin_configs.vim`.
+A Lua-based Neovim configuration managed by [lazy.nvim](https://github.com/folke/lazy.nvim).
 
-### Installation
-```
-bash ./install.sh
-```
-
-### Most used Command
+## Install
 
 ```bash
-:Gdiffsplit # vim-fugitive
-:gv         # gv see commits
-:Vista      # 打开查看当前文件内的函数与变量
-:g<         # 可以用来你不小心跳转了，或者执行了什么指令，再回来 
-# The g< command can be used to see the last page of previous command output.
-:w !sudo tee % # 当你用普通用户没有写权限时很好用。
+bash ./install.sh           # macOS (uses brew) or Ubuntu (uses apt+sudo)
+bash ./install.sh ""        # disable sudo prefix when running as root
 ```
 
-### Command Shortcuts
+The script:
+
+1. Installs Neovim, Node, git, ripgrep, fd, universal-ctags, python3 + pynvim, and
+   formatters (prettier / isort / stylua / black / google-java-format).
+2. Backs up any existing `~/.vim`, `~/.vimrc`, `~/.config/nvim` with a
+   timestamp suffix.
+3. **Symlinks** this directory to `~/.config/nvim` (so future `git pull`s take
+   effect immediately — no re-running the script).
+
+On first `nvim` launch, lazy.nvim will clone and set up every plugin.
+
+## Layout
+
+```
+init.lua
+├── lua/config/
+│   ├── lazy.lua            lazy.nvim bootstrap + leader keys
+│   ├── basic_settings.lua  vim options
+│   ├── addon_filetypes.lua filetype detection (vim.filetype.add)
+│   ├── autocmds.lua        autocommands (augroup-isolated)
+│   ├── mappings.lua        global keymaps (vim.keymap.set)
+│   └── functions.lua       custom commands / tabline / helpers
+└── lua/plugins/
+    ├── colorscheme.lua     sainnhe/edge
+    ├── editor.lua          surround, commentary, repeat, undotree,
+    │                       quick-scope, nvim-autopairs, neo-tree
+    ├── ui.lua              lualine, rainbow-delimiters, web-devicons
+    ├── treesitter.lua      nvim-treesitter (+ textobjects, autotag)
+    ├── coding.lua          aerial.nvim (outline)
+    ├── git.lua             gitsigns + vim-fugitive
+    ├── telescope.lua       fuzzy finder
+    ├── formatting.lua      conform.nvim (format-on-save)
+    └── lsp/init.lua        mason + nvim-lspconfig + nvim-cmp + LuaSnip + jdtls
+```
+
+## Key Bindings
+
+Leader = `<space>`.
+
+### General
+
+| Keys             | Action                                            |
+|------------------|---------------------------------------------------|
+| `<leader>w`      | Save buffer                                       |
+| `<leader>ev`     | Edit `$MYVIMRC` in a new tab                      |
+| `<leader>t / v`  | New tab / new vertical split                      |
+| `<leader>tq / tn`| Close tab / next tab                              |
+| `[<space>` / `]<space>` | Insert blank line above / below (count-aware) |
+| `<C-l>`          | Clear search highlight + redraw                   |
+| `j` / `k`        | Display-line aware when no count (5j is unchanged)|
+| `&`              | Repeat last `:s` with flags                       |
+
+### Find / search (telescope)
+
+| Keys         | Action                                  |
+|--------------|-----------------------------------------|
+| `<C-p>`      | Find files                              |
+| `<leader>ff` | Find files                              |
+| `<leader>fg` | Live grep                               |
+| `<leader>fb` | Buffer list                             |
+| `<leader>fl` | Fuzzy lines in current buffer           |
+| `<leader>ft` | Treesitter symbols                      |
+| `<leader>fh` | Help tags                               |
+| `<leader>fr` | Recent files                            |
+
+Inside Telescope: `<C-j/k>` next/prev, `<C-]>` open in tab, `<C-x/v>` h/v split.
+
+### Files / outline / undo
+
+| Keys         | Action                                  |
+|--------------|-----------------------------------------|
+| `<leader>nt` | Open Neo-tree on left, reveal file      |
+| `<leader>o`  | Toggle Aerial outline (replaces Vista)  |
+| `<leader>u`  | Toggle undotree                         |
+
+### LSP (set on `LspAttach`)
+
+| Keys         | Action                                  |
+|--------------|-----------------------------------------|
+| `gd / gD`    | Goto definition / declaration           |
+| `gr / gi`    | References / implementation             |
+| `K`          | Hover                                   |
+| `<leader>rn` | Rename                                  |
+| `<leader>ca` | Code action                             |
+| `[d` / `]d`  | Previous / next diagnostic              |
+
+### Git
+
+| Keys         | Action                                  |
+|--------------|-----------------------------------------|
+| `<leader>gs` | `:Git` status                           |
+| `<leader>gd` | `:Gdiffsplit`                           |
+| `<leader>gb` | `:Git blame`                            |
+| `]c` / `[c`  | Next / previous hunk (gitsigns)         |
+| `<leader>hs/hr/hp/hb` | Stage/reset/preview/blame hunk |
+
+### Insert mode
+
+| Keys           | Action                                          |
+|----------------|-------------------------------------------------|
+| `<C-Space>`    | Trigger completion                              |
+| `<C-d>`/`<C-f>`| Scroll docs in completion popup                 |
+| `<C-l>`        | Auto-fix previous spelling error                |
+| `<C-x><C-l>`   | Native line completion                          |
+| `<C-x><C-f>`   | Native filename completion                      |
+
+## Useful commands
+
+```
+:Mason                       Manage LSPs / formatters
+:Telescope                   List all telescope pickers
+:Neotree                     File explorer
+:AerialToggle                Symbol outline
+:Rename {newname}            Rename current file on disk
+:Stab                        Prompt for tab width (sets ts/sts/sw)
+:PyrightSetPoetrySetup       Point pyright at the current poetry venv
+:Gdiffsplit                  Diff against index
+:Git blame                   Blame current file
+```
+
+## Debugging Neovim startup
 
 ```bash
-# 自定义快捷键
-<space>       # leader
+# Startup time profile
+nvim --startuptime /tmp/nvim-startup.log +qa && less /tmp/nvim-startup.log
 
-<leader> r    # run current script below
-<c-p>         # leaderF 当前目录内搜索文件，
-              # <c-j> 或 <c-k> 选中要的文件后，<c-]> 或 <c-x> 新窗口打开
+# Verbose runtime log
+nvim -V13/tmp/nvim-verbose.log <file>
 
-<leader> nt   # 左侧打开文件目录
-<leader> jd   # 函数跳转，一般用 <c-o> 返回
-]<space>      # 下面加一行空行，同理 [<space>
+# Health check
+nvim +checkhealth
+```
 
-# 常用默认快捷键
-<c-\><c-n>    # Termianl 返回 Noraml model
-<c-w> h       # 切换窗口，同理 hjkl 为方向键
-<c-w> =       # 调整窗口大小，同理还有 _ | < > + -
-fFtT <char>   # 行内跳转，使用 QuickScope 进行辅助高亮
-])            # 跳到下一个)，同理[(
-]m / ]M       # 跳到函数方法的末尾      
-
-# 插入模式下的删除
-<c-u> # 向前删除一行
-<c-h> # 前删除一个字母
-<c-w> # 向前删除一个单词
-
-# 插件
-<leader> ` # 呼叫 Floaterm 终端
-
-<leader>fb # buffer list
-<leader>ft # buftags
-<leader>fl # search line
-<leader> <c-f> <search-parttern> # search target pattern current files 
-
-
-### Unfrequency Command Shortcuts
-
-1. AutoComplute
-
-    ```bash
-    <c-x><c-l> # 整行补全, 在 complet 选项定义范围内查找
-    <c-x><c-n> # 当前文本的关键词补全，关键词根据 iskeyword 定义
-    <c-x><c-k> # 从 dictionary 里面查找单词进行补全
-    <c-x><c-f> # 文件名补全
-    ```
-
-2. Value Calculator
-
-    在 `insert` 模式下输入 `ctrl+=` 。
-
-### Vim Performance Debug
-
-1. Init Debug log
-
-    ```bash
-    vim --startuptime <file> open_file
-    # :help startup-options to see how to defin startup operations
-    ```
-
-2. Run debug
-
-    ```bash
-    # 目的是 debug 一些日常卡顿的现象，个人有时候会运行时 vim 卡死，这时候就需要 debug 了
-    vim -V13<your/log/file/path> open_file
-
-    # :h 'verbose' 去看输出日志的等级
-
-    :message # 看最近的执行的指令，还有报错的内容
-    :echo errmsg # 查看最近错信息
-    :h errors # 查看各种报错代码的意思
-
-    # 也可以做成 function
-    function! ToggleVerbose()
-        if !&verbose
-            set verbosefile=~/.log/vim/verbose.log
-            set verbose=15
-        else
-            set verbose=0
-            set verbosefile=
-        endif
-    endfunction
-    ```
-
-### Reference
+## References
+- [lazy.nvim docs](https://lazy.folke.io/)
 - [Is there a "vim runtime log"?](https://stackoverflow.com/questions/3025615/is-there-a-vim-runtime-log)
 - [如何调试 Vim 脚本 | Harttle Land](https://harttle.land/2018/12/05/vim-debug.html)

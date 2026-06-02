@@ -1,123 +1,116 @@
--- ===================================
--- Set Custom AUTOCMD for vim
--- ===================================
--- config for all file type =====>
--- Return to last edit position when opening files (You want this!)
-vim.api.nvim_create_autocmd("BufReadPost", {
-    callback = function()
-        local ft = vim.bo.filetype
-        local last_pos = vim.fn.line("'\"")
-        local last_line = vim.fn.line("$")
-        
-        -- 如果文件类型不是 gitcommit 且上次位置有效，则跳转到上次位置
-        if ft ~= "gitcommit" and last_pos > 0 and last_pos <= last_line then
-            vim.cmd("normal! g`\"")
-        end
-    end,
-})
-
--- https://superuser.com/questions/195022/vim-how-to-synchronize-nerdtree-with-current-opened-tab-file-path
-if vim.fn.expand("%:p") ~= "" then
-    vim.api.nvim_create_autocmd("BufEnter", {
-        pattern = "*",
-        callback = function()
-            -- 设置当前工作目录为当前文件的所在目录
-            vim.cmd("lcd " .. vim.fn.expand("%:p:h"))
-        end,
-    })
-end
--- http://inlehmansterms.net/2014/09/04/sane-vim-working-directories/
--- http://vim.wikia.com/wiki/Set_working_directory_to_the_current_file
-vim.api.nvim_create_autocmd("BufEnter", {
-    pattern = "*",
-    callback = function()
-        local dir = vim.fn.expand("%:p:h")
-        if dir ~= "" then
-            vim.cmd("silent! lcd " .. dir)
-        end
-    end,
-})
-vim.api.nvim_create_autocmd("BufEnter", {
-    pattern = "*",
-    callback = function()
-        local dir = vim.fn.expand("%:p:h")
-        if dir ~= "" and not dir:match("^/tmp") then
-            vim.cmd("silent! lcd " .. dir)
-        end
-    end,
-})
-local default_path = vim.o.path:gsub(" ", "\\ ")
-
-
+-- ===========================================================================
+-- Autocommands
+-- ===========================================================================
 local autocmd = vim.api.nvim_create_autocmd
+local function augroup(name)
+	return vim.api.nvim_create_augroup("user_" .. name, { clear = true })
+end
 
--- 自动关闭预览窗口
-autocmd({"CursorMovedI", "InsertLeave"}, {
-    callback = function()
-        if vim.fn.pumvisible() == 0 then
-            vim.cmd("silent! pclose")
-        end
-    end,
+-- Restore last cursor position when reopening files (skip gitcommit).
+autocmd("BufReadPost", {
+	group = augroup("last_pos"),
+	callback = function()
+		if vim.bo.filetype == "gitcommit" then return end
+		local mark = vim.api.nvim_buf_get_mark(0, '"')
+		local lcount = vim.api.nvim_buf_line_count(0)
+		if mark[1] > 0 and mark[1] <= lcount then
+			pcall(vim.api.nvim_win_set_cursor, 0, mark)
+		end
+	end,
 })
 
--- 恢复焦点时刷新缓冲区
-autocmd({"FocusGained", "BufEnter"}, {
-    callback = function()
-        vim.cmd("silent! !")
-    end,
+-- Change local working dir to the current file's directory (skip /tmp and
+-- special buffers like terminal, quickfix, neo-tree).
+autocmd("BufEnter", {
+	group = augroup("auto_lcd"),
+	callback = function()
+		if vim.bo.buftype ~= "" then return end
+		local dir = vim.fn.expand("%:p:h")
+		if dir == "" or dir:match("^/tmp") then return end
+		pcall(vim.cmd, "silent! lcd " .. vim.fn.fnameescape(dir))
+	end,
 })
 
--- Git 提交消息相关设置
+-- Close preview window when the popup menu is gone.
+autocmd({ "CursorMovedI", "InsertLeave" }, {
+	group = augroup("close_pum"),
+	callback = function()
+		if vim.fn.pumvisible() == 0 then
+			pcall(vim.cmd, "silent! pclose")
+		end
+	end,
+})
+
+-- Detect external file changes (the original `silent! !` was a no-op shell
+-- call; `checktime` is what was intended).
+autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+	group = augroup("checktime"),
+	callback = function()
+		if vim.fn.mode() ~= "c" then
+			pcall(vim.cmd, "checktime")
+		end
+	end,
+})
+
+-- For git commit / merge / rebase: jump to the first line so the user starts
+-- typing immediately.
+autocmd("BufReadPost", {
+	group = augroup("gitcommit_first_line"),
+	pattern = { "COMMIT_EDITMSG", "MERGE_MSG" },
+	callback = function() vim.fn.setpos(".", { 0, 1, 1, 0 }) end,
+})
+
+-- Transparent background on entry and after every colorscheme change.
+autocmd({ "VimEnter", "ColorScheme" }, {
+	group = augroup("transparent"),
+	callback = function()
+		vim.cmd("highlight Normal      guibg=NONE ctermbg=NONE")
+		vim.cmd("highlight NormalNC    guibg=NONE ctermbg=NONE")
+		vim.cmd("highlight EndOfBuffer guibg=NONE ctermbg=NONE")
+		vim.cmd("highlight SignColumn  guibg=NONE ctermbg=NONE")
+	end,
+})
+
+-- Filetype-specific options ----------------------------------------------------
+local ft = augroup("ft_opts")
+
 autocmd("FileType", {
-    pattern = "gitcommit",
-    callback = function()
-        autocmd("BufEnter", {
-            pattern = "COMMIT_EDITMSG",
-            callback = function()
-                vim.fn.setpos(".", {0, 1, 1, 0})
-            end,
-        })
-    end,
+	group = ft,
+	pattern = "tex",
+	callback = function()
+		vim.opt_local.spell = true
+		vim.opt_local.spelllang = "en_us"
+		vim.opt_local.wrap = true
+	end,
 })
 
--- TeX 文件的配置
 autocmd("FileType", {
-    pattern = "tex",
-    callback = function()
-        vim.opt_local.spell = true
-        vim.opt_local.spelllang = "en_us"
-        vim.opt_local.wrap = true
-        vim.opt_local.whichwrap = "b,s,h,l,<,>,>h,[,]"
-    end,
+	group = ft,
+	pattern = "python",
+	callback = function()
+		vim.opt_local.tabstop = 4
+		vim.opt_local.softtabstop = 4
+		vim.opt_local.shiftwidth = 4
+		vim.opt_local.expandtab = true
+		vim.opt_local.textwidth = 79
+	end,
 })
 
--- 启动时设置透明背景
-autocmd("VimEnter", {
-    callback = function()
-        vim.cmd("hi Normal guibg=NONE ctermbg=NONE")
-    end,
-})
-
--- Python 文件的配置
 autocmd("FileType", {
-    pattern = "python",
-    callback = function()
-        vim.opt_local.tabstop = 4
-        vim.opt_local.softtabstop = 4
-        vim.opt_local.shiftwidth = 4
-        vim.opt_local.expandtab = true
-        vim.opt_local.textwidth = 79
-    end,
+	group = ft,
+	pattern = { "yaml", "yml" },
+	callback = function()
+		vim.opt_local.tabstop = 2
+		vim.opt_local.softtabstop = 2
+		vim.opt_local.shiftwidth = 2
+		vim.opt_local.expandtab = true
+	end,
 })
 
--- YAML 文件的配置
-autocmd("FileType", {
-    pattern = "yaml",
-    callback = function()
-        vim.opt_local.tabstop = 2
-        vim.opt_local.softtabstop = 2
-        vim.opt_local.shiftwidth = 2
-        vim.opt_local.expandtab = true
-        vim.opt_local.textwidth = 79
-    end,
+-- Highlight on yank (nice quality-of-life feedback).
+autocmd("TextYankPost", {
+	group = augroup("highlight_yank"),
+	callback = function()
+		(vim.hl or vim.highlight).on_yank({ timeout = 200 })
+	end,
 })

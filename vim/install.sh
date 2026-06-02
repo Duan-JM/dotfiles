@@ -1,240 +1,168 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Author: Duan-JM
 # e-mail: vincent.duan95@gmail.com
-# Install neovim & its relevant dependencies
+#
+# Install Neovim and its dependencies, then symlink this config into
+# ~/.config/nvim so future updates to the dotfiles repo take effect
+# automatically.
+#
+# Usage:
+#   bash ./install.sh            # run with sudo for system packages on Linux
+#   bash ./install.sh ""         # disable sudo prefix (e.g. running as root)
 
-COMMAND_PREFIX=$1
-SCRIPT=$(readlink -f $0)
-SCRIPTPATH=`dirname $SCRIPT`
+set -euo pipefail
 
-#######################################
-# Output error messages with time
-# Globals:
-#   error messages
-# Arguments:
-#   None
-#######################################
-err() {
-  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
+COMMAND_PREFIX="${1-sudo}"
+
+# Resolve the absolute path of this script (no readlink -f on macOS by default).
+resolve_path() {
+  python3 -c "import os,sys; print(os.path.realpath(sys.argv[1]))" "$1"
 }
+SCRIPT="$(resolve_path "$0")"
+SCRIPTPATH="$(dirname "$SCRIPT")"
 
-#######################################
-# Output info messages with time
-# Globals:
-#   info messages
-# Arguments:
-#   None
-#######################################
-info() {
-  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&1
-}
+info() { echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] [INFO]  $*"; }
+err()  { echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] [ERROR] $*" >&2; }
 
-#######################################
-# Prepare env for MacOS
-# Arguments:
-#   None
-#######################################
-macos_basic_env_install() {
-  info "Dectect MacOS"
+# ---------------------------------------------------------------------------
+# macOS
+# ---------------------------------------------------------------------------
+ensure_brew() {
   if command -v brew >/dev/null 2>&1; then
-    info 'brew detected, skip install brew'
-  else
-    info 'no exists brew, installing'
-    /usr/bin/ruby -e \
-      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    info "Homebrew detected"
+    return
   fi
-
-  # install node for coc
-  if command -v node > /dev/null 2>&1; then
-    info 'node existing, plz manually check its version'
-    node -v
-  else
-    info "installing node >= 10.12"
-    brew install nodejs
-    node -v || ! err "node install failed" || exit
-  fi
-
-  # installing neovim
-  if command -v nvim >/dev/null 2>&1; then
-    info "neovim detected"
-  else
-    info 'no existing neovim, installing'
-    brew update
-    brew install utf8proc
-    brew install --HEAD neovim
-    nvim -v || ! err "neovim installed failed" || exit
-  fi
-
-  if command -v git >/dev/null 2>&1; then
-    info 'git detected, skip install git'
-  else
-    info 'no exists git, installing'
-    brew install git
-    git -v || ! err "git install failed" || exit
-  fi
-
-  if command -v pip3 >/dev/null 2>&1 || command -v pip >/dev/null 2>&1; then
-    info 'pip3 detected, skip install pip'
-  else
-    info 'no exists pip, installing'
-    if command -v python3 >/dev/null 2>&1; then
-      python3 get-pip.py
-    fi
-    if command -v python2 >/dev/null 2>&1; then
-      python get-pip.py
-    fi
-  fi
-
-  info "Installing ctags for Vista"
-  brew tap universal-ctags/universal-ctags
-  brew install --HEAD universal-ctags/universal-ctags/universal-ctags
-  ctags --version || ! err "ctags installed failed" || exit
-
-  info "Installing for code format"
-  brew install prettier isort stylua black goolge-java-format
+  info "Installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
-#######################################
-# Prepare env for Linux
-# Arguments:
-#   None
-#######################################
-ubuntu_basic_env_install() {
-  info "Detect Linux"
-
-  # installing basic tools
-  if command -v curl >/dev/null 2>&1; then
-    info 'curl exist, skipping'
+brew_install_if_missing() {
+  local pkg="$1"
+  if brew list --formula 2>/dev/null | grep -qx "$pkg"; then
+    info "$pkg already installed"
   else
-    info 'no curl found, installing'
-    ${COMMAND_PREFIX} apt-get install curl make --yes
+    info "Installing $pkg"
+    brew install "$pkg" || err "Failed to install $pkg"
   fi
-
-  # installing neovim
-  ${COMMAND_PREFIX} apt-add-repository ppa:neovim-ppa/stable --yes # if you want to install latest version change `stable` to `unstable`
-  ${COMMAND_PREFIX} apt update --yes
-  if command -v nvim >/dev/null 2>&1; then
-    info "neovim detected"
-  else
-    info 'no existing neovim, installing'
-    ${COMMAND_PREFIX} apt-get install neovim --yes
-  fi
-
-  # install node for coc
-  if command -v node > /dev/null 2>&1; then
-    info 'node existing, plz manually check its version'
-    node -v
-  else
-    info "installing node == 16.x"
-    # deb settings from Digital Ocean
-    # https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-20-04
-    curl -sL https://deb.nodesource.com/setup_16.x -o /tmp/nodesource_setup.sh
-    ${COMMAND_PREFIX} bash /tmp/nodesource_setup.sh
-    ${COMMAND_PREFIX} apt-get install nodejs --yes
-    node -v || ! err "node install failed" || exit
-  fi
-
-  if command -v git >/dev/null 2>&1; then
-    info 'git detected, skip install git'
-  else
-    info 'no exists git, installing'
-    brew install git
-  fi
-
-  if command -v pip3 >/dev/null 2>&1; then
-    info 'pip3 detected, skip install pip'
-  else
-    info 'no exists pip, installing'
-    ${COMMAND_PREFIX} apt-get install python3-pip -y
-  fi
-
-  info "Installing autoconf autogen"
-  ${COMMAND_PREFIX} apt-get install autoconf autogen pkg-config
-  info "Installing ctags for Vista"
-  ${COMMAND_PREFIX} apt-get install libjansson-dev
-  git clone https://github.com/universal-ctags/ctags.git --depth=1 /tmp/ctags
-  cd /tmp/ctags || exit
-  ${COMMAND_PREFIX} ./autogen.sh
-  ${COMMAND_PREFIX} ./configure
-  ${COMMAND_PREFIX} make
-  ${COMMAND_PREFIX} make install
-  ctags --version || ! err "ctags installed failed" || exit
 }
 
+macos_install() {
+  info "Detected macOS"
+  ensure_brew
 
-info "===========> -------------------------------------------- <============"
-info "===========> Start Installing Vim and Other Prerequisites <============"
-info "===========> -------------------------------------------- <============"
-if [[ $(uname) == "Darwin" ]]; then
-    macos_basic_env_install
-fi
+  # Core packages (treesitter / telescope / LSP tooling all want these).
+  local pkgs=(neovim node git universal-ctags python3 ripgrep fd)
+  for pkg in "${pkgs[@]}"; do
+    brew_install_if_missing "$pkg"
+  done
 
-if [ "$(uname)" == "Linux" ]; then
-    ubuntu_basic_env_install
-else
-  err "Scripts do not support $(uname)"
-fi
+  info "Installing formatters"
+  for fmt in prettier isort stylua black google-java-format; do
+    brew_install_if_missing "$fmt" || true
+  done
+}
 
+# ---------------------------------------------------------------------------
+# Ubuntu / Debian
+# ---------------------------------------------------------------------------
+ubuntu_install() {
+  info "Detected Linux"
 
-info "===========> ------------------------------------- <============"
-info "===========> Start Installing Python Prerequisites <============"
-info "===========> ------------------------------------- <============"
+  ${COMMAND_PREFIX} apt-get update -y
 
-info "Add python support"
-python3 -m pip install --user pynvim --break-system-packages
+  local pkgs=(
+    curl make git python3-pip ripgrep fd-find
+    autoconf autogen pkg-config libjansson-dev
+    software-properties-common
+  )
+  ${COMMAND_PREFIX} apt-get install -y "${pkgs[@]}"
 
-info "Installing Pylint autopep8 jedi flake8"
-python3 -m pip install --user flake8 autopep8 jedi --break-system-packages
+  # Neovim from official PPA (stable).
+  if ! command -v nvim >/dev/null 2>&1; then
+    info "Adding neovim PPA and installing"
+    ${COMMAND_PREFIX} apt-add-repository -y ppa:neovim-ppa/stable
+    ${COMMAND_PREFIX} apt-get update -y
+    ${COMMAND_PREFIX} apt-get install -y neovim
+  else
+    info "neovim detected ($(nvim --version | head -n1))"
+  fi
 
+  # Node.js 20.x.
+  if ! command -v node >/dev/null 2>&1; then
+    info "Installing Node.js 20.x"
+    curl -fsSL https://deb.nodesource.com/setup_20.x | ${COMMAND_PREFIX} bash -
+    ${COMMAND_PREFIX} apt-get install -y nodejs
+  else
+    info "node detected ($(node -v))"
+  fi
 
-info "===========> --------------------- <============"
-info "===========> Start Configuring Vim <============"
-info "===========> --------------------- <============"
-info "Backup the Original VIM Configure Files"
-if [ -f "${HOME}/.vim" ]; then
-  info "backup existing vim config file"
-  cp -rf "${HOME}"/.vim "${HOME}"/.vimrc_bak || ! err "Backup failed interrupt" || exit
-  info "deleting existing vim config file"
-  rm -rf "${HOME}"/.vim
-fi
+  # universal-ctags from source (apt's ctags is the old exuberant-ctags).
+  if ! command -v ctags >/dev/null 2>&1; then
+    info "Building universal-ctags from source"
+    local tmpdir
+    tmpdir="$(mktemp -d)"
+    git clone https://github.com/universal-ctags/ctags.git --depth=1 "$tmpdir"
+    pushd "$tmpdir" >/dev/null
+    ./autogen.sh
+    ./configure
+    make
+    ${COMMAND_PREFIX} make install
+    popd >/dev/null
+    rm -rf "$tmpdir"
+  fi
+}
 
-if [ -f "${HOME}/.vimrc" ]; then
-  info "backup existing vimrc"
-  cp "${HOME}"/.vimrc "${HOME}"/.vimrc.bak || ! err "Backup failed interrupt" || exit
-  info "deleting existing vimrc"
-  rm "${HOME}"/.vimrc
-fi
+# ---------------------------------------------------------------------------
+# Common
+# ---------------------------------------------------------------------------
+install_python_support() {
+  info "Installing pynvim (python LSP/RPC support)"
+  if python3 -m pip install --user --upgrade pynvim --break-system-packages 2>/dev/null; then
+    return
+  fi
+  python3 -m pip install --user --upgrade pynvim
+}
 
-info "Backup the NeoVIM Configure Files"
-if [ -f "${HOME}/.config/nvim" ]; then
-  info "backup existing vim config file"
-  cp -rf "${HOME}"/.config/nvim "${HOME}"/.nvim_bak || ! err "Backup failed interrupt" || exit
-  info "deleting existing vim config file"
-  rm -rf "${HOME}"/.config/nvim
-fi
+# Move an existing path to a timestamped backup so re-running the script
+# never overwrites a previous backup.
+backup_path() {
+  local target="$1"
+  if [[ -e "$target" || -L "$target" ]]; then
+    local backup
+    backup="${target}.bak.$(date +%Y%m%d%H%M%S)"
+    info "Backing up $target -> $backup"
+    mv "$target" "$backup"
+  fi
+}
 
-info "Copy Config file to ~/.vim ~/.vimrc"
-cp -rf ${SCRIPTPATH}/../vim "${HOME}"/.vim   || ! err "Copy vim config folder failed" || exit
+deploy_config() {
+  local nvim_cfg="${HOME}/.config/nvim"
+  mkdir -p "${HOME}/.config"
 
-info "Changing relevant linking"
-if [ -d "${HOME}/.config/" ]; then
-  info "Existing ${HOME}/.config file"
-else
-  info "No ${HOME}/.config dir creating"
-  ${COMMAND_PREFIX} mkdir "${HOME}"/.config/
-fi
+  backup_path "${HOME}/.vim"
+  backup_path "${HOME}/.vimrc"
+  backup_path "$nvim_cfg"
 
-if [ -f "${HOME}/.config/nvim" ] || [ -d "${HOME}/.config/nvim" ]; then
-  info "deleting existing nvim config file"
-  rm -rf "${HOME}"/.config/nvim
-fi
+  info "Symlinking $SCRIPTPATH -> $nvim_cfg"
+  ln -sfn "$SCRIPTPATH" "$nvim_cfg"
+}
 
-info "Creating link to nvim configfile"
-ln -s "${HOME}"/.vim "${HOME}"/.config/nvim || ! err "Creating nvim link failed" || exit
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+main() {
+  info "===> Installing Neovim and prerequisites <==="
+  case "$(uname)" in
+    Darwin) macos_install ;;
+    Linux)  ubuntu_install ;;
+    *)      err "Unsupported OS: $(uname)"; exit 1 ;;
+  esac
 
-info "===========> --------------- <============"
-info "===========> One More things <============"
-info "===========> --------------- <============"
-info "We are good to go now, Happy Vimming"
-info "If configure is not set up correctly, please check out if ${HOME}/.config/nvim and ${HOME}/.config/nvim/init.lua are generated properly"
+  install_python_support
+  deploy_config
+
+  info "===> All done. Launch nvim; lazy.nvim will sync plugins on first run. <==="
+}
+
+main "$@"
