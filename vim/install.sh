@@ -52,7 +52,7 @@ macos_install() {
   ensure_brew
 
   # Core packages (treesitter / telescope / LSP tooling all want these).
-  local pkgs=(neovim node git universal-ctags python3 ripgrep fd)
+  local pkgs=(neovim node git python3 ripgrep fd)
   for pkg in "${pkgs[@]}"; do
     brew_install_if_missing "$pkg"
   done
@@ -95,21 +95,6 @@ ubuntu_install() {
     ${COMMAND_PREFIX} apt-get install -y nodejs
   else
     info "node detected ($(node -v))"
-  fi
-
-  # universal-ctags from source (apt's ctags is the old exuberant-ctags).
-  if ! command -v ctags >/dev/null 2>&1; then
-    info "Building universal-ctags from source"
-    local tmpdir
-    tmpdir="$(mktemp -d)"
-    git clone https://github.com/universal-ctags/ctags.git --depth=1 "$tmpdir"
-    pushd "$tmpdir" >/dev/null
-    ./autogen.sh
-    ./configure
-    make
-    ${COMMAND_PREFIX} make install
-    popd >/dev/null
-    rm -rf "$tmpdir"
   fi
 }
 
