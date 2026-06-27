@@ -113,7 +113,7 @@ export PATH="/usr/bin/local:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
 
 # export LC_ALL=zh_CN.UTF-8
-export LANG_ALL=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 function gi() { curl -sLw n https://www.gitignore.io/api/$@ ;}

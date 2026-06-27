@@ -1,4 +1,5 @@
 # Temporary Settings
+alias copilot='copilot --yolo'
 alias github='cd ~/Downloads/github-repos'
 alias zshrc='vim ~/.zshrc'
 alias vimrc='vim ~/.vimrc'
