@@ -1,7 +1,8 @@
 #!/bin/bash
-SUDO_PREFIX=$1
-SCRIPT=$(readlink -f $0)
-SCRIPTPATH=`dirname $SCRIPT`
+set -euo pipefail
+
+SUDO_PREFIX=${1:-}
+SCRIPTPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
 #######################################
 # Output error messages with time
@@ -25,7 +26,7 @@ info() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&1
 }
 
-if [ $(uname) == "Darwin" ]; then
+if [ "$(uname)" == "Darwin" ]; then
   echo "Dectect MacOS"
 
   if command -v brew >/dev/null 2>&1; then
@@ -49,7 +50,7 @@ if [ $(uname) == "Darwin" ]; then
     brew install tmux
   fi
 
-elif [ $(uname) == "Linux" ]; then
+elif [ "$(uname)" == "Linux" ]; then
   echo "Detect Linux"
 
   if command -v git >/dev/null 2>&1; then
@@ -69,22 +70,22 @@ fi
 # simple script
 if [ -d "${HOME}/.tmux/" ]; then
   info "backup existing tmux config file"
-  cp -rf "${HOME}"/.tmux "${HOME}"/.tmux_bak || ! err "Backup failed interrupt" || exit
+  cp -rf "${HOME}"/.tmux "${HOME}"/.tmux_bak || { err "Backup failed interrupt"; exit 1; }
   info "deleting existing tmux config file"
   rm -rf "${HOME}"/.tmux
 fi
 
 info "Creating the Tmux Configure Files"
-cp -rf ${SCRIPTPATH}/tmux.conf ${HOME}/.tmux.conf
-cp -rf ${SCRIPTPATH}/tmux ${HOME}/.tmux
+cp -rf "${SCRIPTPATH}/tmux.conf" "${HOME}/.tmux.conf"
+cp -rf "${SCRIPTPATH}/tmux" "${HOME}/.tmux"
 
 info "Installing the Tmux plugins"
 if [ -d "${HOME}/.tmux/plugins/tpm/" ]; then
   info "tpm founded, skipping"
 else
   info "tpm not found, installing tpm."
-  git clone https://github.com/tmux-plugins/tpm ${HOME}/.tmux/plugins/tpm
+  git clone https://github.com/tmux-plugins/tpm "${HOME}/.tmux/plugins/tpm"
 fi
 
 info "Installing plugins"
-bash ${HOME}/.tmux/plugins/tpm/bin/install_plugins
+bash "${HOME}/.tmux/plugins/tpm/bin/install_plugins"

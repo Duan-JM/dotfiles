@@ -4,19 +4,33 @@ set -eu
 set -o pipefail
 
 
-cd "$(dirname "$0")/.." || exit 1
+tmux_dir="$(cd "$(dirname "$0")/.." && pwd -P)"
+cd "$tmux_dir" || exit 1
 
 
-plugins="$(rg '^set -g @plugin' < tmux.conf)"
-repos="$(echo "$plugins" | sd 'set -g @plugin "([^"]+)"' '$1')"
+config_file=""
+for candidate in "$tmux_dir/../tmux.conf" "$tmux_dir/../.tmux.conf" "$HOME/.tmux.conf" "$tmux_dir/tmux.conf"; do
+  if [[ -f "$candidate" ]]; then
+    config_file="$candidate"
+    break
+  fi
+done
+
+if [[ -z "$config_file" ]]; then
+  echo "tmux.conf not found" >&2
+  exit 1
+fi
+
+repos="$(sed -nE "s/^set -g @plugin ['\"]([^'\"]+)['\"].*/\1/p" "$config_file")"
 
 
-cd 'plugins' || exit 1
+mkdir -p plugins
+cd plugins || exit 1
 
 
 git_update() {
   local repo="$1"
-  local dest="$(echo "$repo" | sd '[^/]+/' '')"
+  local dest="${repo##*/}"
   if [[ -d "$dest" ]]
   then
     (
@@ -30,7 +44,8 @@ git_update() {
 }
 
 
-echo "$repos" | while read repo
+echo "$repos" | while read -r repo
 do
+  [[ -n "$repo" ]] || continue
   git_update "$repo"
 done

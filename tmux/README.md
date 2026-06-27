@@ -14,8 +14,7 @@ tmux kill-server # kill server
 tmux new -s <session-name>
 
 # windows / session
-<prefix> - c     # new windows
-<prefix> - ,     # rename windows
+<prefix> - n     # new windows
 <prefix> - [ / ] # pre or next window
 <prefix> - w     # change windows
 <prefix> - s     # change sessions
@@ -23,9 +22,11 @@ tmux new -s <session-name>
 # panel
 <prefix> - = / - # split or vertical split panel
 <prefix> - <c-h> # hjkl resize panel
+<prefix> - h/j/k/l # move between panes
 
 # config or plugin
 <prefix> - r     # reload tmux.conf
+<prefix> - R     # reload tmux.conf and refresh client
 <prefix> - I     # install plugin with tpm
 <prefix> - U     # update plugin
 <prefix> - <c-s> # save layout
