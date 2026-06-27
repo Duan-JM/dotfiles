@@ -30,19 +30,27 @@ backup_dir() {
     return
   fi
 
+  if [[ -d "$target_dir" ]]; then
+    local source_real target_real
+    source_real="$(cd "$source_dir" && pwd -P)"
+    target_real="$(cd "$target_dir" && pwd -P)"
+    if [[ "$source_real" == "$target_real" ]]; then
+      echo "info: skip unchanged directory: $source_dir -> $target_dir"
+      return
+    fi
+  fi
+
   mkdir -p "$(dirname "$target_dir")"
   rm -rf -- "$target_dir"
   cp -R "$source_dir" "$target_dir"
 }
 
 
-##########################
-#  BACKUP VIM CONFIGURE  #
-##########################
+##############################
+#  BACKUP NEOVIM CONFIGURE  #
+##############################
 # back up to dotfiles
-backup_dir "$HOME/.vim/fonts" "$DOT_FILE/vim/fonts"
-backup_dir "$HOME/.vim/lua" "$DOT_FILE/vim/lua"
-backup_file "$HOME/.vim/init.lua" "$DOT_FILE/vim/init.lua"
+backup_dir "$HOME/.config/nvim" "$DOT_FILE/vim"
 
 
 ###########################

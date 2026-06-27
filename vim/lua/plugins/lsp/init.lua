@@ -16,23 +16,54 @@ return {
 		event = { "BufReadPre", "BufNewFile" },
 		dependencies = {
 			"williamboman/mason.nvim",
-			"williamboman/mason-lspconfig.nvim",
 			"hrsh7th/cmp-nvim-lsp",
 		},
 		config = function()
-			require("mason-lspconfig").setup({
-				ensure_installed       = { "pyright", "jdtls" },
-				automatic_installation = true,
-			})
-
 			local caps = require("cmp_nvim_lsp").default_capabilities()
+			local python_env = require("config.python_env")
 
 			-- Global default applied to every server.
 			vim.lsp.config("*", { capabilities = caps })
 
-			-- Enable pyright. jdtls is intentionally NOT enabled here ── it is
-			-- started by nvim-jdtls (below) with project-aware settings.
-			vim.lsp.enable("pyright")
+			local function executable(name)
+				return vim.fn.exepath(name) ~= ""
+			end
+
+			if executable("pyright-langserver") then
+				vim.lsp.config("pyright", {
+					cmd = { vim.fn.exepath("pyright-langserver"), "--stdio" },
+					on_new_config = function(config, root_dir)
+						local python = python_env.python(root_dir)
+						if not python then return end
+						config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
+							python = { pythonPath = python },
+						})
+					end,
+				})
+				vim.lsp.enable("pyright")
+			else
+				vim.api.nvim_create_autocmd("FileType", {
+					group = vim.api.nvim_create_augroup("user_lsp_missing_pyright", { clear = true }),
+					pattern = "python",
+					callback = function()
+						vim.notify("pyright-langserver not on PATH; install pyright for Python LSP",
+							vim.log.levels.WARN)
+					end,
+				})
+			end
+
+			if executable("rust-analyzer") then
+				vim.lsp.enable("rust_analyzer")
+			else
+				vim.api.nvim_create_autocmd("FileType", {
+					group = vim.api.nvim_create_augroup("user_lsp_missing_rust_analyzer", { clear = true }),
+					pattern = "rust",
+					callback = function()
+						vim.notify("rust-analyzer not on PATH; install it for Rust LSP",
+							vim.log.levels.WARN)
+					end,
+				})
+			end
 
 			-- Buffer-local mappings on LSP attach.
 			vim.api.nvim_create_autocmd("LspAttach", {
@@ -49,38 +80,12 @@ return {
 					bmap("n", "<leader>rn", vim.lsp.buf.rename,         "LSP: rename")
 					bmap("n", "<leader>ca", vim.lsp.buf.code_action,    "LSP: code action")
 
-					local prev, nxt
-					if vim.diagnostic.jump then
-						prev = function() vim.diagnostic.jump({ count = -1, float = true }) end
-						nxt  = function() vim.diagnostic.jump({ count = 1,  float = true }) end
-					else
-						prev, nxt = vim.diagnostic.goto_prev, vim.diagnostic.goto_next
-					end
+					local prev = function() vim.diagnostic.jump({ count = -1, float = true }) end
+					local nxt  = function() vim.diagnostic.jump({ count = 1,  float = true }) end
 					bmap("n", "[d", prev, "Prev diagnostic")
 					bmap("n", "]d", nxt,  "Next diagnostic")
 				end,
 			})
-
-			-- :PyrightSetPoetrySetup ── repoint pyright at the current poetry env.
-			vim.api.nvim_create_user_command("PyrightSetPoetrySetup", function()
-				local handle = io.popen("poetry run which python 2>/dev/null")
-				if not handle then return end
-				local path = (handle:read("*a") or ""):gsub("[\n\r]+$", "")
-				handle:close()
-				if path == "" then
-					vim.notify("poetry returned no python path", vim.log.levels.WARN)
-					return
-				end
-				for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0, name = "pyright" })) do
-					client.settings = vim.tbl_deep_extend(
-						"force",
-						client.settings or {},
-						{ python = { pythonPath = path } }
-					)
-					client.notify("workspace/didChangeConfiguration", { settings = client.settings })
-				end
-				vim.notify("pyright python -> " .. path)
-			end, { desc = "Point pyright at poetry's python" })
 		end,
 	},
 

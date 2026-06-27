@@ -30,4 +30,11 @@ tm() {
   session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
 }
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+if [[ -t 0 && -z "${__DOTFILES_FZF_LOADED:-}" ]]; then
+  __DOTFILES_FZF_LOADED=1
+  if [[ -r ~/.fzf.zsh ]]; then
+    source ~/.fzf.zsh
+  elif (( $+commands[fzf] )); then
+    source <(fzf --zsh)
+  fi
+fi
