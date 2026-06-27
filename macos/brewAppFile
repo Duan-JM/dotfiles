@@ -1,3 +1,4 @@
+brew "mole"
 brew "postgres"
 brew "jq"
 brew "aria2"
