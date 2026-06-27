@@ -8,6 +8,131 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOT_FILE="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+trim_secret_value() {
+  local value="$1"
+
+  value="${value%%#*}"
+  value="${value%%//*}"
+  value="${value%,}"
+  value="${value%;}"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+
+  if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+    value="${value#\"}"
+    value="${value%\"}"
+  elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+    value="${value#\'}"
+    value="${value%\'}"
+  fi
+
+  printf '%s' "$value"
+}
+
+is_placeholder_secret_value() {
+  local value value_lower
+  value="$(trim_secret_value "$1")"
+  value_lower="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+
+  case "$value_lower" in
+    ""|none|null|nil|false|changeme|change_me|placeholder|example|dummy|test|xxx|xxxx|xxxxx|your_*)
+      return 0
+      ;;
+    '$'*|'${'*)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+scan_file_for_secrets() {
+  local file="$1"
+  local display_path="${file/#$HOME/\$HOME}"
+
+  case "$file" in
+    */.env|*/.env.*|*/.netrc|*/.npmrc|*/.pypirc|*/id_rsa|*/id_dsa|*/id_ecdsa|*/id_ed25519|*.pem|*.p12|*.pfx|*.key)
+      echo "warning: secret-like file path found: $display_path" >&2
+      return 1
+      ;;
+  esac
+
+  if ! LC_ALL=C grep -Iq . "$file"; then
+    return 0
+  fi
+
+  local line_number=0
+  local line secret_value
+  shopt -s nocasematch
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line_number=$((line_number + 1))
+
+    if [[ "$line" =~ -----BEGIN[[:space:]][A-Z0-9[:space:]]*PRIVATE[[:space:]]KEY----- ]]; then
+      echo "warning: private key block found: $display_path:$line_number" >&2
+      return 1
+    fi
+
+    if [[ "$line" =~ ^[[:space:]]*(#|//) ]]; then
+      continue
+    fi
+
+    if [[ "$line" =~ (API[_-]?KEY|TOKEN|SECRET|PASSWORD|PASSWD|PRIVATE[_-]?KEY|ACCESS[_-]?KEY|CLIENT[_-]?SECRET|AUTH[_-]?TOKEN|CREDENTIAL)[A-Za-z0-9_-]*[[:space:]]*[:=][[:space:]]*(.+)$ ]]; then
+      secret_value="${BASH_REMATCH[2]}"
+      if ! is_placeholder_secret_value "$secret_value"; then
+        echo "warning: secret-like assignment found: $display_path:$line_number" >&2
+        return 1
+      fi
+    fi
+  done < "$file"
+}
+
+scan_path_for_secrets() {
+  local source_path="$1"
+  local failed=0
+  local file
+
+  if [[ -f "$source_path" ]]; then
+    scan_file_for_secrets "$source_path"
+    return
+  fi
+
+  while IFS= read -r -d '' file; do
+    if ! scan_file_for_secrets "$file"; then
+      failed=1
+    fi
+  done < <(find "$source_path" -type f ! -path '*/.git/*' -print0)
+
+  if [[ "$failed" -ne 0 ]]; then
+    echo "warning: potential secrets were found under ${source_path/#$HOME/\$HOME}" >&2
+    return 1
+  fi
+}
+
+confirm_secret_risk() {
+  local source_path="$1"
+  local answer
+
+  if scan_path_for_secrets "$source_path"; then
+    return 0
+  fi
+
+  if ! read -r -p "Potential secrets were found. Continue backing up ${source_path/#$HOME/\$HOME}? [y/N] " answer; then
+    echo "error: backup aborted because potential secrets were found and no confirmation was provided" >&2
+    return 1
+  fi
+
+  case "$answer" in
+    [yY]|[yY][eE][sS])
+      echo "warning: continuing backup with potential secrets: ${source_path/#$HOME/\$HOME}" >&2
+      return 0
+      ;;
+    *)
+      echo "error: backup aborted by user" >&2
+      return 1
+      ;;
+  esac
+}
+
 backup_file() {
   local source_file="$1"
   local target_file="$2"
@@ -16,6 +141,8 @@ backup_file() {
     echo "warning: skip missing file: $source_file" >&2
     return
   fi
+
+  confirm_secret_risk "$source_file"
 
   mkdir -p "$(dirname "$target_file")"
   cp -f "$source_file" "$target_file"
@@ -39,6 +166,8 @@ backup_dir() {
       return
     fi
   fi
+
+  confirm_secret_risk "$source_dir"
 
   mkdir -p "$(dirname "$target_dir")"
   rm -rf -- "$target_dir"

@@ -15,6 +15,9 @@ described below each sub folders.
 make backup
 ```
 
+The backup script asks for confirmation when it finds secret-like files or
+assignments, such as private keys, token files, or non-placeholder API keys.
+
 ## Install Vim
 
 ```
