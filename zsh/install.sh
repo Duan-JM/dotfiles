@@ -1,7 +1,6 @@
 #!/bin/bash
-SUDO_PREFIX=$1
-SCRIPT=$(readlink -f $0)
-SCRIPTPATH=`dirname $SCRIPT`
+SUDO_PREFIX=${1:-sudo}
+SCRIPTPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
 # os check
 if [ $(uname) == "Darwin" ]; then
@@ -11,22 +10,22 @@ if [ $(uname) == "Darwin" ]; then
     echo 'brew detected, skip install brew'
   else
     echo 'no exists brew, installing'
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
   if command -v git >/dev/null 2>&1; then
     echo 'git detected, skip install git'
   else
     echo 'no exists git, installing'
-    brew install git
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --quiet git
   fi
 
   if command -v zsh >/dev/null 2>&1; then
     echo 'zsh detected, skip install zsh'
   else
     echo 'no exist zsh, installing'
-    brew install zsh
-    chsh -s /bin/zsh
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --quiet zsh
+    ${SUDO_PREFIX} chsh -s /bin/zsh "$USER"
   fi
 
   if [ ! -d "${HOME}/.oh-my-zsh" ]; then
@@ -43,15 +42,15 @@ elif [ $(uname) == "Linux" ]; then
     echo 'git detected, skip install git'
   else
     echo 'no exists git, installing'
-    ${SUDO_PREFIX} apt install git make
+    ${SUDO_PREFIX} apt install --yes git make
   fi
 
   if command -v zsh >/dev/null 2>&1; then
     echo 'zsh detected, skip install zsh'
   else
     echo 'no exist zsh, installing'
-    ${SUDO_PREFIX} apt install zsh
-    chsh -s /bin/zsh
+    ${SUDO_PREFIX} apt install --yes zsh
+    ${SUDO_PREFIX} chsh -s /bin/zsh "$USER"
   fi
 
   if [ ! -d "${HOME}/.oh-my-zsh" ]; then
@@ -67,8 +66,8 @@ fi
 
 echo "Copy the Configure Files"
 
-cp ./zshrc ~/.zshrc
-cp -rf ${SCRIPTPATH}/.zsh-config ${HOME}/.zsh-config
+cp "${SCRIPTPATH}/zshrc" "${HOME}/.zshrc"
+cp -rf "${SCRIPTPATH}/.zsh-config" "${HOME}/.zsh-config"
 
 echo "Installing Plugins"
 git clone https://github.com/zsh-users/zsh-syntax-highlighting ${HOME}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting

@@ -33,21 +33,21 @@ if [ "$(uname)" == "Darwin" ]; then
     echo 'brew detected, skip install brew'
   else
     echo 'no exists brew, installing'
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
   if command -v git >/dev/null 2>&1; then
     echo 'git detected, skip install git'
   else
     echo 'no exists git, installing'
-    brew install git
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --quiet git
   fi
 
   if command -v tmux >/dev/null 2>&1; then
     echo 'tmux detected, skip install tmux'
   else
     echo 'no exist tmux, installing'
-    brew install tmux
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --quiet tmux
   fi
 
 elif [ "$(uname)" == "Linux" ]; then

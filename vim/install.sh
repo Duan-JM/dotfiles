@@ -34,7 +34,7 @@ ensure_brew() {
     return
   fi
   info "Installing Homebrew"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
 brew_install_if_missing() {
@@ -43,7 +43,7 @@ brew_install_if_missing() {
     info "$pkg already installed"
   else
     info "Installing $pkg"
-    brew install "$pkg" || err "Failed to install $pkg"
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --quiet "$pkg" || err "Failed to install $pkg"
   fi
 }
 

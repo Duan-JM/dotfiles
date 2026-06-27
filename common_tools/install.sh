@@ -4,7 +4,7 @@
 # e-mail: vincent.duan95@gmail.com
 # Install neovim & its relevant dependencies
 
-SUDO_PREFIX='sudo'
+SUDO_PREFIX=${1:-sudo}
 
 #######################################
 # Output error messages with time
@@ -42,8 +42,8 @@ if [[ $(uname) == "Darwin" ]]; then
     info 'brew detected, skip install brew'
   else
     info 'no exists brew, installing'
-    /usr/bin/ruby -e \
-      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    NONINTERACTIVE=1 /bin/bash -c \
+      "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   fi
 
   # install fd
@@ -51,7 +51,7 @@ if [[ $(uname) == "Darwin" ]]; then
     info 'fd existing, plz manually check its version'
   else
     info "installing fd"
-    brew install fd
+    HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install --quiet fd
   fi
 fi
 
@@ -63,6 +63,6 @@ if [ "$(uname)" == "Linux" ]; then
     info 'fd existing, plz manually check its version'
   else
     info "installing fd"
-     ${SUDO_PREFIX} apt-get install fd
+     ${SUDO_PREFIX} apt-get install -y fd
   fi
 fi

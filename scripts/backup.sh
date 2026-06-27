@@ -1,27 +1,55 @@
 #!/bin/bash
+set -euo pipefail
 
 ###############
 #  CONFIGURE  #
 ###############
 
-DOT_FILE=`pwd`
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOT_FILE="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+backup_file() {
+  local source_file="$1"
+  local target_file="$2"
+
+  if [[ ! -f "$source_file" ]]; then
+    echo "warning: skip missing file: $source_file" >&2
+    return
+  fi
+
+  mkdir -p "$(dirname "$target_file")"
+  cp -f "$source_file" "$target_file"
+}
+
+backup_dir() {
+  local source_dir="$1"
+  local target_dir="$2"
+
+  if [[ ! -d "$source_dir" ]]; then
+    echo "warning: skip missing directory: $source_dir" >&2
+    return
+  fi
+
+  mkdir -p "$(dirname "$target_dir")"
+  rm -rf -- "$target_dir"
+  cp -R "$source_dir" "$target_dir"
+}
 
 
 ##########################
 #  BACKUP VIM CONFIGURE  #
 ##########################
 # back up to dotfiles
-cp -rf ~/.vim/fonts $DOT_FILE/vim
-cp -rf ~/.vim/lua $DOT_FILE/vim
-cp ~/.vim/init.lua $DOT_FILE/vim/init.lua
+backup_dir "$HOME/.vim/fonts" "$DOT_FILE/vim/fonts"
+backup_dir "$HOME/.vim/lua" "$DOT_FILE/vim/lua"
+backup_file "$HOME/.vim/init.lua" "$DOT_FILE/vim/init.lua"
 
 
 ###########################
 #  BACKUP TMUX CONFIGURE  #
 ###########################
-cp -rf ~/.tmux.conf $DOT_FILE/tmux/tmux.conf
-rm -rf $DOT_FILE/tmux/tmux
-cp -rf ~/.tmux $DOT_FILE/tmux/tmux
+backup_file "$HOME/.tmux.conf" "$DOT_FILE/tmux/tmux.conf"
+backup_dir "$HOME/.tmux" "$DOT_FILE/tmux/tmux"
 
 
 ##############
@@ -31,8 +59,8 @@ cp -rf ~/.tmux $DOT_FILE/tmux/tmux
 # plugin should install with command below
 # git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 # git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-cp ~/.zshrc $DOT_FILE/zsh/zshrc
-cp -rf ~/.zsh-config $DOT_FILE/zsh
+backup_file "$HOME/.zshrc" "$DOT_FILE/zsh/zshrc"
+backup_dir "$HOME/.zsh-config" "$DOT_FILE/zsh/.zsh-config"
 
 
 #####################
@@ -44,5 +72,4 @@ cp -rf ~/.zsh-config $DOT_FILE/zsh
 #########
 # Kitty #
 #########
-cp ~/.config/kitty/kitty.conf $DOT_FILE//kitty/kitty.conf
-
+backup_file "$HOME/.config/kitty/kitty.conf" "$DOT_FILE/kitty/kitty.conf"
