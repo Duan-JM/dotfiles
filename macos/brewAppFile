@@ -1,4 +1,4 @@
-brew "tailscale"
+brew "gh"
 brew "fio"
 brew "smartmontools"
 brew "mole"
