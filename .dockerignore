@@ -1,0 +1,7 @@
+# Keep the docker build context small. Docker reads this file from the build
+# context root (the repo root), which is what docker_files/code-cli/build.sh uses.
+.git
+*.bak
+*.bak.*
+macos
+kitty
