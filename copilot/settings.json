@@ -1,0 +1,35 @@
+{
+  "colorMode": "dim",
+  "theme": "dim",
+  "subagents": {
+    "agents": {
+      "explore": {
+        "model": "inherit"
+      },
+      "task": {
+        "model": "inherit"
+      },
+      "general-purpose": {
+        "model": "inherit"
+      },
+      "rubber-duck": {
+        "model": "inherit",
+        "autoInvoke": true
+      },
+      "code-review": {
+        "model": "inherit"
+      },
+      "research": {
+        "model": "inherit"
+      },
+      "security-review": {
+        "model": "inherit"
+      }
+    }
+  },
+  "askUser": false,
+  "includeCoAuthoredBy": false,
+  "memory": false,
+  "notifications": false,
+  "terminalProgress": true
+}
