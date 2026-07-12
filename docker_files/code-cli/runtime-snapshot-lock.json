@@ -1,0 +1,23 @@
+{
+  "ohmyzsh": {
+    "commit": "677a4592b18c08ddea737f8aca70bac0e9fc9313"
+  },
+  "tpm": {
+    "commit": "e261deb1b47614eed3400089ce7197dc68acc4eb"
+  },
+  "tmux-cpu": {
+    "commit": "bcb110d754ab2417de824c464730c412a3eb2769"
+  },
+  "tmux-prefix-highlight": {
+    "commit": "06cbb4ecd3a0a918ce355c70dc56d79debd455c7"
+  },
+  "tmux-resurrect": {
+    "commit": "cff343cf9e81983d3da0c8562b01616f12e8d548"
+  },
+  "zsh-autosuggestions": {
+    "commit": "85919cd1ffa7d2d5412f6d3fe437ebdbeeec4fc5"
+  },
+  "zsh-syntax-highlighting": {
+    "commit": "1d85c692615a25fe2293bdd44b34c217d5d2bf04"
+  }
+}
