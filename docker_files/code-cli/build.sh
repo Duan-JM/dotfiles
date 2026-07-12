@@ -4,27 +4,27 @@
 #
 # Usage:
 #   bash docker_files/code-cli/build.sh
-#   VARIANT=core bash docker_files/code-cli/build.sh
-#   PLATFORM=linux/amd64 IMAGE=my/code-cli:dev bash docker_files/code-cli/build.sh
+#   VARIANT=python bash docker_files/code-cli/build.sh
+#   PLATFORM=linux/amd64 VARIANT=rust bash docker_files/code-cli/build.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd -P)"
 
-VARIANT="${VARIANT:-full}"
+VARIANT="${VARIANT:-core}"
 PLATFORM="${PLATFORM:-}"
 
 case "${VARIANT}" in
-  core|full) ;;
+  core|python|rust|go) ;;
   *)
-    echo "ERROR: unsupported VARIANT '${VARIANT}' (use core or full)" >&2
+    echo "ERROR: unsupported VARIANT '${VARIANT}' (use core, python, rust, or go)" >&2
     exit 1
     ;;
 esac
 
 if [[ -z "${IMAGE:-}" ]]; then
-  if [[ "${VARIANT}" == "full" ]]; then
+  if [[ "${VARIANT}" == "core" ]]; then
     IMAGE="code-cli:latest"
   else
     IMAGE="code-cli:${VARIANT}"

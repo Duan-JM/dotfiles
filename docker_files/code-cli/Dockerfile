@@ -86,7 +86,7 @@ RUN python3 /usr/local/bin/install-nvim-plugins \
 
 FROM ${ALPINE_IMAGE}
 
-ARG CODE_CLI_VARIANT=full
+ARG CODE_CLI_VARIANT=core
 ARG TARGETARCH
 
 ENV HOME=/root \
@@ -105,7 +105,7 @@ RUN set -eux; \
       return 1; \
     }; \
     case "${CODE_CLI_VARIANT}" in \
-      core|full) ;; \
+      core|python|rust|go) ;; \
       *) echo "unsupported CODE_CLI_VARIANT: ${CODE_CLI_VARIANT}" >&2; exit 1 ;; \
     esac; \
     apk_add_with_retry \
@@ -115,19 +115,15 @@ RUN set -eux; \
       fd \
       fzf \
       git \
-      make \
       neovim \
-      nodejs \
-      npm \
-      python3 \
-      py3-pip \
-      py3-pynvim \
       ripgrep \
       tmux \
       zsh; \
-    if [ "${CODE_CLI_VARIANT}" = full ]; then \
-      apk_add_with_retry cargo go rust; \
-    fi; \
+    case "${CODE_CLI_VARIANT}" in \
+      python) apk_add_with_retry python3 py3-pip py3-pynvim ;; \
+      rust) apk_add_with_retry cargo rust ;; \
+      go) apk_add_with_retry go ;; \
+    esac; \
     printf '%s\n' "${CODE_CLI_VARIANT}" > /etc/code-cli-variant; \
     printf '%s\n' "${TARGETARCH:-unknown}" > /etc/code-cli-arch
 

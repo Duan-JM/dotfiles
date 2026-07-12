@@ -2,14 +2,11 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd -P)"
-
 IMAGE="${1:-code-cli:latest}"
-EXPECTED_VARIANT="${2:-full}"
+EXPECTED_VARIANT="${2:-core}"
 
 case "${EXPECTED_VARIANT}" in
-  core|full) ;;
+  core|python|rust|go) ;;
   *)
     echo "ERROR: unsupported expected variant '${EXPECTED_VARIANT}'" >&2
     exit 1
@@ -18,8 +15,6 @@ esac
 
 docker run --rm -t --network none \
   -e "EXPECTED_VARIANT=${EXPECTED_VARIANT}" \
-  -v "${SCRIPT_DIR}/verify-nvim-plugins.py:/tmp/verify-nvim-plugins.py:ro" \
-  -v "${REPO_ROOT}/vim/lazy-lock.json:/tmp/lazy-lock.json:ro" \
   "${IMAGE}" \
   /bin/sh -euc '
     test "$(cat /etc/code-cli-variant)" = "${EXPECTED_VARIANT}"
@@ -31,37 +26,65 @@ docker run --rm -t --network none \
       test -d "/root/.tmux/plugins/${plugin}"
     done
 
-    for command in zsh tmux nvim python3 node npm git rg fd fzf; do
+    for command in zsh tmux nvim git rg fd fzf; do
       command -v "${command}" >/dev/null
+    done
+    for command in node npm; do
+      ! command -v "${command}" >/dev/null
     done
 
     nvim_output="$(nvim --headless \
-      "+lua assert(vim.fn.stdpath(\"config\") == \"/root/.config/nvim\"); assert(require(\"lazy.core.config\").plugins[\"nvim-treesitter\"])" \
+      "+lua assert(vim.fn.stdpath(\"config\") == \"/root/.config/nvim\"); assert(require(\"lazy.core.config\").plugins[\"nvim-treesitter\"]); require(\"lazy\").load({ plugins = { \"telescope.nvim\" } }); local telescope = require(\"telescope\"); telescope.load_extension(\"fzf\"); assert(telescope.extensions.fzf)" \
       +qa 2>&1)"
     printf "%s\n" "${nvim_output}"
     ! printf "%s\n" "${nvim_output}" | grep -Eq "(^|[[:space:]])E[0-9]{3,4}:"
-    python3 /tmp/verify-nvim-plugins.py \
-      /tmp/lazy-lock.json /root/.local/share/nvim/lazy
-    python3 -c "print(\"python-ok\")"
+    expected_plugins="$(grep -c "\"commit\":" /root/.config/nvim/lazy-lock.json)"
+    installed_plugins="$(find /root/.local/share/nvim/lazy \
+      -mindepth 2 -maxdepth 2 -name .code-cli-commit | wc -l | tr -d " ")"
+    test "${installed_plugins}" = "${expected_plugins}"
     zsh -lic "test \"\${LC_ALL}\" = C.UTF-8"
 
-    if [ "${EXPECTED_VARIANT}" = full ]; then
-      for command in rustc cargo go; do
-        command -v "${command}" >/dev/null
-      done
-      workdir="$(mktemp -d)"
-      printf "fn main() {}\\n" > "${workdir}/main.rs"
-      rustc "${workdir}/main.rs" -o "${workdir}/rust-smoke"
-      "${workdir}/rust-smoke"
-      printf "package main\\nfunc main() {}\\n" > "${workdir}/main.go"
-      go build -o "${workdir}/go-smoke" "${workdir}/main.go"
-      "${workdir}/go-smoke"
-      rm -rf "${workdir}"
-    else
-      for command in rustc cargo go; do
-        ! command -v "${command}" >/dev/null
-      done
-    fi
+    case "${EXPECTED_VARIANT}" in
+      core)
+        for command in python3 rustc cargo go; do
+          ! command -v "${command}" >/dev/null
+        done
+        ;;
+      python)
+        command -v python3 >/dev/null
+        command -v pip3 >/dev/null
+        workdir="$(mktemp -d)"
+        printf "value: int = 1\\n" > "${workdir}/smoke.py"
+        python3 -m py_compile "${workdir}/smoke.py"
+        rm -rf "${workdir}"
+        for command in rustc cargo go; do
+          ! command -v "${command}" >/dev/null
+        done
+        ;;
+      rust)
+        command -v rustc >/dev/null
+        command -v cargo >/dev/null
+        workdir="$(mktemp -d)"
+        printf "fn main() {}\\n" > "${workdir}/main.rs"
+        rustc "${workdir}/main.rs" -o "${workdir}/rust-smoke"
+        "${workdir}/rust-smoke"
+        rm -rf "${workdir}"
+        for command in python3 go; do
+          ! command -v "${command}" >/dev/null
+        done
+        ;;
+      go)
+        command -v go >/dev/null
+        workdir="$(mktemp -d)"
+        printf "package main\\nfunc main() {}\\n" > "${workdir}/main.go"
+        go build -o "${workdir}/go-smoke" "${workdir}/main.go"
+        "${workdir}/go-smoke"
+        rm -rf "${workdir}"
+        for command in python3 rustc cargo; do
+          ! command -v "${command}" >/dev/null
+        done
+        ;;
+    esac
   '
 
 docker image inspect "${IMAGE}" \
