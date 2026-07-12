@@ -1,213 +1,358 @@
 # AGENTS.md
 
-This file provides guidance to AI coding agents when working with code in this repository.
+This file is the working guide for AI coding agents in this repository. Keep it
+short and operational: durable architecture, feature guides, and API reference
+belong in the project documentation. This file should point to those sources
+and retain only the rules agents need before editing code.
+
+Replace every `<PLACEHOLDER>` and remove sections that do not apply.
 
 ## Project Overview
 
-<PROJECT_NAME> is a <ONE_LINE_DESCRIPTION>. It provides:
+<PROJECT_NAME> is <ONE_LINE_DESCRIPTION>.
+
+It provides:
 
 - <KEY_CAPABILITY_1>
 - <KEY_CAPABILITY_2>
 - <KEY_CAPABILITY_3>
 - <KEY_CAPABILITY_4>
 
+## Product Boundaries
+
+<Describe the product's primary user and the workflow that new features should
+support. Keep this section focused on durable product decisions, not current
+roadmap items.>
+
+Primary workflow:
+
+```text
+<INPUT> -> <DECISION_OR_TRANSFORMATION> -> <OUTPUT> -> <REVIEW>
+```
+
+New user-facing work should answer at least one of these questions:
+
+- <PRIMARY_USER_QUESTION_1>
+- <PRIMARY_USER_QUESTION_2>
+- <PRIMARY_USER_QUESTION_3>
+
+Non-goals:
+
+- <NON_GOAL_1>
+- <NON_GOAL_2>
+- <NON_GOAL_3>
+
+If a proposal falls outside these boundaries, keep it in internal tooling,
+research support, or documentation unless the maintainer explicitly approves
+the product-scope change.
+
+## Architecture and Documentation Map
+
+<DOCS_SYSTEM> documentation is the canonical home for architecture and feature
+reference. Do not duplicate long explanations in this file.
+
+| Topic | Canonical source |
+| --- | --- |
+| System architecture and data flow | `<ARCHITECTURE_DOC>` |
+| Setup and local development | `<SETUP_DOC>` |
+| Data contracts and persistence | `<DATA_DOC>` |
+| Public API or CLI behavior | `<API_DOC>` |
+| Feature workflows | `<FEATURE_GUIDE_DIR>` |
+| Contribution and release process | `<CONTRIBUTING_DOC>` |
+
+Agent-facing architecture reminders:
+
+- Source code lives under `<SOURCE_ROOT>`.
+- `<MODULE_1>` owns <RESPONSIBILITY_1>.
+- `<MODULE_2>` owns <RESPONSIBILITY_2>.
+- `<MODULE_3>` owns <RESPONSIBILITY_3>.
+- <Describe the allowed dependency direction between layers or modules.>
+- <State where business logic belongs and which surfaces should remain thin.>
+- Import internal components from their responsibility-specific module. Keep
+  package-root exports limited to intentionally stable public contracts.
+
+## Documentation Audit Gate
+
+Every change that touches code, architecture, setup, commands, public behavior,
+or contributor workflow must audit related documentation before the final
+response or PR. This applies to documentation-only changes too.
+
+Review these surfaces and update the ones affected:
+
+- `<CHANGELOG_SOURCE>`: add an entry or fragment for user-visible changes.
+- `README.md`: update for user-facing setup, features, commands, architecture,
+  or project positioning.
+- `<CONTRIBUTING_DOC>`: update for branch flow, verification, commit and PR
+  rules, changelog policy, or coding conventions.
+- `AGENTS.md`: update for agent rules, architecture pointers, module layout,
+  product boundaries, or workflow changes.
+- `<DOCS_INDEX>`: update when top-level navigation or the project summary
+  changes.
+- `<FEATURE_GUIDE_DIR>`: update guides that describe changed behavior, APIs,
+  architecture, installation, or workflows.
+- `<API_DOC_DIR>`: confirm coverage when public symbols are added, renamed, or
+  removed.
+
+After documentation changes, run `<DOCS_CHECK_COMMAND>`.
+
+## Core Engineering Rules
+
+- Preserve <PROJECT_CRITICAL_INVARIANT_1>.
+- Keep behavior consistent across <RELATED_EXECUTION_PATHS> by sharing domain
+  primitives instead of copying scenario-specific logic.
+- Use `<PRIMARY_PERSISTENCE_LAYER>` as the source of truth for
+  <PERSISTED_DATA>.
+- Use `<MIGRATION_TOOL>` for schema changes. Do not mutate production schemas
+  through ad hoc startup logic.
+- Handle missing, invalid, and partial data explicitly. Do not replace missing
+  values with convenient defaults unless the default has a documented domain
+  meaning.
+- Keep business logic out of transport, UI, and persistence adapters.
+- Delete superseded code and update imports, tests, and docs. Do not retain
+  deprecated compatibility shims "for reference" unless a documented support
+  window requires them.
+- Surface errors through the project's established exception and logging
+  patterns. Do not add broad catches, silent early returns, or success-shaped
+  fallbacks.
+- Secrets and environment-specific settings belong in environment variables or
+  the approved secret store. Never commit credentials.
+
 ## Commands
+
+Use the project's existing package manager and task runner. Do not install
+parallel tooling for a task the repository already supports.
 
 ```bash
 # Install dependencies
-poetry install
+<INSTALL_COMMAND>
 
-# Run the application / CLI
-poetry run <ENTRY_POINT> <SUBCOMMAND>
+# Run the application or CLI
+<RUN_COMMAND>
 
-# Run all tests with coverage
-poetry run pytest
+# Run a targeted test
+<TARGETED_TEST_COMMAND>
 
-# Run a single test file
-poetry run pytest tests/<module>/test_<name>.py
+# Run the main test suite
+<TEST_COMMAND>
 
-# Run tests by marker
-poetry run pytest -m unit
-poetry run pytest -m "not integration"
-poetry run pytest -m "not slow"
-
-# Format code
-poetry run black src/ tests/ --line-length 120
+# Format
+<FORMAT_COMMAND>
 
 # Lint
-poetry run ruff check src/ tests/
+<LINT_COMMAND>
 
 # Type-check
-poetry run mypy src/<package_name>
+<TYPECHECK_COMMAND>
 
-# Build docs (if applicable)
-make -C docs strict
+# Build or validate docs
+<DOCS_CHECK_COMMAND>
 ```
-
-## Architecture
-
-### Source layout: `src/<package_name>/`
-
-**Entry point**: `<entry_file>.py` — <Describe CLI / app entry, e.g. Click group, FastAPI factory, etc.>
-
-**Main modules:**
-
-1. **`<module_1>/`** — <Responsibility>
-   - `<file>.py` — <Class/function and its role>
-   - `<file>.py` — <...>
-
-2. **`<module_2>/`** — <Responsibility>
-   - `<file>.py` — <...>
-
-3. **`<module_3>/`** — <Responsibility>
-   - `<file>.py` — <...>
-
-**Top-level modules:**
-
-- `<utility>.py` — <Description, e.g. logging setup, shared helpers>
-
-### Key patterns
-
-- **Configuration**: All secrets and environment settings via `.env` file. Loaded with `python-dotenv`. Config object lists all expected env vars (e.g. `<ENV_VAR_1>`, `<ENV_VAR_2>`).
-- **Data storage**: <Describe DBs / storage backends used, e.g. PostgreSQL via SQLAlchemy ORM, Redis, S3, etc.>
-- **Service architecture**: <Describe layering, e.g. Routes → Services → Workers; or CLI → Handlers → Repositories.>
-- **Background / async work**: <Describe task queue, scheduler, thread pool, etc. if applicable.>
-- **Logging**: `structlog.get_logger()` throughout. Use named keyword arguments for structured context. Auto-switches between console (TTY) and JSON (container) rendering. Log level via `LOG_LEVEL` env var.
-- **Error handling**: Custom exception hierarchy under `<module>/exceptions.py`. Wrap external calls with try-except and log with structured context.
-- **No legacy code**: Deprecated or replaced code MUST be deleted, not left behind "for reference". When a module is superseded, remove the old files entirely and update all imports, tests, and documentation. Dead code increases maintenance burden and confuses contributors.
-
-### Infrastructure
-
-- **Docker Compose** (`docker-compose.yml`): <List app + dependent services>
-- **Dockerfiles** in `dockerfiles/` directory
-- **Scripts** (`scripts/`): <List notable migration / integration / dev scripts>
 
 ## Code Style
 
-- **Formatter**: Black, 120 char line length
-- **Linter**: Ruff (and Pylint)
-- **Type-checker**: mypy
-- Always use classes instead of standalone functions
-- Google Python Style Guide for docstrings
-- 4-space indentation, PEP 8 compliance
-- Type hints required on all public functions/methods
-- Descriptive names; comments for non-obvious logic only
+- Formatter: `<FORMATTER>` with <FORMATTER_POLICY>.
+- Linter: `<LINTER>` with <LINTER_POLICY>.
+- Type checker: `<TYPE_CHECKER>`.
+- Follow <LANGUAGE_STYLE_GUIDE> and the repository's existing conventions.
+- Add types to public interfaces and boundaries.
+- Keep modules and classes single-purpose; prefer small composable units over
+  inheritance-heavy designs.
+- Use `<LOGGING_LIBRARY>` with structured context.
+- Comment only non-obvious behavior, constraints, and tradeoffs.
+- Reuse existing helpers and patterns before introducing new abstractions.
 
 ## Testing
 
-- Tests mirror source structure under `tests/`
-- Shared fixtures in `tests/conftest.py` and `tests/fixtures/`
-- Markers: `unit`, `integration`, `slow`
-- Coverage gate: `--cov-fail-under=<N>` (aspirational target 80%)
-- External APIs / network calls MUST be mocked
-- `pythonpath` is set to `src` in pytest config — imports use `from <package_name>.xxx import ...`
+- Tests mirror source structure under `<TEST_ROOT>`.
+- Shared fixtures live in `<FIXTURE_LOCATIONS>`.
+- Test markers or groups: `<TEST_GROUPS>`.
+- Mock external network and provider calls using the project test pattern.
+- Add regression coverage for every bug fix.
+- Test public behavior and domain invariants, not implementation details.
+- For time-dependent or stateful behavior, verify boundary conditions and
+  guard against future-data leakage, ordering mistakes, and stale state where
+  applicable.
+- Run the smallest targeted test first, then the repository verification set
+  required for the changed surface.
 
 ## Dependencies
 
-- **Poetry** for all dependency management — never use pip directly
-- Python `>=3.10,<4`
-- <Pin notable libraries with their constraints>
-- <List other key dependencies with one-line purpose>
+- Use `<PACKAGE_MANAGER>` for dependency management. Do not edit generated lock
+  files manually or use a second package manager.
+- Runtime version: `<RUNTIME_VERSION>`.
+- Core stack: <CORE_LIBRARIES_AND_PURPOSES>.
+- Keep optional or heavyweight providers lazily loaded when possible, with a
+  clear error and installation path when unavailable.
+- Before adding a dependency, search for an existing project utility or
+  standard-library solution.
 
-## Iteration Workflow (MANDATORY for AI agents)
+## Versioning and Releases
 
-Every code change — feature, fix, refactor, docs, even one-line typos —
-must go through this loop. **Direct pushes to `main` are forbidden**,
-no exceptions. The loop ensures CI is the single source of truth for
-"is this change safe to merge".
+<Describe the release model, stable branch, integration branch, and automation.
+Remove this section if the repository has no release process.>
 
-### The 7-step loop
+- Day-to-day branches target `<INTEGRATION_BRANCH>`.
+- Release and hotfix branches target `<STABLE_BRANCH>`.
+- `<CHANGELOG_FILE>` is generated or release-managed through
+  `<CHANGELOG_TOOL>`. Do not edit generated release material during ordinary
+  feature work.
+- User-visible feature, fix, deprecation, removal, and security changes require
+  <CHANGELOG_ENTRY_POLICY>.
+- Internal-only refactors, tests, and docs may skip a changelog entry when the
+  PR explains why.
+- Do not bump versions unless the user explicitly requests a release or version
+  change.
 
-1. **Branch from latest `main`**
+## Iteration Workflow for AI Agents
+
+Every code or documentation change starts from a GitHub issue. Direct pushes to
+protected branches are forbidden. Do not auto-merge.
+
+1. Create or identify the issue before implementation.
+
+   - Use one issue for a small, independently reviewable change.
+   - Split large work into an epic with independently implementable,
+     testable, and reviewable child issues.
+   - Implement one claimed issue at a time. Do not create an implementation
+     branch or PR for an epic that only tracks child work.
+
+2. Confirm that the issue is open and available, then claim it using the
+   authenticated GitHub account.
 
    ```bash
-   git checkout main && git pull --ff-only origin main
-   git checkout -b <type>/<slug>
+   set -euo pipefail
+   issue=<ISSUE_NUMBER>
+   actor=$(gh api user --jq .login)
+   claimed_now=false
+
+   test "$(gh issue view "$issue" --json state --jq .state)" = "OPEN"
+
+   assignment=$(
+     gh issue view "$issue" --json assignees \
+       --jq ".assignees | if length == 0 then \"unassigned\"
+         elif ([.[].login] == [\"$actor\"]) then \"self\"
+         else \"other\" end"
+   )
+   case "$assignment" in
+     unassigned)
+       gh issue edit "$issue" --add-assignee "$actor"
+       claimed_now=true
+       ;;
+     self) ;;
+     other) exit 1 ;;
+   esac
+
+   if ! gh issue view "$issue" --json state,assignees \
+     --jq ".state == \"OPEN\" and ([.assignees[].login] == [\"$actor\"])" |
+     grep -qx true; then
+     if [ "$claimed_now" = true ]; then
+       gh issue edit "$issue" --remove-assignee "$actor"
+     fi
+     exit 1
+   fi
    ```
 
-   `<type>` ∈ {`feat`, `fix`, `docs`, `refactor`, `test`, `chore`} —
-   matcheks Conventional Commits.
-   `<slug>` is 2–5 word kebab-case (e.g. `fix/login-redirect-loop`,
-   `feat/csv-export`).
+   Stop if the issue is assigned to another contributor. Recheck ownership
+   before each commit, push, and PR creation when the repository requires
+   exclusive issue ownership.
 
-2. **Implement and verify locally** before pushing:
+3. Keep the primary checkout clean. Create the issue branch from the latest
+   remote integration branch in a dedicated worktree.
 
    ```bash
-   poetry run ruff check src/ tests/
-   poetry run black --check src/ tests/
-   poetry run mypy src/<package_name>
-   poetry run pytest -m "not slow and not integration"
-   make -C docs strict        # only if docs/ changed
+   git status --short --branch -uall
+   git fetch origin --prune
+
+   branch=<TYPE>/<ISSUE_NUMBER>-<SHORT_SLUG>
+   repo_root=$(git rev-parse --show-toplevel)
+   worktree_path="$repo_root/.worktree/<ISSUE_NUMBER>-<SHORT_SLUG>"
+   mkdir -p "$repo_root/.worktree"
+   git worktree add -b "$branch" "$worktree_path" \
+     "origin/<INTEGRATION_BRANCH>"
+   cd "$worktree_path"
    ```
 
-3. **Commit** with Conventional Commits format. Every commit message
-   must include the trailer:
+   Inspect the primary checkout before creating the worktree. If tracked or
+   untracked changes are present, do not stash, clean, reset, move, or overwrite
+   them. Stop and ask the maintainer how to proceed. Reuse an existing worktree
+   when resuming the same issue. Do not use `git worktree add --force`.
 
+4. Implement only the claimed issue and verify locally.
+
+   ```bash
+   <LINT_COMMAND>
+   <FORMAT_CHECK_COMMAND>
+   <TYPECHECK_COMMAND>
+   <TEST_COMMAND>
+   <DOCS_CHECK_COMMAND>  # if docs changed
    ```
+
+   Run targeted checks first. Escalate to broader verification only as required
+   by repository policy or the changed behavior.
+
+5. Apply the documentation audit gate before committing. If documentation
+   changes, rerun the affected checks.
+
+6. Commit using Conventional Commits:
+
+   ```text
+   <type>(<optional-scope>): <concise description>
+
    Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
    ```
 
-4. **Push the branch and open a PR**:
+7. Recheck issue ownership and base freshness, then push.
 
    ```bash
+   git fetch origin <INTEGRATION_BRANCH>
+   git merge-base --is-ancestor origin/<INTEGRATION_BRANCH> HEAD
    git push -u origin HEAD
-   gh pr create --fill --base main
    ```
 
-   The PR body must include a `## Verification` section listing
-   exactly what was run locally (the commands from step 2 plus their
-   outcomes).
+   If the integration branch is not an ancestor of `HEAD`, stop and report the
+   stale base. Do not automatically rebase or merge without maintainer
+   approval.
 
-5. **Watch CI and self-heal until green**:
+8. Open a PR using the repository template.
 
    ```bash
-   gh run watch --exit-status        # blocks until the run finishes
-   # if it fails:
-   gh run view <run-id> --log-failed # diagnose
-   # push fix commits to the same branch, repeat
+   gh pr create \
+     --base <INTEGRATION_BRANCH> \
+     --title "<conventional-commit-style title>" \
+     --body-file <PREPARED_PR_BODY>
+   gh pr view --json baseRefName,headRefName,body,url
    ```
 
-   **Hard limit: 3 fix attempts.** If CI is still red after the third
-   push, stop. Summarize what was tried and surface the failure to the
-   human — do NOT keep guessing. Suspected-flaky failures count toward
-   this budget; if you believe a failure is flaky, say so explicitly
-   in the PR and stop.
+   The PR body must describe scope, issue linkage, documentation impact, and
+   exact verification commands. Use the repository's required issue-closing
+   syntax; do not close an epic from a child-issue PR.
 
-6. **After CI is green, audit documentation and update if needed.**
-   Walk the doc surfaces below and decide for each whether the change
-   requires an update. If it does, make the change and re-run steps
-   2–5 for the doc commit (it must also pass CI before merging).
+9. Follow the repository CI policy.
 
-   Doc surfaces and when to update each:
-   - `CHANGELOG.md` — **always update for any user-visible change**
-     (new behaviour, perf, API addition, fix, security). Add an entry
-     under `## [Unreleased]` using Keep a Changelog categories
-     (Added / Changed / Deprecated / Removed / Fixed / Security).
-   - `docs/guides/*.md` — update when behaviour, APIs, or architecture
-     described in a guide changed (architecture, backtesting,
-     data_contracts, factor_mining, quickstart, installation).
-   - `docs/api/*.md` — Sphinx `automodule` regenerates from docstrings;
-     no manual edit needed unless a public symbol was added / renamed /
-     removed, in which case confirm the `automodule` directive covers it.
-   - `docs/factors/` — when factor inventory or derivation changed.
-   - `README.md` — when user-facing setup, features, commands, or
-     architecture overview changed.
-   - `AGENTS.md` — when architecture, module layout, key patterns,
-     infrastructure, or this workflow itself changed.
+   ```bash
+   gh pr checks --watch --fail-fast
+   ```
 
-   Rule of thumb: an internal refactor or perf change with unchanged
-   public contract usually needs only a `CHANGELOG.md` entry;
-   architectural shifts usually need `AGENTS.md` + `README.md` too.
+   Self-heal failures only within the configured attempt budget
+   (`<MAX_CI_FIX_ATTEMPTS>`). Recheck issue ownership before each fix. If the
+   budget is exhausted, stop and report the remaining failure instead of
+   guessing.
 
-   If any docs change, run `make -C docs strict` locally before pushing
-   and confirm CI's docs job stays green on the new commit.
+10. Stop after verification and PR creation. Do not merge. Remove a worktree
+    only after the PR is merged, the issue is closed, the worktree is clean,
+    and the branch is contained in the integration branch. Never force-remove
+    a worktree or force-delete its branch.
 
-7. **Stop after the PR is green. Do NOT auto-merge.** Report the PR URL
-   and the final green CI run ID. Merging is the human's call.
+## Release Promotion Loop
 
-### Why no direct pushes to `main`
+<Remove this section if releases do not use integration-to-stable promotion.>
 
-Changes that "look clean locally" can still fail on CI's cold
-environment. The PR + CI loop catches those before they land on `main`,
-and gives reviewers a single artifact (the PR diff) to inspect rather
-than a moving `main`.
+1. Open a release PR from `<INTEGRATION_BRANCH>` to `<STABLE_BRANCH>`.
+2. Generate and edit release notes using `<CHANGELOG_TOOL>`.
+3. Run the full local verification set and wait for release PR CI.
+4. Merge only at a coherent release boundary.
+5. Let the stable-branch automation create the version, tag, and release.
+
+Urgent production fixes branch from `<STABLE_BRANCH>`, target the same branch,
+and are then merged or cherry-picked back to `<INTEGRATION_BRANCH>` so the
+branches do not drift.
