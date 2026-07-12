@@ -11,12 +11,12 @@ bash ./install.sh ""        # disable sudo prefix when running as root
 
 The script:
 
-1. Installs Neovim, Node, git, ripgrep, fd, universal-ctags, python3 + pynvim, and
-   formatters (prettier / isort / stylua / black / google-java-format).
+1. Installs Neovim, Node.js, Git, ripgrep, fd, Python, and pynvim. On macOS it
+   also installs prettier, isort, stylua, black, and google-java-format.
 2. Backs up any existing `~/.vim`, `~/.vimrc`, `~/.config/nvim` with a
    timestamp suffix.
 3. **Symlinks** this directory to `~/.config/nvim` (so future `git pull`s take
-   effect immediately — no re-running the script).
+   effect immediately; there is no need to re-run the script).
 
 On first `nvim` launch, lazy.nvim will clone and set up every plugin.
 

@@ -1,8 +1,10 @@
-Notion
-Things
-Flomo
-Magent
-Dropover
-Tuxera
-Obsidian
-PDF Squeezer
+# 日常软件
+
+- Notion
+- Things
+- Flomo
+- Magnet
+- Dropover
+- Tuxera
+- Obsidian
+- PDF Squeezer
