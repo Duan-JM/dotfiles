@@ -7,9 +7,11 @@ if not vim.uv.fs_stat(lazypath) then
 		vim.api.nvim_echo({
 			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
 			{ out, "WarningMsg" },
-			{ "\nPress any key to exit..." },
 		}, true, {})
-		vim.fn.getchar()
+		if #vim.api.nvim_list_uis() > 0 then
+			vim.api.nvim_echo({ { "\nPress any key to exit..." } }, true, {})
+			vim.fn.getchar()
+		end
 		os.exit(1)
 	end
 end
@@ -22,8 +24,15 @@ vim.g.maplocalleader = "\\"
 
 require("lazy").setup({
 	spec = { { import = "plugins" } },
-	install = { colorscheme = { "edge", "habamax" } },
-	checker = { enabled = true, notify = false },
+	concurrency = tonumber(vim.env.CODE_CLI_LAZY_CONCURRENCY),
+	install = {
+		missing = vim.env.CODE_CLI_IMAGE ~= "1",
+		colorscheme = { "edge", "habamax" },
+	},
+	checker = {
+		enabled = vim.env.CODE_CLI_BUILD ~= "1" and vim.env.CODE_CLI_IMAGE ~= "1",
+		notify = false,
+	},
 	change_detection = { notify = false },
 	performance = {
 		rtp = {

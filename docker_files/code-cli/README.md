@@ -1,81 +1,110 @@
 # code-cli image
 
-A minimal, ready-to-run container image that bundles this repo's **tmux**,
-**vim (neovim)** and **zsh** configuration. Handy when you SSH into a remote
-box for temporary work and want your usual editor/multiplexer/shell without
-polluting the host.
+`code-cli` is an Alpine Edge-based terminal environment with this repository's
+zsh, tmux, and Neovim configuration. The default image stays minimal; language
+toolchains are provided as separate variants.
 
-The image reuses the repository's own per-tool `install.sh` scripts, so it
-stays in sync with the dotfiles instead of duplicating package lists.
+## Variants
+
+| Variant | Additional tools | Default tag |
+| --- | --- | --- |
+| `core` | None | `code-cli:latest` |
+| `python` | Python, pip, pynvim | `code-cli:python` |
+| `rust` | Rust and Cargo | `code-cli:rust` |
+| `go` | Go | `code-cli:go` |
+
+Every variant includes zsh, tmux, Neovim, bash, git, curl, ripgrep, fd, fzf,
+the configured shell/tmux plugins, Neovim plugins, and precompiled
+Python/Go/Rust Treesitter parsers.
+
+The variants are intentionally independent rather than cumulative. Use the
+smallest image that matches the project being maintained.
 
 ## Build
 
 ```bash
-# from anywhere in the repo
+# minimal default image: code-cli:latest
 bash docker_files/code-cli/build.sh
 
-# custom tag
-IMAGE=my/code-cli:dev bash docker_files/code-cli/build.sh
+# language-specific images
+VARIANT=python bash docker_files/code-cli/build.sh
+VARIANT=rust bash docker_files/code-cli/build.sh
+VARIANT=go bash docker_files/code-cli/build.sh
 
-# pass extra flags through to `docker build`
+# custom tag and platform
+PLATFORM=linux/amd64 VARIANT=rust IMAGE=my/code-cli:rust \
+  bash docker_files/code-cli/build.sh
+
+# pass extra flags through to docker build
 bash docker_files/code-cli/build.sh --no-cache
 ```
 
-### Target platform
+The build uses multiple stages. Compilers and parser build dependencies stay
+in the builder stage; runtime images receive only configuration, installed
+plugins, compiled parsers, and the packages selected by the variant.
 
-By default the image is built for the host platform. Use `PLATFORM` to pick a
-specific architecture (requires docker buildx / qemu for cross builds):
+Alpine Edge is used because the pinned Neovim plugins require Neovim 0.12,
+while current stable Alpine releases package Neovim 0.11. The build installs
+plugins sequentially at the exact commits in `lazy-lock.json`, verifies every
+snapshot, and compiles native plugin components before producing the runtime
+image.
+
+The Alpine Edge image index and all zsh/tmux plugin snapshots are pinned to
+immutable digests or commit SHAs. APK package versions still follow the Edge
+repository, so package-level rebuild reproducibility is limited by Alpine's
+rolling repository.
+
+## Target platform
 
 ```bash
-# x86_64 image (typical Linux servers)
 PLATFORM=linux/amd64 bash docker_files/code-cli/build.sh
-
-# arm64 image (Apple Silicon / macOS)
 PLATFORM=linux/arm64 bash docker_files/code-cli/build.sh
 ```
 
-The Dockerfile auto-selects the matching neovim release binary for the target
-architecture.
-
-The build context is the repo root (the script handles this), so the
-Dockerfile can reach `tmux/`, `zsh/` and `vim/`.
+Cross-platform builds require Docker Buildx/QEMU. Each single-platform build is
+loaded into the local Docker image store with `--load`.
 
 ## Run
 
 ```bash
-# throwaway shell
 docker run --rm -it code-cli
-
-# mount your current project into the container
-docker run --rm -it -v "$PWD":/work -w /work code-cli
+docker run --rm -it code-cli:python
+docker run --rm -it code-cli:rust
+docker run --rm -it code-cli:go
 ```
 
-The default command is `zsh`. `tmux` and `nvim` are on `PATH` with configs and
-plugins pre-installed.
+Mount a working directory when needed:
 
-### Offline / out-of-the-box
+```bash
+docker run --rm -it -v "$PWD":/work -w /work code-cli:python
+```
 
-The image is built to be usable **without network access** on first launch:
+## Verify
 
-- All neovim plugins are installed at build time via `Lazy! restore`, pinned to
-  the commits in the committed `vim/lazy-lock.json`. Opening `nvim` offline shows
-  nothing pending in `:Lazy` — no install/update/clone happens on startup.
-- treesitter parsers for **python / java / rust** are precompiled into the image,
-  so syntax highlighting for those languages works offline immediately.
+Smoke tests run with networking disabled and compile a minimal program for the
+selected language variant:
 
-Note: opening a file whose treesitter parser was not precompiled (e.g. yaml,
-json) simply falls back to basic syntax highlighting offline; run
-`:TSInstall <lang>` once you have network to add it. Language servers (pyright,
-jdtls, rust-analyzer, …) are **not** bundled — install them when needed.
+```bash
+bash docker_files/code-cli/smoke-test.sh code-cli:latest core
+bash docker_files/code-cli/smoke-test.sh code-cli:python python
+bash docker_files/code-cli/smoke-test.sh code-cli:rust rust
+bash docker_files/code-cli/smoke-test.sh code-cli:go go
+```
 
-## Notes
+## Size and compatibility trade-offs
 
-- Based on `ubuntu:24.04`, runs as `root` with `HOME=/root`.
-- Neovim is installed from the official **stable** release (the Ubuntu/PPA
-  package is too old for this config, which requires `vim.uv` / neovim >= 0.10).
-- Includes the neovim toolchain the config expects (Node.js, Python, ripgrep,
-  fd, pynvim) plus a C/C++ compiler so treesitter can build additional parsers
-  on demand, so the image is a full dev environment rather than a bare shell.
-  This is why the image is ~1.3 GB; the shell/tmux/nvim core is only ~300 MB,
-  the rest is the neovim IDE stack (Node.js ~190 MB, compiler toolchain, plugins
-  and precompiled parsers).
+Measured locally on `linux/arm64`:
+
+| Variant | `docker image ls` size | Docker content size |
+| --- | ---: | ---: |
+| `core` | ~243 MB | ~47 MB |
+| `python` | ~321 MB | ~65 MB |
+| `go` | ~735 MB | ~165 MB |
+| `rust` | ~1.02 GB | ~262 MB |
+
+Language variants are larger than `core` only by the packages required for
+that language. Rust remains the largest because Alpine's Rust package pulls
+compiler and LLVM runtime dependencies.
+
+The image uses musl libc and `C.UTF-8`. Native binaries built for glibc may
+need to be rebuilt inside the image or replaced with musl-compatible releases.

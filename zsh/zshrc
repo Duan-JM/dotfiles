@@ -104,7 +104,7 @@ source $ZSH/oh-my-zsh.sh
 MAILCHECK=0
 
 [[ -r ~/.zsh-config/alias.sh ]] && source ~/.zsh-config/alias.sh
-[[ -r ~/.zsh-config/gem-config.sh ]] && source ~/.zsh-config/gem-config.sh
+(( $+commands[ruby] )) && [[ -r ~/.zsh-config/gem-config.sh ]] && source ~/.zsh-config/gem-config.sh
 [[ -r ~/.zsh-config/fzf.sh ]] && source ~/.zsh-config/fzf.sh
 
 export PATH="/usr/local/sbin:$PATH"

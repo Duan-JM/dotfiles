@@ -8,7 +8,11 @@ return {
 			{
 				"nvim-telescope/telescope-fzf-native.nvim",
 				build = "make",
-				cond  = vim.fn.executable("make") == 1,
+				cond  = function()
+					local plugin = vim.fn.stdpath("data") .. "/lazy/telescope-fzf-native.nvim"
+					return vim.fn.glob(plugin .. "/build/libfzf.*") ~= ""
+						or vim.fn.executable("make") == 1
+				end,
 			},
 		},
 		keys = {

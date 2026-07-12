@@ -1,87 +1,150 @@
 # syntax=docker/dockerfile:1
-#
-# Minimal, ready-to-run dev image bundling this repo's tmux / vim (neovim) / zsh
-# configuration. Intended for hopping onto remote machines to do temporary work:
-#
-#   docker run --rm -it code-cli
-#
-# The image reuses the repository's own per-tool install.sh scripts so it stays
-# in sync with the dotfiles instead of duplicating package lists.
 
-FROM ubuntu:24.04
+ARG ALPINE_IMAGE=alpine:edge@sha256:9a341ff2287c54b86425cbee0141114d811ae69d88a36019087be6d896cef241
 
-# Run everything as root during build; the install scripts take an empty sudo
-# prefix so they call apt / chsh directly.
-ENV DEBIAN_FRONTEND=noninteractive \
-    USER=root \
-    HOME=/root \
-    LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8 \
-    TERM=xterm-256color
+FROM ${ALPINE_IMAGE} AS config-builder
 
-# Base packages the install scripts assume are already present (git/curl) plus
-# locale support so zsh's LC_ALL=en_US.UTF-8 does not emit warnings.
-RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends \
-        ca-certificates curl git locales sudo python3 \
-    && sed -i 's/^# *\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
-    && locale-gen \
-    && rm -rf /var/lib/apt/lists/*
+ENV HOME=/root \
+    XDG_CONFIG_HOME=/root/.config \
+    CODE_CLI_BUILD=1 \
+    CODE_CLI_IMAGE=1 \
+    CODE_CLI_LAZY_CONCURRENCY=1
 
-# Bring the whole dotfiles repo in so the install scripts can find their
-# sibling config files (tmux/, zsh/, vim/).
-COPY . /opt/dotfiles
-WORKDIR /opt/dotfiles
+RUN apk_add_with_retry() { \
+      for attempt in 1 2 3; do \
+        if apk add --no-cache "$@"; then return 0; fi; \
+        echo "apk add attempt ${attempt}/3 failed" >&2; \
+      done; \
+      return 1; \
+    }; \
+    apk_add_with_retry \
+      build-base \
+      ca-certificates \
+      curl \
+      git \
+      neovim \
+      nodejs \
+      python3 \
+      py3-pynvim \
+      tree-sitter-cli
 
-# Install the official neovim *stable* release. The distro / neovim PPA package
-# on Ubuntu 24.04 is stuck at 0.9.5, but this config needs >= 0.10 (it uses
-# vim.uv). Installing it here means vim/install.sh detects nvim and skips its
-# own outdated apt install.
-RUN set -eux; \
-    arch="$(dpkg --print-architecture)"; \
-    case "$arch" in \
-        amd64) nvim_arch="x86_64" ;; \
-        arm64) nvim_arch="arm64" ;; \
-        *) echo "unsupported arch: $arch" >&2; exit 1 ;; \
-    esac; \
-    curl -fsSL -o /tmp/nvim.tar.gz \
-        "https://github.com/neovim/neovim/releases/download/stable/nvim-linux-${nvim_arch}.tar.gz"; \
-    tar -xzf /tmp/nvim.tar.gz -C /opt; \
-    ln -sf "/opt/nvim-linux-${nvim_arch}/bin/nvim" /usr/local/bin/nvim; \
-    rm -f /tmp/nvim.tar.gz; \
-    nvim --version | head -1
+COPY vim/lazy-lock.json /opt/dotfiles/vim/lazy-lock.json
+COPY docker_files/code-cli/install-nvim-plugins.py /usr/local/bin/install-nvim-plugins
+COPY docker_files/code-cli/nvim-plugin-repositories.json /opt/code-cli/nvim-plugin-repositories.json
+COPY docker_files/code-cli/verify-nvim-plugins.py /usr/local/bin/verify-nvim-plugins
+COPY docker_files/code-cli/runtime-snapshot-lock.json /opt/code-cli/runtime-snapshot-lock.json
+COPY docker_files/code-cli/runtime-snapshot-repositories.json /opt/code-cli/runtime-snapshot-repositories.json
 
-# Run all three install scripts in a single layer. The tmux/zsh scripts assume
-# an existing apt index (they do not run `apt-get update` themselves), so we
-# refresh it up front and only prune the lists once at the very end.
-#   - zsh:  installs zsh + oh-my-zsh + plugins, deploys ~/.zshrc
-#   - tmux: installs tmux + tpm, deploys ~/.tmux.conf, pre-fetches plugins
-#   - vim:  installs neovim + tooling, symlinks ~/.config/nvim
-# Finally, install neovim plugins fully so the image is usable OFFLINE with no
-# first-launch work: `Lazy! restore` installs every plugin pinned to the commit
-# in the committed lazy-lock.json (deterministic, matches the repo), and the
-# treesitter parsers for the primary languages are precompiled. Plugin .git
-# dirs are intentionally kept so Lazy sees them as fully installed and never
-# tries to re-clone/repair on startup.
-RUN apt-get update -y \
-    && ( cd zsh  && bash install.sh "" ) \
-    && ( cd tmux && bash install.sh "" ) \
-    && ( cd vim  && bash install.sh "" ) \
-    && npm install -g tree-sitter-cli \
-    && nvim --headless "+Lazy! restore" +qa \
-    && nvim --headless \
-        "+lua require('nvim-treesitter').install({'python','java','rust'}):wait(300000)" \
-        +qa \
-    && for lang in python java rust; do \
-         find /root/.local/share/nvim -type f -name "${lang}.so" | grep -q . \
-           || { echo "ERROR: treesitter parser for ${lang} was not built" >&2; exit 1; }; \
+RUN git config --global http.version HTTP/1.1 \
+    && mkdir -p /root/.local/share/nvim/lazy \
+    && python3 /usr/local/bin/install-nvim-plugins \
+         /opt/dotfiles/vim/lazy-lock.json \
+         /opt/code-cli/nvim-plugin-repositories.json \
+         /root/.local/share/nvim/lazy \
+    && python3 /usr/local/bin/verify-nvim-plugins \
+         /opt/dotfiles/vim/lazy-lock.json /root/.local/share/nvim/lazy \
+    && make -C /root/.local/share/nvim/lazy/telescope-fzf-native.nvim
+
+COPY vim /opt/dotfiles/vim
+
+RUN for lang in python go rust; do \
+      mkdir -p /root/.config; \
+      ln -sfn /opt/dotfiles/vim /root/.config/nvim; \
+      parser_ready=0; \
+      for attempt in 1 2 3; do \
+        nvim --headless \
+          "+lua require('nvim-treesitter').install({'${lang}'}):wait(300000)" \
+          +qa || true; \
+        if find /root/.local/share/nvim -type f -name "${lang}.so" | grep -q .; then \
+          parser_ready=1; \
+          break; \
+        fi; \
+        echo "Treesitter ${lang} attempt ${attempt}/3 failed" >&2; \
+      done; \
+      test "${parser_ready}" = 1; \
+    done
+
+RUN python3 /usr/local/bin/install-nvim-plugins \
+      /opt/code-cli/runtime-snapshot-lock.json \
+      /opt/code-cli/runtime-snapshot-repositories.json \
+      /opt/code-cli/runtime-snapshots \
+    && python3 /usr/local/bin/verify-nvim-plugins \
+      /opt/code-cli/runtime-snapshot-lock.json \
+      /opt/code-cli/runtime-snapshots \
+    && mkdir -p /root/.oh-my-zsh/custom/plugins /root/.tmux/plugins \
+    && cp -a /opt/code-cli/runtime-snapshots/ohmyzsh/. /root/.oh-my-zsh/ \
+    && rm -rf /opt/code-cli/runtime-snapshots/ohmyzsh \
+    && for plugin in zsh-syntax-highlighting zsh-autosuggestions; do \
+         mv "/opt/code-cli/runtime-snapshots/${plugin}" \
+           "/root/.oh-my-zsh/custom/plugins/${plugin}"; \
        done \
-    && apt-get purge -y --auto-remove \
-        autoconf autogen pkg-config libjansson-dev software-properties-common \
-    && rm -rf /root/.oh-my-zsh/.git \
-    && rm -rf /tmp/* /var/tmp/* \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && for plugin in tpm tmux-prefix-highlight tmux-cpu tmux-resurrect; do \
+         mv "/opt/code-cli/runtime-snapshots/${plugin}" \
+           "/root/.tmux/plugins/${plugin}"; \
+       done \
+    && rmdir /opt/code-cli/runtime-snapshots
+
+FROM ${ALPINE_IMAGE}
+
+ARG CODE_CLI_VARIANT=core
+ARG TARGETARCH
+
+ENV HOME=/root \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    TERM=xterm-256color \
+    CODE_CLI_IMAGE=1 \
+    CODE_CLI_VARIANT=${CODE_CLI_VARIANT}
+
+RUN set -eux; \
+    apk_add_with_retry() { \
+      for attempt in 1 2 3; do \
+        if apk add --no-cache "$@"; then return 0; fi; \
+        echo "apk add attempt ${attempt}/3 failed" >&2; \
+      done; \
+      return 1; \
+    }; \
+    case "${CODE_CLI_VARIANT}" in \
+      core|python|rust|go) ;; \
+      *) echo "unsupported CODE_CLI_VARIANT: ${CODE_CLI_VARIANT}" >&2; exit 1 ;; \
+    esac; \
+    apk_add_with_retry \
+      bash \
+      ca-certificates \
+      curl \
+      fd \
+      fzf \
+      git \
+      neovim \
+      ripgrep \
+      tmux \
+      zsh; \
+    case "${CODE_CLI_VARIANT}" in \
+      python) apk_add_with_retry python3 py3-pip py3-pynvim ;; \
+      rust) apk_add_with_retry cargo rust ;; \
+      go) apk_add_with_retry go ;; \
+    esac; \
+    printf '%s\n' "${CODE_CLI_VARIANT}" > /etc/code-cli-variant; \
+    printf '%s\n' "${TARGETARCH:-unknown}" > /etc/code-cli-arch
+
+COPY vim /opt/dotfiles/vim
+COPY zsh/zshrc /root/.zshrc
+COPY zsh/.zsh-config /root/.zsh-config
+COPY tmux/tmux.conf /root/.tmux.conf
+COPY tmux/tmux /root/.tmux
+
+COPY --from=config-builder /root/.local/share/nvim /root/.local/share/nvim
+COPY --from=config-builder /root/.oh-my-zsh /root/.oh-my-zsh
+COPY --from=config-builder /root/.tmux/plugins /root/.tmux/plugins
+
+RUN mkdir -p /root/.config \
+    && ln -s /opt/dotfiles/vim /root/.config/nvim \
+    && sed -i 's/export LC_ALL=en_US.UTF-8/export LC_ALL=C.UTF-8/' /root/.zshrc \
+    && nvim_output="$(nvim --headless \
+         "+lua assert(require('lazy.core.config').plugins['nvim-treesitter'])" \
+         +qa 2>&1)" \
+    && printf '%s\n' "${nvim_output}" \
+    && ! printf '%s\n' "${nvim_output}" | grep -Eq '(^|[[:space:]])E[0-9]{3,4}:'
 
 WORKDIR /root
-CMD ["/usr/bin/zsh"]
+CMD ["/bin/zsh"]

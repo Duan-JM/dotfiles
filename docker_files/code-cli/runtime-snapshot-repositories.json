@@ -1,0 +1,9 @@
+{
+  "ohmyzsh": "ohmyzsh/ohmyzsh",
+  "tpm": "tmux-plugins/tpm",
+  "tmux-cpu": "tmux-plugins/tmux-cpu",
+  "tmux-prefix-highlight": "tmux-plugins/tmux-prefix-highlight",
+  "tmux-resurrect": "tmux-plugins/tmux-resurrect",
+  "zsh-autosuggestions": "zsh-users/zsh-autosuggestions",
+  "zsh-syntax-highlighting": "zsh-users/zsh-syntax-highlighting"
+}
