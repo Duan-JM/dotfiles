@@ -6,7 +6,7 @@ IMAGE="${1:-code-cli:latest}"
 EXPECTED_VARIANT="${2:-core}"
 
 case "${EXPECTED_VARIANT}" in
-  core|python|rust|go) ;;
+  core|python|rust|go|ops) ;;
   *)
     echo "ERROR: unsupported expected variant '${EXPECTED_VARIANT}'" >&2
     exit 1
@@ -44,11 +44,18 @@ docker run --rm -t --network none \
     test "${installed_plugins}" = "${expected_plugins}"
     zsh -lic "test \"\${LC_ALL}\" = C.UTF-8"
 
+    assert_ops_commands_absent() {
+      for command in psql redis-cli kcat kaf pgcli iredis ncat socat mtr trip dig nslookup nmap jq yq xh; do
+        ! command -v "${command}" >/dev/null
+      done
+    }
+
     case "${EXPECTED_VARIANT}" in
       core)
         for command in python3 rustc cargo go; do
           ! command -v "${command}" >/dev/null
         done
+        assert_ops_commands_absent
         ;;
       python)
         command -v python3 >/dev/null
@@ -60,6 +67,7 @@ docker run --rm -t --network none \
         for command in rustc cargo go; do
           ! command -v "${command}" >/dev/null
         done
+        assert_ops_commands_absent
         ;;
       rust)
         command -v rustc >/dev/null
@@ -72,6 +80,7 @@ docker run --rm -t --network none \
         for command in python3 go; do
           ! command -v "${command}" >/dev/null
         done
+        assert_ops_commands_absent
         ;;
       go)
         command -v go >/dev/null
@@ -81,6 +90,79 @@ docker run --rm -t --network none \
         "${workdir}/go-smoke"
         rm -rf "${workdir}"
         for command in python3 rustc cargo; do
+          ! command -v "${command}" >/dev/null
+        done
+        assert_ops_commands_absent
+        ;;
+      ops)
+        for command in \
+          psql redis-cli kcat kaf pgcli iredis ncat socat mtr trip dig \
+          nslookup ip ss ping nmap jq yq ssh openssl xh; do
+          command -v "${command}" >/dev/null
+        done
+
+        psql --version
+        redis-cli --version
+        kcat -V
+        kaf --version
+        pgcli --version
+        iredis --version
+        trip --version
+        ncat --version
+        mtr --version
+        nmap --version
+        jq --version
+        yq --version
+        ssh -V
+        openssl version
+        xh --version
+
+        ! timeout 5 psql "postgresql://postgres@127.0.0.1:1/postgres?connect_timeout=1" \
+          -c "select 1"
+        ! timeout 5 redis-cli -u redis://127.0.0.1:1/0 PING
+        ! timeout 5 iredis --url redis://127.0.0.1:1/0 PING
+        ! timeout 5 kcat -b 127.0.0.1:1 -L -m 1
+
+        listener_log="$(mktemp)"
+        socat TCP-LISTEN:45678,bind=127.0.0.1,reuseaddr,fork \
+          OPEN:"${listener_log}",creat,append &
+        listener_pid=$!
+        listener_ready=0
+        for attempt in 1 2 3 4 5; do
+          if ncat -z 127.0.0.1 45678; then
+            listener_ready=1
+            break
+          fi
+          sleep 0.1
+        done
+        test "${listener_ready}" = 1
+        printf "ops-smoke\n" | ncat 127.0.0.1 45678
+        kill "${listener_pid}"
+        wait "${listener_pid}" || true
+        grep -q "ops-smoke" "${listener_log}"
+        rm -f "${listener_log}"
+
+        dns_query="$(mktemp)"
+        socat -u UDP4-RECVFROM:45679,bind=127.0.0.1,reuseaddr STDOUT >"${dns_query}" &
+        dns_listener_pid=$!
+        dns_query_sent=0
+        for attempt in 1 2 3; do
+          if ! dig @127.0.0.1 -p 45679 example.com +time=1 +tries=1 >/dev/null 2>&1 \
+            && test -s "${dns_query}"; then
+            dns_query_sent=1
+            break
+          fi
+        done
+        wait "${dns_listener_pid}"
+        test "${dns_query_sent}" = 1
+        rm -f "${dns_query}"
+
+        nslookup -version
+        mtr --report --report-cycles 1 127.0.0.1
+        trip --mode silent --report-cycles 1 --protocol tcp \
+          --target-port 45679 127.0.0.1
+
+        for command in rustc cargo go; do
           ! command -v "${command}" >/dev/null
         done
         ;;

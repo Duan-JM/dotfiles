@@ -16,9 +16,9 @@ VARIANT="${VARIANT:-core}"
 PLATFORM="${PLATFORM:-}"
 
 case "${VARIANT}" in
-  core|python|rust|go) ;;
+  core|python|rust|go|ops) ;;
   *)
-    echo "ERROR: unsupported VARIANT '${VARIANT}' (use core, python, rust, or go)" >&2
+    echo "ERROR: unsupported VARIANT '${VARIANT}' (use core, python, rust, go, or ops)" >&2
     exit 1
     ;;
 esac

@@ -70,7 +70,7 @@ git diff
 
 ## code-cli 容器
 
-`docker_files/code-cli` 提供 `core`、`python`、`rust` 和 `go` 四种镜像。构建方式、平台支持和验证命令见 [code-cli 文档](docker_files/code-cli/README.md)。
+`docker_files/code-cli` 提供 `core`、`python`、`rust`、`go` 和 `ops` 五种镜像。`ops` 包含数据库客户端与网络排障工具；构建方式、平台支持和验证命令见 [code-cli 文档](docker_files/code-cli/README.md)。
 
 ## License
 
