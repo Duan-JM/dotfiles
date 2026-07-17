@@ -1,0 +1,118 @@
+services:
+  postgres-permissions:
+    image: postgres:15-alpine
+    container_name: ${CONTAINER_NAME:-infra_postgres}_permissions
+    user: root
+    command:
+      - sh
+      - -c
+      - |
+        mkdir -p /var/lib/postgresql/wal_archive
+        chown -R postgres:postgres /var/lib/postgresql/wal_archive
+        chmod 700 /var/lib/postgresql/wal_archive
+    volumes:
+      - postgres_wal_archive:/var/lib/postgresql/wal_archive
+    restart: "no"
+    networks:
+      - postgres_net
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${CONTAINER_NAME:-infra_postgres}
+    shm_size: ${POSTGRES_SHM_SIZE:-256mb}
+    environment:
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in .env before starting PostgreSQL}
+      POSTGRES_USER: ${DB_USER:?Set DB_USER in .env before starting PostgreSQL}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env before starting PostgreSQL}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C --auth-host=scram-sha-256 --auth-local=trust"
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: ${TZ:-Asia/Shanghai}
+      REPLICATION_USER: ${REPLICATION_USER:-}
+      REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_wal_archive:/var/lib/postgresql/wal_archive
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${DB_HOST:-127.0.0.1}:${DB_PORT:?Set DB_PORT in .env before starting PostgreSQL}:5432"
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - hba_file=/etc/postgresql/pg_hba.conf
+    depends_on:
+      postgres-permissions:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        ["CMD-SHELL", 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    stop_grace_period: 60s
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    logging:
+      driver: json-file
+      options:
+        max-size: ${LOG_MAX_SIZE:-100m}
+        max-file: "${LOG_MAX_FILE:-10}"
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - postgres_net
+
+  postgres-backup:
+    image: postgres:15-alpine
+    container_name: ${CONTAINER_NAME:-infra_postgres}_backup
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      PGHOST: postgres
+      PGPORT: "5432"
+      DB_NAME: ${DB_NAME:?Set DB_NAME in .env before starting PostgreSQL}
+      DB_USER: ${DB_USER:?Set DB_USER in .env before starting PostgreSQL}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env before starting PostgreSQL}
+      REPLICATION_USER: ${REPLICATION_USER:-}
+      REPLICATION_PASSWORD: ${REPLICATION_PASSWORD:-}
+      LOGICAL_BACKUP_ENABLED: ${LOGICAL_BACKUP_ENABLED:-true}
+      LOGICAL_BACKUP_CRON: ${LOGICAL_BACKUP_CRON:-15 2 * * *}
+      LOGICAL_BACKUP_ON_START: ${LOGICAL_BACKUP_ON_START:-false}
+      BASEBACKUP_ENABLED: ${BASEBACKUP_ENABLED:-true}
+      BASEBACKUP_CRON: ${BASEBACKUP_CRON:-15 3 * * 0}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+      BASEBACKUP_RETENTION_DAYS: ${BASEBACKUP_RETENTION_DAYS:-7}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/container-backup.sh:/scripts/container-backup.sh:ro
+      - ./scripts/container-backup-entrypoint.sh:/scripts/container-backup-entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/scripts/container-backup-entrypoint.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: ${LOG_MAX_SIZE:-100m}
+        max-file: "${LOG_MAX_FILE:-10}"
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - postgres_net
+
+volumes:
+  postgres_data:
+    name: infra_postgres_data
+  postgres_wal_archive:
+    name: infra_postgres_wal_archive
+
+networks:
+  postgres_net:
+    name: infra_postgres_net
