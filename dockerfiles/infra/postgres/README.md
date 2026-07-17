@@ -24,6 +24,31 @@ vi .env
 ./deploy.sh backup-logs         # follow backup scheduler logs
 ```
 
+## Sync all databases to another PostgreSQL cluster
+
+The sync script copies every connectable, non-template database and all of its
+schemas, tables, sequences, functions, extensions, and large objects. Matching
+target databases are dropped and recreated, so use a target superuser and stop
+application writes before running it.
+
+```sh
+ALLOW_TARGET_OVERWRITE=yes \
+SOURCE_PGHOST=pg-a.example.com \
+SOURCE_PGUSER=postgres \
+SOURCE_PGPASSWORD='source-password' \
+TARGET_PGHOST=pg-b.example.com \
+TARGET_PGUSER=postgres \
+TARGET_PGPASSWORD='target-password' \
+./scripts/sync-cluster.sh
+```
+
+The script intentionally does not copy roles, role passwords, tablespaces,
+ownership, or grants. It requires PostgreSQL 13 or newer client tools because
+it uses `dropdb --force`. The client tools must match the target server's major
+version. On macOS, install a matching version with `brew install postgresql@15`;
+the script detects Homebrew versioned installations automatically. Alternatively,
+set `PG_BIN_DIR` to the matching PostgreSQL `bin` directory.
+
 ## Automatic backups
 
 Automatic backups are managed by the lightweight `postgres-backup` container, so the same setup works on macOS and Linux without systemd or host cron.
