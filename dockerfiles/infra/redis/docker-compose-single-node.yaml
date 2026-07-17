@@ -1,22 +1,76 @@
-version: "3.8"
-
 services:
   redis:
     image: redis:7.2-alpine
-    container_name: redis
+    container_name: ${CONTAINER_NAME:-infra_redis}
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "${REDIS_HOST:-127.0.0.1}:${REDIS_PORT:?Set REDIS_PORT in .env before starting Redis}:6379"
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env before starting Redis}
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
       - redis_data:/data
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command:
+      - sh
+      - -c
+      - exec redis-server /usr/local/etc/redis/redis.conf --requirepass "$$REDIS_PASSWORD" --masterauth "$$REDIS_PASSWORD"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", 'redis-cli -a "$${REDIS_PASSWORD}" --no-auth-warning ping | grep -q PONG']
       interval: 10s
       timeout: 3s
-      retries: 3
-      start_period: 5s
+      retries: 10
+      start_period: 15s
+    stop_grace_period: 30s
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    logging:
+      driver: json-file
+      options:
+        max-size: ${LOG_MAX_SIZE:-100m}
+        max-file: "${LOG_MAX_FILE:-10}"
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - redis_net
+
+  redis-backup:
+    image: redis:7.2-alpine
+    container_name: ${CONTAINER_NAME:-infra_redis}_backup
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env before starting Redis}
+      REDIS_BACKUP_ENABLED: ${REDIS_BACKUP_ENABLED:-true}
+      REDIS_BACKUP_CRON: ${REDIS_BACKUP_CRON:-30 2 * * *}
+      REDIS_BACKUP_ON_START: ${REDIS_BACKUP_ON_START:-false}
+      REDIS_BACKUP_RETENTION_DAYS: ${REDIS_BACKUP_RETENTION_DAYS:-14}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/container-backup.sh:/scripts/container-backup.sh:ro
+      - ./scripts/container-backup-entrypoint.sh:/scripts/container-backup-entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/scripts/container-backup-entrypoint.sh"]
+    depends_on:
+      redis:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: ${LOG_MAX_SIZE:-100m}
+        max-file: "${LOG_MAX_FILE:-10}"
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - redis_net
 
 volumes:
   redis_data:
+    name: infra_redis_data
+
+networks:
+  redis_net:
+    name: infra_redis_net
