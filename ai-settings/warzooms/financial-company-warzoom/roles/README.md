@@ -41,6 +41,7 @@ task:    agent_type=general-purpose, prompt=<上一步 stdout>
   1. 在 role 文件「Placeholders」表中登记
   2. 在 `render_role.py` 对应 `_build_*_mapping()` 中补 key
   3. 在 role 文件「Prompt」段内使用 `{key}` 引用
+  4. 运行 `make verify`；未映射占位符会使渲染直接失败
 - 新增 role 文件须：
   1. 在 `scripts/render_role.py` 的 `ROLE_BUILDERS` 字典中注册
   2. 在本 README 文件清单中登记

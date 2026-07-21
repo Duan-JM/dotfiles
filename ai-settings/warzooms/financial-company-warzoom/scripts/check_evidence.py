@@ -23,7 +23,9 @@
     ``output/audits/programmatic_check.json`` —— JSON 数组，每个章节一份汇总。
 
 退出码：
-    - ``0`` 总是；本脚本只产出诊断信息，是否中断流程由调用方决定。
+    - ``0`` 扫描完成；默认只产出诊断信息。
+    - ``1`` 开启 ``--fail-on-error`` 且存在 error 级问题。
+    - ``2`` 开启 ``--require-sections`` 但没有匹配章节。
 """
 
 from __future__ import annotations
@@ -36,6 +38,8 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
+
+from pipeline_common import sha256_file, sha256_text
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "output"
@@ -137,11 +141,13 @@ class ChapterReport:
     Args:
         chapter: 章节文件 stem（如 ``03_financials``）。
         checked_at: ISO 时间戳。
+        content_hash: 被检查章节的 SHA-256。
         issues: 该章命中的所有 Issue。
     """
 
     chapter: str
     checked_at: str
+    content_hash: str
     issues: tuple[Issue, ...]
 
 
@@ -433,6 +439,7 @@ def _scan_chapter(chapter_path: Path, *, registered: frozenset[str]) -> ChapterR
     return ChapterReport(
         chapter=chapter_path.stem,
         checked_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        content_hash=sha256_file(chapter_path),
         issues=tuple(issues),
     )
 
@@ -480,15 +487,21 @@ def _serialize_report(report: ChapterReport) -> dict[str, object]:
     return {
         "chapter": report.chapter,
         "checked_at": report.checked_at,
+        "content_hash": report.content_hash,
         "issues": [asdict(issue) for issue in report.issues],
     }
 
 
-def _write_aggregated_report(reports: list[ChapterReport]) -> Path:
+def _write_aggregated_report(
+    reports: list[ChapterReport],
+    *,
+    source_log_hash: str,
+) -> Path:
     """把所有章节报告写入 ``output/audits/programmatic_check.json``。
 
     Args:
         reports: 多章节检查结果。
+        source_log_hash: 本次扫描使用的证据库 SHA-256。
 
     Returns:
         写入的文件路径。
@@ -499,8 +512,9 @@ def _write_aggregated_report(reports: list[ChapterReport]) -> Path:
 
     AUDITS_DIR.mkdir(parents=True, exist_ok=True)
     payload = {
-        "version": "1.0",
+        "version": "1.1",
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "source_log_hash": source_log_hash,
         "chapters": [_serialize_report(report) for report in reports],
     }
     PROGRAMMATIC_CHECK_FILE.write_text(
@@ -560,26 +574,56 @@ def _parse_arguments(argv: list[str] | None) -> argparse.Namespace:
         default=None,
         help="只检查指定章节（章节 stem 或前缀，如 03 / 03_financials）；默认全部",
     )
+    parser.add_argument(
+        "--fail-on-error",
+        action="store_true",
+        help="存在 error 级问题时返回退出码 1",
+    )
+    parser.add_argument(
+        "--require-sections",
+        action="store_true",
+        help="没有匹配章节时返回退出码 2",
+    )
     return parser.parse_args(argv)
 
 
-def run(section_filter: str | None) -> int:
+def run(
+    section_filter: str | None,
+    *,
+    fail_on_error: bool = False,
+    require_sections: bool = False,
+) -> int:
     """运行整条检查流水线。
 
     Args:
         section_filter: 章节过滤参数。
 
     Returns:
-        进程退出码；当前实现总是返回 0（脚本只产出诊断信息）。
+        进程退出码。
 
     Raises:
         OSError: 读写文件失败时由底层抛出。
     """
 
-    registered = _collect_registered_src_ids(_read_text(SEARCH_LOG_FILE))
+    search_log_text = _read_text(SEARCH_LOG_FILE)
+    registered = _collect_registered_src_ids(search_log_text)
     reports = [_scan_chapter(path, registered=registered) for path in _iter_target_chapter_files(section_filter)]
-    _write_aggregated_report(reports)
+    source_log_hash = (
+        sha256_file(SEARCH_LOG_FILE)
+        if SEARCH_LOG_FILE.is_file()
+        else sha256_text(search_log_text)
+    )
+    _write_aggregated_report(reports, source_log_hash=source_log_hash)
     _print_summary(reports)
+    if require_sections and not reports:
+        print("[check_evidence] 错误: 没有匹配的章节文件。", file=sys.stderr)
+        return 2
+    if fail_on_error and any(
+        issue.severity == _SEVERITY_ERROR
+        for report in reports
+        for issue in report.issues
+    ):
+        return 1
     return 0
 
 
@@ -597,7 +641,11 @@ def main(argv: list[str] | None = None) -> int:
     """
 
     args = _parse_arguments(argv)
-    return run(args.section)
+    return run(
+        args.section,
+        fail_on_error=args.fail_on_error,
+        require_sections=args.require_sections,
+    )
 
 
 if __name__ == "__main__":

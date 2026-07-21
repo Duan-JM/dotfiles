@@ -1,0 +1,12 @@
+.claude/settings.local.json
+__pycache__/
+*.py[cod]
+
+output/*
+!output/.gitkeep
+!output/audits/
+output/audits/*
+!output/audits/.gitkeep
+!output/sections/
+output/sections/*
+!output/sections/.gitkeep
