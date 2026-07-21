@@ -35,6 +35,36 @@ _CONFIRM_SUFFIX = ".confirm.json"
 
 
 @dataclass(frozen=True)
+class AuditPaths:
+    """审计汇总使用的项目路径集合。"""
+
+    root: Path
+    audits_dir: Path
+    sections_dir: Path
+    programmatic_check_file: Path
+    final_audit_file: Path
+    audit_summary_file: Path
+
+    @classmethod
+    def from_root(cls, root: Path) -> "AuditPaths":
+        """从项目根目录构造路径集合。"""
+
+        root = root.resolve()
+        audits_dir = root / "output" / "audits"
+        return cls(
+            root=root,
+            audits_dir=audits_dir,
+            sections_dir=root / "output" / "sections",
+            programmatic_check_file=audits_dir / "programmatic_check.json",
+            final_audit_file=audits_dir / "final_consistency.audit.json",
+            audit_summary_file=audits_dir / "audit_summary.md",
+        )
+
+
+DEFAULT_PATHS = AuditPaths.from_root(ROOT)
+
+
+@dataclass(frozen=True)
 class ChapterAuditFile:
     """单章审计产物。
 
@@ -70,7 +100,9 @@ def _read_json(path: Path) -> dict[str, Any] | None:
         return None
 
 
-def _collect_chapter_audit_files() -> list[ChapterAuditFile]:
+def _collect_chapter_audit_files(
+    paths: AuditPaths = DEFAULT_PATHS,
+) -> list[ChapterAuditFile]:
     """枚举 audits/ 下所有章节级审计文件。
 
     Args:
@@ -83,23 +115,35 @@ def _collect_chapter_audit_files() -> list[ChapterAuditFile]:
         无。
     """
 
-    if not AUDITS_DIR.exists():
+    if not paths.audits_dir.exists():
         return []
+    active_chapters = {
+        path.stem
+        for path in paths.sections_dir.glob("*.md")
+        if path.name != ".gitkeep"
+    }
     chapters: dict[str, ChapterAuditFile] = {}
-    for child in sorted(AUDITS_DIR.iterdir()):
+    for child in sorted(paths.audits_dir.iterdir()):
         if not child.is_file() or not child.name.endswith(_AUDIT_SUFFIX):
             continue
-        if child.name in {PROGRAMMATIC_CHECK_FILE.name, FINAL_AUDIT_FILE.name}:
+        if child.name in {
+            paths.programmatic_check_file.name,
+            paths.final_audit_file.name,
+        }:
             continue
         chapter = child.name[: -len(_AUDIT_SUFFIX)]
+        if chapter not in active_chapters:
+            continue
         if chapter in chapters:
             continue
-        confirm_path = AUDITS_DIR / f"{chapter}{_CONFIRM_SUFFIX}"
+        confirm_path = paths.audits_dir / f"{chapter}{_CONFIRM_SUFFIX}"
         chapters[chapter] = ChapterAuditFile(chapter=chapter, audit_path=child, confirm_path=confirm_path)
     return sorted(chapters.values(), key=lambda entry: entry.chapter)
 
 
-def _render_programmatic_section() -> str:
+def _render_programmatic_section(
+    paths: AuditPaths = DEFAULT_PATHS,
+) -> str:
     """渲染程序化检查段。
 
     Args:
@@ -112,7 +156,7 @@ def _render_programmatic_section() -> str:
         无。
     """
 
-    payload = _read_json(PROGRAMMATIC_CHECK_FILE)
+    payload = _read_json(paths.programmatic_check_file)
     if payload is None:
         return "## B.1 程序化检查\n\n- 未运行 `scripts/check_evidence.py`。\n"
     lines: list[str] = ["## B.1 程序化检查\n"]
@@ -134,7 +178,10 @@ def _render_programmatic_section() -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_chapter_audit_entry(entry: ChapterAuditFile) -> str:
+def _render_chapter_audit_entry(
+    entry: ChapterAuditFile,
+    paths: AuditPaths = DEFAULT_PATHS,
+) -> str:
     """渲染单章 audit / confirm 摘要。
 
     Args:
@@ -151,7 +198,7 @@ def _render_chapter_audit_entry(entry: ChapterAuditFile) -> str:
     if audit_payload is None:
         return f"### {entry.chapter}\n\n- audit JSON 缺失或解析失败：`{entry.audit_path.name}`\n"
     lines: list[str] = [f"### {entry.chapter}\n"]
-    lines.append(f"- audit 文件：`{entry.audit_path.relative_to(ROOT)}`")
+    lines.append(f"- audit 文件：`{entry.audit_path.relative_to(paths.root)}`")
     category = audit_payload.get("category", "unknown")
     violations: list[dict[str, Any]] = audit_payload.get("violations", []) or []
     lines.append(f"- 审计结论：`{category}`；违规条目 {len(violations)} 条")
@@ -173,7 +220,9 @@ def _render_chapter_audit_entry(entry: ChapterAuditFile) -> str:
     if confirm_payload is not None:
         results = confirm_payload.get("results", []) or []
         lines.append("")
-        lines.append(f"- confirm 文件：`{entry.confirm_path.relative_to(ROOT)}`；复核 {len(results)} 条")
+        lines.append(
+            f"- confirm 文件：`{entry.confirm_path.relative_to(paths.root)}`；复核 {len(results)} 条"
+        )
         if results:
             lines.append("")
             lines.append("| 违规序号 | 复核结论 | SRC | 说明 |")
@@ -190,7 +239,10 @@ def _render_chapter_audit_entry(entry: ChapterAuditFile) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _render_chapter_audits_section(entries: list[ChapterAuditFile]) -> str:
+def _render_chapter_audits_section(
+    entries: list[ChapterAuditFile],
+    paths: AuditPaths = DEFAULT_PATHS,
+) -> str:
     """渲染所有章节 audit/confirm 段。
 
     Args:
@@ -207,11 +259,13 @@ def _render_chapter_audits_section(entries: list[ChapterAuditFile]) -> str:
         return "## B.2 章节审计\n\n- 未发现任何章节 audit JSON。\n"
     parts: list[str] = ["## B.2 章节审计\n"]
     for entry in entries:
-        parts.append(_render_chapter_audit_entry(entry))
+        parts.append(_render_chapter_audit_entry(entry, paths))
     return "\n".join(parts)
 
 
-def _render_final_audit_section() -> str:
+def _render_final_audit_section(
+    paths: AuditPaths = DEFAULT_PATHS,
+) -> str:
     """渲染最终一致性审计段。
 
     Args:
@@ -224,7 +278,7 @@ def _render_final_audit_section() -> str:
         无。
     """
 
-    payload = _read_json(FINAL_AUDIT_FILE)
+    payload = _read_json(paths.final_audit_file)
     if payload is None:
         return "## B.3 最终一致性审计\n\n- 未生成 `final_consistency.audit.json`。\n"
     lines: list[str] = ["## B.3 最终一致性审计\n"]
@@ -270,7 +324,7 @@ def _render_header() -> str:
     )
 
 
-def build_summary() -> str:
+def build_summary(paths: AuditPaths = DEFAULT_PATHS) -> str:
     """构建完整附录字符串。
 
     Args:
@@ -285,14 +339,14 @@ def build_summary() -> str:
 
     sections: Iterable[str] = (
         _render_header(),
-        _render_programmatic_section(),
-        _render_chapter_audits_section(_collect_chapter_audit_files()),
-        _render_final_audit_section(),
+        _render_programmatic_section(paths),
+        _render_chapter_audits_section(_collect_chapter_audit_files(paths), paths),
+        _render_final_audit_section(paths),
     )
     return "\n".join(section.rstrip() + "\n" for section in sections)
 
 
-def _has_any_audit_input() -> bool:
+def _has_any_audit_input(paths: AuditPaths = DEFAULT_PATHS) -> bool:
     """判定是否存在任何可聚合的审计输入。
 
     Args:
@@ -305,16 +359,16 @@ def _has_any_audit_input() -> bool:
         无。
     """
 
-    if PROGRAMMATIC_CHECK_FILE.exists():
+    if paths.programmatic_check_file.exists():
         return True
-    if FINAL_AUDIT_FILE.exists():
+    if paths.final_audit_file.exists():
         return True
-    if _collect_chapter_audit_files():
+    if _collect_chapter_audit_files(paths):
         return True
     return False
 
 
-def run() -> int:
+def run(root: Path = ROOT) -> int:
     """执行聚合并落盘。
 
     Args:
@@ -327,16 +381,17 @@ def run() -> int:
         OSError: 文件写入失败时由底层抛出。
     """
 
-    AUDITS_DIR.mkdir(parents=True, exist_ok=True)
-    if not _has_any_audit_input():
+    paths = AuditPaths.from_root(root)
+    paths.audits_dir.mkdir(parents=True, exist_ok=True)
+    if not _has_any_audit_input(paths):
         # 无任何审计输入则不生成附录，避免 merge 阶段出现"未生成"的占位附录
-        if AUDIT_SUMMARY_FILE.exists():
-            AUDIT_SUMMARY_FILE.unlink()
+        if paths.audit_summary_file.exists():
+            paths.audit_summary_file.unlink()
         print("[audit_summary] 未发现任何审计输入，跳过附录生成")
         return 0
-    summary = build_summary()
-    AUDIT_SUMMARY_FILE.write_text(summary, encoding="utf-8")
-    print(f"[audit_summary] 已写入 {AUDIT_SUMMARY_FILE.relative_to(ROOT)}")
+    summary = build_summary(paths)
+    paths.audit_summary_file.write_text(summary, encoding="utf-8")
+    print(f"[audit_summary] 已写入 {paths.audit_summary_file.relative_to(paths.root)}")
     return 0
 
 

@@ -25,6 +25,8 @@ import sys
 from pathlib import Path
 from typing import Callable
 
+from pipeline_common import merge_section_texts
+
 ROOT = Path(__file__).resolve().parents[1]
 ROLES_DIR = ROOT / "roles"
 SECTIONS_DIR = ROOT / "output" / "sections"
@@ -256,12 +258,13 @@ def _read_merged_draft() -> str:
 
     if not SECTIONS_DIR.exists():
         return EMPTY_PLACEHOLDER
-    parts: list[str] = []
-    for md_file in sorted(SECTIONS_DIR.glob("*.md")):
-        if md_file.name == ".gitkeep":
-            continue
-        parts.append(md_file.read_text(encoding="utf-8").strip())
-    return "\n\n---\n\n".join(parts) if parts else EMPTY_PLACEHOLDER
+    section_files = [
+        md_file
+        for md_file in sorted(SECTIONS_DIR.glob("*.md"))
+        if md_file.name != ".gitkeep"
+    ]
+    merged = merge_section_texts(section_files)
+    return merged if merged else EMPTY_PLACEHOLDER
 
 
 def _extract_prompt_section(role_file: Path) -> str:
@@ -287,17 +290,17 @@ def _extract_prompt_section(role_file: Path) -> str:
 
 
 def _substitute(template: str, mapping: dict[str, str]) -> str:
-    """把 ``{key}`` 占位符替换为 mapping 中对应文本，最多迭代 5 轮以处理嵌套占位符。
+    """把模板中的 ``{key}`` 占位符单次替换为 mapping 中对应文本。
 
     Args:
         template: 含 ``{key}`` 的模板字符串。
         mapping: 占位符到替换值的字典。
 
     Returns:
-        替换后的字符串；未在 mapping 中的占位符保持原样。
+        替换后的字符串。
 
     Raises:
-        无。
+        ValueError: 模板使用了 mapping 未提供的占位符。
     """
 
     def repl(match: re.Match[str]) -> str:
@@ -305,13 +308,10 @@ def _substitute(template: str, mapping: dict[str, str]) -> str:
         return mapping.get(key, match.group(0))
 
     pattern = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}")
-    current = template
-    for _ in range(5):
-        rendered = pattern.sub(repl, current)
-        if rendered == current:
-            break
-        current = rendered
-    return current
+    missing = sorted(set(pattern.findall(template)) - mapping.keys())
+    if missing:
+        raise ValueError(f"未提供占位符：{', '.join(missing)}")
+    return pattern.sub(repl, template)
 
 
 def _build_infer_mapping() -> dict[str, str]:
@@ -513,7 +513,11 @@ def run(argv: list[str] | None = None) -> int:
     role_file = ROLES_DIR / f"{args.role}.md"
     template = _extract_prompt_section(role_file)
     mapping = ROLE_BUILDERS[args.role](args)
-    rendered = _substitute(template, mapping)
+    try:
+        rendered = _substitute(template, mapping)
+    except ValueError as exc:
+        print(f"[render_role] {exc}", file=sys.stderr)
+        return 3
     sys.stdout.write(rendered)
     if not rendered.endswith("\n"):
         sys.stdout.write("\n")

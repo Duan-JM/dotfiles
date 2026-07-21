@@ -14,22 +14,21 @@
     若没有 ``00`` / ``09`` 章节，按既有 8 章顺序合并；若没有 audits 附录，按既有方式合并。
 """
 
-import glob
-import os
+import argparse
+import sys
+from pathlib import Path
 
-SECTIONS_DIR = "output/sections"
-MERGED_FILE = "output/research_report.md"
-COMPANY_FILE = "input/company.md"
-SEARCH_LOG_FILE = "output/web_search_log.md"
-AUDIT_SUMMARY_FILE = "output/audits/audit_summary.md"
+from audit_summary import run as refresh_audit_summary
+from verify_pipeline import print_validation_result, validate_pipeline
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
-def read_file(file_path):
+def read_file(file_path: Path) -> str:
     """读取文件内容，文件不存在则返回空字符串。"""
-    if not os.path.exists(file_path):
+    if not file_path.exists():
         return ""
-    with open(file_path, "r", encoding="utf-8") as f:
-        return f.read().strip()
+    return file_path.read_text(encoding="utf-8").strip()
 
 
 def extract_field(company_text, header):
@@ -68,24 +67,42 @@ def build_header(company_text):
     return "\n".join(meta_lines)
 
 
-def collect_section_files():
+def collect_section_files(root: Path = ROOT) -> list[Path]:
     """按文件名升序收集所有可合并的章节文件。
 
     返回包含 00_overview / 01..08 / 09_research_decision 等已存在章节的有序列表。
     跳过 .gitkeep 等占位文件。
     """
-    section_files = sorted(glob.glob(os.path.join(SECTIONS_DIR, "*.md")))
-    return [f for f in section_files if not f.endswith(".gitkeep")]
+    sections_dir = root / "output" / "sections"
+    return [
+        path
+        for path in sorted(sections_dir.glob("*.md"))
+        if path.name != ".gitkeep"
+    ]
 
 
-def run_merge():
+def run_merge(*, force: bool = False, root: Path = ROOT) -> bool:
     """合并所有章节文件为完整调研报告。"""
-    company_text = read_file(COMPANY_FILE)
+    root = root.resolve()
+    validation = validate_pipeline(root, force=force)
+    print_validation_result(validation)
+    if not validation.ok:
+        return False
+    if refresh_audit_summary(root) != 0:
+        print("错误: 审计附录生成失败。", file=sys.stderr)
+        return False
+
+    company_file = root / "input" / "company.md"
+    merged_file = root / "output" / "research_report.md"
+    search_log_file = root / "output" / "web_search_log.md"
+    audit_summary_file = root / "output" / "audits" / "audit_summary.md"
+
+    company_text = read_file(company_file)
     if not company_text:
         print("错误: 未找到 input/company.md，请先填写公司信息。")
         return False
 
-    section_files = collect_section_files()
+    section_files = collect_section_files(root)
     if not section_files:
         print("错误: 没有找到已生成的章节文件，请先运行 /company-generate")
         return False
@@ -97,27 +114,43 @@ def run_merge():
             parts.append(content)
 
     # 附录 A：证据库
-    search_log = read_file(SEARCH_LOG_FILE)
+    search_log = read_file(search_log_file)
     if search_log:
         parts.append("# 附录 A · 全网检索证据库\n\n" + search_log)
 
     # 附录 B：审计闭环结果摘要（若已生成）
-    audit_summary = read_file(AUDIT_SUMMARY_FILE)
+    audit_summary = read_file(audit_summary_file)
     if audit_summary:
         parts.append(audit_summary)
 
     merged = "\n\n---\n\n".join(parts)
 
-    os.makedirs(os.path.dirname(MERGED_FILE), exist_ok=True)
-    with open(MERGED_FILE, "w", encoding="utf-8") as f:
-        f.write(merged)
+    merged_file.parent.mkdir(parents=True, exist_ok=True)
+    merged_file.write_text(merged, encoding="utf-8")
 
-    print(f"调研报告已合并到: {MERGED_FILE}")
+    print(f"调研报告已合并到: {merged_file.relative_to(root)}")
     print(f"  - 章节数：{len(section_files)}")
     print(f"  - 证据库附录：{'是' if search_log else '否'}")
     print(f"  - 审计闭环附录：{'是' if audit_summary else '否'}")
     return True
 
 
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="验证并合并公司调研章节")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="仅允许绕过 audit_status=failed；其它闸门仍必须通过",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """CLI 入口。"""
+
+    args = _parse_args(argv)
+    return 0 if run_merge(force=args.force) else 1
+
+
 if __name__ == "__main__":
-    run_merge()
+    sys.exit(main())

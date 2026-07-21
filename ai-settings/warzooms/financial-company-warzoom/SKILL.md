@@ -62,10 +62,16 @@ roles/
   final_audit.md                   # 跨章节一致性审计 role prompt
 scripts/
   check_evidence.py                # 程序化证据 linter（句子级 / 表格行级）
+  pipeline_common.py               # 流水线共享 hash / 章节拼接规则
+  verify_pipeline.py               # 合并前 manifest / hash / 审计硬闸门
   render_role.py                   # 把 roles/<role>.md 渲染为可派发的完整 prompt
   audit_summary.py                 # 把 audits/*.json 聚合成 markdown 附录
   merge.py                         # 合并章节
   convert.sh                       # Markdown → Word
+tests/
+  test_check_evidence.py
+  test_render_role.py
+  test_verify_pipeline.py
 ```
 
 ## Inputs
@@ -418,6 +424,10 @@ rough 模式默认跳过 `04`、`05`、`07`、`08`；若硬伤集中在治理或
 - **C1 (禁词)**：扫描"据称 / 传闻 / 或将 / 据悉 / 应该会 / 业内人士"等弱来源用语。
 - 白名单：年份（`2024 年`）、章节编号（`第 3 章`）、源 ID（`SRC-001`）、股票代码、
   页码、电话号码、ISO 日期。
+- 输出同时记录 `source_log_hash` 与每章 `content_hash`；章节修复或证据库变更后必须重跑，
+  否则合并前检查会判定为 stale。
+- `make check` 使用 `--require-sections --fail-on-error` 严格模式；无章节或存在 error
+  都返回非零。Audit Loop 内直接调用脚本时仍可使用默认诊断模式。
 
 ### Step 2：LLM 审计（`audit` role）
 
@@ -513,6 +523,8 @@ rough 模式默认跳过 `04`、`05`、`07`、`08`；若硬伤集中在治理或
 - rough 模式第 00 / 09 章是否坚持"排除 / 观察池 / 进入深研 / 信息不足"的研究决策，不输出买卖评级或目标价
 
 输出 `output/audits/final_consistency.audit.json`，结构同 Step 2 但作用域为全文。
+审计通过后，把当前按文件名排序、以 `\n\n---\n\n` 拼接的章节正文 SHA-256 写入
+`manifest.final_audit.sections_hash`。
 
 ## Subagent Dispatch（子代理派发）
 
@@ -583,12 +595,25 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 4. rough 模式默认写第 00 章与第 09 章；short / deep 模式仅在开启 `--with-decision` 时写第 09 章
 5. short / deep 模式若开启 `--with-overview`，最后回填第 00 章 + 走一次 Audit Loop
 6. 执行 Step 5 最终一致性审计
-7. 运行 `python3 scripts/merge.py` 合并文档
+7. 运行 `make merge`；它会先验证流水线、刷新审计附录，再合并文档
 8. 运行 `bash scripts/convert.sh` 转 Word
 9. 若缺少 pandoc，明确提示 `brew install pandoc`，但不要阻断前面已完成的产物
 
 `/company-all --fast` 模式：跳过 Audit Loop 与最终一致性审计；仍跑程序化预审作为最低红线。
 适合"先看草稿、后续再补审"的场景。
+
+## Long-running Stop Policy
+
+长流程每完成一个 phase 或一次修复后记录 checkpoint。命中任一条件时必须停止派发新任务，
+把 `manifest.run_status` 设为 `blocked`，写入 `blocked_reason` 并向用户展示当前状态：
+
+1. **连续两个 checkpoint 无进展**：SRC 数、facts 数、章节状态、审计状态均未变化。
+2. **重复同一失败**：相同错误、堆栈或失败断言连续出现 3 次。
+3. **预算耗尽**：超过 `input/company.md` 配置的时间 / Token / API 成本预算；未填写时，
+   rough / short / deep 的默认时长分别为 45 / 90 / 180 分钟。
+4. **外部阻塞**：缺凭证、网络不可达、目标分支冲突、依赖锁无法解决。
+
+停止后不得自动重试，也不得用 `--force` 绕过；`--force` 只处理已有章节的失败审计。
 
 ## web_search_log 模板
 
@@ -625,7 +650,13 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 ```json
 {
   "report_mode": "rough | short | deep",
-  "workflow_mode": "full",
+  "workflow_mode": "full | fast",
+  "run_status": "running | completed | blocked",
+  "blocked_reason": null,
+  "budget": {
+    "wall_clock_minutes": 90,
+    "token_or_cost_limit": null
+  },
   "with_decision": false,
   "with_overview": false,
   "data_as_of": "2026-05-28",
@@ -635,7 +666,9 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
   "sections": {
     "01_company_profile": {
       "status": "generated | skipped | failed",
+      "content_hash": "sha256:...",
       "audit_status": "passed | failed | stale | not_run",
+      "audited_content_hash": "sha256:...",
       "repair_attempts": 1,
       "audit_files": [
         "output/audits/01_company_profile.audit.json",
@@ -646,6 +679,7 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
   },
   "final_audit": {
     "status": "passed | failed | not_run",
+    "sections_hash": "sha256:...",
     "audit_file": "output/audits/final_consistency.audit.json",
     "last_updated": "2026-05-28T11:05:42Z"
   }
@@ -654,11 +688,24 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 
 含义：
 
-- `status` = `generated` 表示章节正文存在；`failed` 表示重试 3 次仍未通过；`skipped` 表示
-  用户用 `--fast` 跳过该章。
+- `run_status` 只有在全部必需章节与对应检查完成后才能写 `completed`；命中停止条件写
+  `blocked`，并在 `blocked_reason` 记录可操作原因。
+- `status` = `generated` 表示章节正文存在；`failed` 表示生成失败；`skipped` 仅用于当前
+  报告模式不要求的章节，不能替代必需章节。
+- `content_hash` 是章节文件原始字节的 SHA-256；每次写作、repair、regenerate 后更新。
+- `audited_content_hash` 只在该版本正文 audit 通过后写入，必须与当前 `content_hash` 一致。
 - `audit_status` = `stale` 当 `source_log_hash` 或 `facts_hash` 与上次审计时不一致——
   此时合并前必须重审。
 - `repair_attempts` 达到 3 后**禁止**继续自动修复，必须把违规清单展示给用户由用户决定。
+- `final_audit.sections_hash` 使用 `scripts/pipeline_common.py` 的章节拼接规则计算；任何章节
+  变化都会使最终审计失效。
+- `workflow_mode=fast` 可跳过单章与最终 LLM 审计，但程序化检查必须覆盖全部必需章节且
+  不得存在 error。
+
+合并前运行 `python3 scripts/verify_pipeline.py`。它会强制检查输入模式与日期、必需文件、
+三类来源 hash、严格章节集合、程序化检查新鲜度、单章审计与最终审计。`--force` 仅绕过
+已有合法 audit JSON 的 `audit_status=failed`；缺审计产物、缺章节、hash 不一致、
+`not_run/stale`、程序化 error 或最终审计失败均不可绕过。
 
 ## Output Checklist
 
@@ -689,10 +736,14 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 ## Useful Commands
 
 ```bash
-make check                                          # 跑程序化 evidence linter
+make verify                                         # 跑仓库级单元测试（无需生成报告）
+make check                                          # 严格 evidence 检查；无章节或 error 时失败
+make pipeline-check                                 # 校验 manifest / hash / 章节 / 审计闸门
+make pipeline-check FORCE=1                         # 仅绕过 audit_status=failed
 make render-role ROLE=audit CHAPTER=03_financials   # 渲染指定 role 的完整 prompt 到 stdout
 make audit-summary                                  # 把 audits/*.json 聚合成 markdown 附录
-make merge                                          # 合并各章节（含审计附录）
+make merge                                          # 先校验再合并各章节（含审计附录）
+make merge FORCE=1                                  # 仅绕过 audit_status=failed
 make docx                                           # 转 Word
 make clean                                          # 清理所有生成文件
 make clean-audits                                   # 仅清理 audits/ 目录

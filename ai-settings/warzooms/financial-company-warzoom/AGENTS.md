@@ -62,10 +62,16 @@ roles/
                                    # 审计闭环各 role 的独立 prompt 文件
 scripts/
   check_evidence.py                # 程序化 evidence linter
+  pipeline_common.py               # 共享 hash / 章节拼接规则
+  verify_pipeline.py               # 合并前 manifest / hash / 审计硬闸门
   render_role.py                   # 把 roles/<role>.md 渲染为可派发的完整 prompt
   audit_summary.py                 # 聚合 audits/*.json 写附录
   merge.py
   convert.sh
+tests/
+  test_check_evidence.py
+  test_render_role.py
+  test_verify_pipeline.py
 ```
 
 ## 可用 Skills 与命令
@@ -88,7 +94,8 @@ scripts/
 - `--fast` — 跳过 audit / confirm / repair（仍跑程序化预审作为最低红线）
 - `--with-decision` — short / deep 模式额外生成第 09 章「研究决策章」；rough 模式默认生成
 - `--with-overview` — short / deep 模式额外生成第 00 章「投资要点概览」（最后回填）；rough 模式第 00 章为一页纸闸门
-- `--force` — 在某些章节 audit 失败的情况下仍允许合并
+- `--force` — 仅允许绕过已有合法 audit JSON、且明确标记为 `audit_status=failed` 的章节；
+  缺审计产物、缺章节、过期 hash、`not_run/stale` 或程序化 error 仍禁止合并
 
 ## 子代理派发（Copilot CLI 主路径）
 
@@ -145,6 +152,19 @@ scripts/
 
 详细规则、JSON schema、`manifest.json` 状态机请见根目录的 `SKILL.md`。
 
+## 全流程硬停止条件
+
+`/company-all` 与其它长流程命中任一条件后必须停止派发新任务，把
+`manifest.run_status` 设为 `blocked` 并写入 `blocked_reason`：
+
+1. 连续两个 checkpoint 的 SRC 数、facts 数、章节状态与审计状态均无进展。
+2. 同一错误、堆栈或失败断言连续出现 3 次。
+3. 超过 `input/company.md` 配置的时间 / Token / API 成本预算；默认时长为
+   rough 45 分钟、short 90 分钟、deep 180 分钟。
+4. 出现缺凭证、网络不可达、目标分支冲突、依赖锁无法解决等外部阻塞。
+
+命中后向用户展示当前 manifest 与阻塞原因，不得自动重试或用 `--force` 绕过。
+
 ## 角色边界（必读）
 
 | 角色 | 可写文件 | 可联网 | 输入 | 输出 |
@@ -163,10 +183,14 @@ scripts/
 ## 工具命令
 
 ```bash
-make check                                            # 程序化 evidence linter
+make verify                                           # 仓库级单元测试（无需生成报告）
+make check                                            # 严格 evidence 检查；无章节或 error 时失败
+make pipeline-check                                   # 校验 manifest / hash / 章节 / 审计闸门
+make pipeline-check FORCE=1                           # 仅绕过 audit_status=failed
 make render-role ROLE=audit CHAPTER=03_financials     # 渲染指定 role prompt 到 stdout
 make audit-summary                                    # 聚合 audits/*.json 写 markdown 附录
-make merge                                            # 合并各章节
+make merge                                            # 先校验再合并各章节
+make merge FORCE=1                                    # 仅绕过 audit_status=failed
 make docx                                             # 转 Word
 make clean                                            # 清理所有生成文件
 make clean-audits                                     # 仅清理 audits/
@@ -185,7 +209,8 @@ Copilot CLI 主代理可直接捕获 `python3 scripts/render_role.py <role> [--c
      subagent 派发用 `task` 工具 + `scripts/render_role.py`
    - **Claude Code**：可注册同名 slash command，或直接让主代理执行
 4. 一键完成：触发 `/company-all`；粗读公司建议在 `input/company.md` 选择 `rough`；short / deep 如需研究决策章与概览页，用 `/company-all --with-decision --with-overview`
-5. 或分步执行：先 `/company-search`，再 `/company-infer`，再 `/company-generate`，最后 `make merge && make docx`
+5. 或分步执行：先 `/company-search`，再 `/company-infer`，再 `/company-generate`，最后
+   `make pipeline-check && make merge && make docx`
 
 ## 数据规范
 
