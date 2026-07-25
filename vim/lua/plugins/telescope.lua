@@ -1,3 +1,9 @@
+local function search_root()
+	return vim.fs.root(0, ".git")
+		or vim.fs.root(0, { "pyproject.toml", "package.json", "Cargo.toml", "go.mod" })
+		or vim.fn.getcwd()
+end
+
 return {
 	{
 		"nvim-telescope/telescope.nvim",
@@ -17,8 +23,20 @@ return {
 		},
 		keys = {
 			{ "<C-p>",      "<cmd>Telescope find_files<cr>",               desc = "Find files" },
-			{ "<leader>ff", "<cmd>Telescope find_files<cr>",               desc = "Find files" },
-			{ "<leader>fg", "<cmd>Telescope live_grep<cr>",                desc = "Live grep" },
+			{
+				"<leader>ff",
+				function()
+					require("telescope.builtin").find_files({ cwd = search_root() })
+				end,
+				desc = "Find files",
+			},
+			{
+				"<leader>fg",
+				function()
+					require("telescope.builtin").live_grep({ cwd = search_root() })
+				end,
+				desc = "Live grep",
+			},
 			{ "<leader>fb", "<cmd>Telescope buffers<cr>",                  desc = "Buffers" },
 			{ "<leader>fh", "<cmd>Telescope help_tags<cr>",                desc = "Help tags" },
 			{ "<leader>fl", "<cmd>Telescope current_buffer_fuzzy_find<cr>", desc = "Search lines in buffer" },

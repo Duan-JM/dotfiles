@@ -1,5 +1,5 @@
 # Temporary Settings
-alias copilot='copilot --yolo'
+alias copilot='COPILOT_TASK_WAIT_TIMEOUT_SECONDS=600 copilot --yolo --max-autopilot-continues 2000'
 alias github='cd ~/Downloads/github-repos'
 alias zshrc='vim ~/.zshrc'
 alias vimrc='vim ~/.vimrc'
@@ -73,4 +73,10 @@ function gcn() {
   remain_str=${git_url##*https://github.com/}
   head_str="https://github.com.cnpmjs.org/"
   `git clone ${head_str}${remain_str}`
+}
+
+function gh() {
+  HTTPS_PROXY="http://127.0.0.1:8234" \
+  HTTP_PROXY="http://127.0.0.1:8324" \
+  command gh "$@"
 }
