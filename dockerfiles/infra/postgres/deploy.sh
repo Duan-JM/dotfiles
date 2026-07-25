@@ -67,11 +67,23 @@ wait_healthy() {
   exit 1
 }
 
+run_start_basebackup() {
+  if [ "${BASEBACKUP_ON_START:-true}" != "true" ]; then
+    return 0
+  fi
+
+  : "${REPLICATION_USER:?Set REPLICATION_USER in .env}"
+  : "${REPLICATION_PASSWORD:?Set REPLICATION_PASSWORD in .env}"
+  printf 'Creating startup physical base backup...\n'
+  $COMPOSE exec -T postgres-backup /scripts/container-backup.sh base
+}
+
 case "${1:-help}" in
   start)
     require_db_env
     $COMPOSE up -d
     wait_healthy
+    run_start_basebackup
     ;;
   stop)
     $COMPOSE down

@@ -14,9 +14,9 @@ vi .env
 ## Operations
 
 ```sh
-./deploy.sh backup              # compressed pg_dump backup
+./deploy.sh backup              # compressed pg_dump backups for all databases
 ./deploy.sh basebackup          # physical base backup with WAL stream
-./deploy.sh backup-now          # logical backup from the backup sidecar
+./deploy.sh backup-now          # all-database logical backup from the backup sidecar
 ./deploy.sh basebackup-now      # physical backup from the backup sidecar
 ./deploy.sh restore <file.dump> # restore a logical backup
 ./deploy.sh reload              # reload postgresql.conf
@@ -55,9 +55,10 @@ Automatic backups are managed by the lightweight `postgres-backup` container, so
 
 Defaults:
 
-- logical backup: every day at 02:15, written to `./backups/logical`
+- logical backup: every connectable non-template database at 02:15 daily, written to `./backups/logical`
+- startup physical base backup: after every successful `./deploy.sh start`
 - physical base backup: every Sunday at 03:15, written to `./backups/base`
-- retention: logical backups 14 days, base backups 7 days
+- retention: logical and physical backups 7 days
 
 Tune these in `.env`:
 
@@ -66,7 +67,8 @@ LOGICAL_BACKUP_ENABLED=true
 LOGICAL_BACKUP_CRON='15 2 * * *'
 BASEBACKUP_ENABLED=true
 BASEBACKUP_CRON='15 3 * * 0'
-BACKUP_RETENTION_DAYS=14
+BASEBACKUP_ON_START=true
+BACKUP_RETENTION_DAYS=7
 BASEBACKUP_RETENTION_DAYS=7
 ```
 
