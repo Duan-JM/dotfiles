@@ -52,7 +52,7 @@ macos_install() {
   ensure_brew
 
   # Core packages (treesitter / telescope / LSP tooling all want these).
-  local pkgs=(neovim node git python3 ripgrep fd)
+  local pkgs=(neovim node go git python3 ripgrep fd)
   for pkg in "${pkgs[@]}"; do
     brew_install_if_missing "$pkg"
   done
@@ -72,7 +72,7 @@ ubuntu_install() {
   ${COMMAND_PREFIX} apt-get update -y
 
   local pkgs=(
-    curl make git python3-pip ripgrep fd-find
+    curl make git python3-pip ripgrep fd-find golang-go
     autoconf autogen pkg-config libjansson-dev
     software-properties-common
   )

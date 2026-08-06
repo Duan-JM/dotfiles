@@ -16,6 +16,13 @@ return {
 		event = { "BufReadPre", "BufNewFile" },
 		dependencies = {
 			"williamboman/mason.nvim",
+			{
+				"mason-org/mason-lspconfig.nvim",
+				opts = {
+					ensure_installed = { "gopls" },
+					automatic_enable = false,
+				},
+			},
 			"hrsh7th/cmp-nvim-lsp",
 		},
 		config = function()
@@ -64,6 +71,9 @@ return {
 					end,
 				})
 			end
+
+			-- mason-lspconfig installs gopls and exposes it on Mason's PATH.
+			vim.lsp.enable("gopls")
 
 			-- Buffer-local mappings on LSP attach.
 			vim.api.nvim_create_autocmd("LspAttach", {

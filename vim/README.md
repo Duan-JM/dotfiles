@@ -11,14 +11,15 @@ bash ./install.sh ""        # disable sudo prefix when running as root
 
 The script:
 
-1. Installs Neovim, Node.js, Git, ripgrep, fd, Python, and pynvim. On macOS it
-   also installs prettier, isort, stylua, black, and google-java-format.
+1. Installs Neovim, Node.js, Go, Git, ripgrep, fd, Python, and pynvim. On macOS
+   it also installs prettier, isort, stylua, black, and google-java-format.
 2. Backs up any existing `~/.vim`, `~/.vimrc`, `~/.config/nvim` with a
    timestamp suffix.
 3. **Symlinks** this directory to `~/.config/nvim` (so future `git pull`s take
    effect immediately; there is no need to re-run the script).
 
-On first `nvim` launch, lazy.nvim will clone and set up every plugin.
+On first `nvim` launch, lazy.nvim will clone and set up every plugin. Mason
+will also install `gopls` automatically for Go LSP support.
 
 ## Layout
 
@@ -41,7 +42,7 @@ init.lua
     ├── git.lua             gitsigns + vim-fugitive
     ├── telescope.lua       fuzzy finder
     ├── formatting.lua      conform.nvim (format-on-save)
-    └── lsp/init.lua        mason + nvim-lspconfig + nvim-cmp + LuaSnip + jdtls
+    └── lsp/init.lua        mason + nvim-lspconfig + gopls + nvim-cmp + LuaSnip + jdtls
 ```
 
 ## Key Bindings
