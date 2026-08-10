@@ -11,6 +11,7 @@
   "lazy.nvim": "folke/lazy.nvim",
   "lualine.nvim": "nvim-lualine/lualine.nvim",
   "luasnip-snippets": "mireq/luasnip-snippets",
+  "mason-lspconfig.nvim": "mason-org/mason-lspconfig.nvim",
   "mason.nvim": "williamboman/mason.nvim",
   "neo-tree.nvim": "nvim-neo-tree/neo-tree.nvim",
   "nui.nvim": "MunifTanjim/nui.nvim",

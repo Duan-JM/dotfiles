@@ -45,7 +45,7 @@ docker run --rm -t --network none \
     zsh -lic "test \"\${LC_ALL}\" = C.UTF-8"
 
     assert_ops_commands_absent() {
-      for command in psql redis-cli kcat kaf pgcli iredis ncat socat mtr trip dig nslookup nmap jq yq xh; do
+      for command in psql redis-cli kcat kaf esctl pgcli iredis ncat socat mtr trip dig nslookup nmap jq yq xh; do
         ! command -v "${command}" >/dev/null
       done
     }
@@ -97,7 +97,7 @@ docker run --rm -t --network none \
       ops)
         for command in \
           psql redis-cli kcat kaf pgcli iredis ncat socat mtr trip dig \
-          nslookup ip ss ping nmap jq yq ssh openssl xh; do
+          nslookup ip ss ping nmap esctl jq yq ssh openssl xh; do
           command -v "${command}" >/dev/null
         done
 
@@ -116,6 +116,7 @@ docker run --rm -t --network none \
         ssh -V
         openssl version
         xh --version
+        ES_URI=http://127.0.0.1:1 ES_USER=smoke ES_TOKEN=smoke esctl version
 
         ! timeout 5 psql "postgresql://postgres@127.0.0.1:1/postgres?connect_timeout=1" \
           -c "select 1"

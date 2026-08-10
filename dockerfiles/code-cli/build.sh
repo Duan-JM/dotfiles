@@ -3,9 +3,9 @@
 # Build the Alpine-based code-cli image.
 #
 # Usage:
-#   bash docker_files/code-cli/build.sh
-#   VARIANT=python bash docker_files/code-cli/build.sh
-#   PLATFORM=linux/amd64 VARIANT=rust bash docker_files/code-cli/build.sh
+#   bash dockerfiles/code-cli/build.sh
+#   VARIANT=python bash dockerfiles/code-cli/build.sh
+#   PLATFORM=linux/amd64 VARIANT=rust bash dockerfiles/code-cli/build.sh
 
 set -euo pipefail
 
