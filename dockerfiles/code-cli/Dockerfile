@@ -29,11 +29,11 @@ RUN apk_add_with_retry() { \
       tree-sitter-cli
 
 COPY vim/lazy-lock.json /opt/dotfiles/vim/lazy-lock.json
-COPY docker_files/code-cli/install-nvim-plugins.py /usr/local/bin/install-nvim-plugins
-COPY docker_files/code-cli/nvim-plugin-repositories.json /opt/code-cli/nvim-plugin-repositories.json
-COPY docker_files/code-cli/verify-nvim-plugins.py /usr/local/bin/verify-nvim-plugins
-COPY docker_files/code-cli/runtime-snapshot-lock.json /opt/code-cli/runtime-snapshot-lock.json
-COPY docker_files/code-cli/runtime-snapshot-repositories.json /opt/code-cli/runtime-snapshot-repositories.json
+COPY dockerfiles/code-cli/install-nvim-plugins.py /usr/local/bin/install-nvim-plugins
+COPY dockerfiles/code-cli/nvim-plugin-repositories.json /opt/code-cli/nvim-plugin-repositories.json
+COPY dockerfiles/code-cli/verify-nvim-plugins.py /usr/local/bin/verify-nvim-plugins
+COPY dockerfiles/code-cli/runtime-snapshot-lock.json /opt/code-cli/runtime-snapshot-lock.json
+COPY dockerfiles/code-cli/runtime-snapshot-repositories.json /opt/code-cli/runtime-snapshot-repositories.json
 
 RUN git config --global http.version HTTP/1.1 \
     && mkdir -p /root/.local/share/nvim/lazy \
@@ -94,6 +94,9 @@ ARG KAF_SHA256_ARM64=8bcb6738652088f1b3d59ff4d244f5e5ce5ae0ae29c6e7caa6b255abd82
 ARG TRIPPY_VERSION=0.13.0
 ARG TRIPPY_SHA256_AMD64=aa2b7b2a0773f3cc04da691100419049950b690fe3736d25e24ac955b63d6056
 ARG TRIPPY_SHA256_ARM64=73af939aa94e9e0f07cac2b3c8177e02a6b1c3be88299d85988e02be81ae7004
+ARG ESCTL_VERSION=0.0.27
+ARG ESCTL_SHA256_AMD64=9c569e72522747c023114dec0d977021db8f01f3b065361ae629f700ae6c838e
+ARG ESCTL_SHA256_ARM64=dfad4819340f39633cc4a97e69744a8fddd187816bbe52f3c766114be4285c8f
 
 ENV HOME=/root \
     LANG=C.UTF-8 \
@@ -153,12 +156,16 @@ RUN set -eux; \
             kaf_arch=x86_64; \
             kaf_sha256="${KAF_SHA256_AMD64}"; \
             trippy_arch=x86_64; \
-            trippy_sha256="${TRIPPY_SHA256_AMD64}" ;; \
+            trippy_sha256="${TRIPPY_SHA256_AMD64}"; \
+            esctl_arch=amd64; \
+            esctl_sha256="${ESCTL_SHA256_AMD64}" ;; \
           arm64) \
             kaf_arch=arm64; \
             kaf_sha256="${KAF_SHA256_ARM64}"; \
             trippy_arch=aarch64; \
-            trippy_sha256="${TRIPPY_SHA256_ARM64}" ;; \
+            trippy_sha256="${TRIPPY_SHA256_ARM64}"; \
+            esctl_arch=arm64; \
+            esctl_sha256="${ESCTL_SHA256_ARM64}" ;; \
           *) echo "unsupported ops TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
         esac; \
         workdir="$(mktemp -d)"; \
@@ -176,6 +183,12 @@ RUN set -eux; \
         install -m 0755 \
           "${workdir}/trippy-${TRIPPY_VERSION}-${trippy_arch}-unknown-linux-musl/trip" \
           /usr/local/bin/trip; \
+        curl -fsSL --retry 3 --retry-all-errors \
+          "https://codeberg.org/scip/esctl/releases/download/${ESCTL_VERSION}/esctl_${ESCTL_VERSION}_linux_${esctl_arch}.tar.gz" \
+          -o "${workdir}/esctl.tar.gz"; \
+        echo "${esctl_sha256}  ${workdir}/esctl.tar.gz" | sha256sum -c -; \
+        tar -xzf "${workdir}/esctl.tar.gz" -C "${workdir}" esctl; \
+        install -m 0755 "${workdir}/esctl" /usr/local/bin/esctl; \
         printf '%s\n' \
           'iredis==1.16.0 --hash=sha256:8b51086e5cae9e3d136a74cd9b35c5b75491dcb333d2dae476078094df4cc5d2' \
           'click==8.4.2 --hash=sha256:e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76' \
