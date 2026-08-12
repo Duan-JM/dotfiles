@@ -19,7 +19,7 @@ The script:
    effect immediately; there is no need to re-run the script).
 
 On first `nvim` launch, lazy.nvim will clone and set up every plugin. Mason
-will also install `gopls` automatically for Go LSP support.
+will also install `gopls` for Go LSP support and Delve for Go debugging.
 
 ## Layout
 
@@ -42,6 +42,7 @@ init.lua
     ├── git.lua             gitsigns + vim-fugitive
     ├── telescope.lua       fuzzy finder
     ├── formatting.lua      conform.nvim (format-on-save)
+    ├── debugging.lua       nvim-dap + nvim-dap-go + Delve
     └── lsp/init.lua        mason + nvim-lspconfig + gopls + nvim-cmp + LuaSnip + jdtls
 ```
 
@@ -106,6 +107,18 @@ Inside Telescope: `<C-j/k>` next/prev, `<C-]>` open in tab, `<C-x/v>` h/v split.
 | `]c` / `[c`  | Next / previous hunk (gitsigns)         |
 | `<leader>hs/hr/hp/hb` | Stage/reset/preview/blame hunk |
 
+### Go debugging
+
+| Keys          | Action                              |
+|---------------|-------------------------------------|
+| `<leader>db`  | Toggle breakpoint                   |
+| `<leader>dB`  | Set conditional breakpoint          |
+| `<F5>`        | Start or continue                   |
+| `<F10/F11/F12>` | Step over / into / out            |
+| `<leader>dt`  | Debug the Go test under the cursor  |
+| `<leader>dr`  | Open the debug REPL                 |
+| `<leader>dx`  | Terminate the debug session         |
+
 ### Insert mode
 
 | Keys           | Action                                          |
@@ -120,6 +133,8 @@ Inside Telescope: `<C-j/k>` next/prev, `<C-]>` open in tab, `<C-x/v>` h/v split.
 
 ```
 :Mason                       Manage LSPs / formatters
+:DapContinue                 Start or continue debugging
+:DapToggleBreakpoint        Toggle a breakpoint
 :Telescope                   List all telescope pickers
 :Neotree                     File explorer
 :AerialToggle                Symbol outline
