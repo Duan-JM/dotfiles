@@ -470,12 +470,14 @@ def _scan_c1_in_line(line: str, *, line_number: int) -> list[Issue]:
 def _text_contains_alias(text: str, alias: str) -> bool:
     """判断章节文本是否包含 KPI 语义别名。
 
-    英文别名使用大小写不敏感匹配；中文别名直接做子串匹配。该检查只判断"是否覆盖议题"，
+    英文 / 字母数字别名使用大小写不敏感的 token 边界匹配，避免短 KPI 误命中
+    普通英文单词；中文别名直接做子串匹配。该检查只判断"是否覆盖议题"，
     不判断数字是否正确，也不会生成或补充任何数据。
     """
 
-    if re.search(r"[A-Za-z]", alias):
-        return alias.casefold() in text.casefold()
+    if re.search(r"[A-Za-z0-9]", alias):
+        pattern = rf"(?<![A-Za-z0-9]){re.escape(alias)}(?![A-Za-z0-9])"
+        return re.search(pattern, text, flags=re.IGNORECASE) is not None
     return alias in text
 
 

@@ -123,6 +123,30 @@ class CheckEvidenceTests(unittest.TestCase):
         self.assertEqual(payload["industry_rules"]["selected_rule_ids"], [])
         self.assertEqual(payload["chapters"][0]["issues"], [])
 
+    def test_english_kpi_alias_requires_token_boundary(self) -> None:
+        cases = [
+            ("barriers", "ARR"),
+            ("macroeconomic", "ROE"),
+            ("caching", "CAC"),
+        ]
+
+        for text, alias in cases:
+            with self.subTest(text=text, alias=alias):
+                self.assertFalse(check_evidence._text_contains_alias(text, alias))
+
+    def test_kpi_alias_boundary_keeps_chinese_and_symbol_matches(self) -> None:
+        cases = [
+            ("ARR 增速改善", "ARR"),
+            ("arr增长暂未获取", "ARR"),
+            ("LTV/CAC 高于同业", "LTV/CAC"),
+            ("EV/ARR 估值较低", "EV/ARR"),
+            ("净收入留存暂未获取", "净收入留存"),
+        ]
+
+        for text, alias in cases:
+            with self.subTest(text=text, alias=alias):
+                self.assertTrue(check_evidence._text_contains_alias(text, alias))
+
 
 if __name__ == "__main__":
     unittest.main()
