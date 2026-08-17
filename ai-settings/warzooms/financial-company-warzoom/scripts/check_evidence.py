@@ -11,8 +11,8 @@
     - ``E2``：正文出现的 ``SRC-XXX`` 引用未在 ``output/web_search_log.md`` 中登记。
     - ``C1``：扫描"据称 / 传闻 / 或将 / 据悉 / 应该会 / 业内人士"等弱来源用语。
     - ``S5``：结构性提示。第 08 章必须包含可证伪预期差框架与
-      "内在价值 / 1-3 个月路径 / 研究动作"三分法；第 09 章仅在结论为
-      "观察池 / 进入深研"时要求补充该框架，避免 rough 模式被强制扩写。
+      "内在价值 / 1-3 个月路径 / 研究动作"三分法；第 00 / 09 章仅在结论为
+      "观察池 / 进入深研"时要求补充该框架，其中第 00 章不要求三分法。
 
 白名单（不视为定量断言）：
     - 年份 / 月份 / 日 / 季度（``2024 年``、``Q3``、``2023H2``）
@@ -135,9 +135,11 @@ _DECISION_SPLIT_REQUIRED_TERMS: tuple[str, ...] = (
     "研究动作",
 )
 
-_ACTIVE_RESEARCH_DECISION = re.compile(
-    r"(?:研究结论|初步结论|粗读结论|研究动作|结论)[：:\s｜|]*[^\n。；;]{0,40}(?:观察池|进入深研)"
+_RESEARCH_DECISION_ANCHOR = re.compile(
+    r"(?:研究结论|初步结论|粗读结论|研究动作|结论)\s*(?:[：:｜|]|\|\s*)\s*"
 )
+_RESEARCH_DECISION_VALUES: tuple[str, ...] = ("排除", "观察池", "进入深研", "信息不足")
+_ACTIVE_RESEARCH_DECISION_VALUES = frozenset(("观察池", "进入深研"))
 
 
 @dataclass(frozen=True)
@@ -446,17 +448,52 @@ def _missing_terms(text: str, required_terms: tuple[str, ...]) -> list[str]:
     return [term for term in required_terms if term not in normalized]
 
 
+def _clean_decision_fragment(fragment: str) -> str:
+    """清理结论锚点后的 markdown / 表格噪声，保留结论精确前缀。"""
+
+    cleaned = fragment.strip()
+    previous = None
+    while cleaned != previous:
+        previous = cleaned
+        cleaned = cleaned.strip()
+        cleaned = re.sub(r"^[\s|:：\-—–>「『【\[\(（`*_]+", "", cleaned)
+        cleaned = re.sub(r"^[\s|:：\-—–>」』】\]\)）`*_]+", "", cleaned)
+    return cleaned
+
+
+def _extract_research_decision(text: str) -> str | None:
+    """解析结论锚点后的四选一精确值。
+
+    只接受锚点后紧随的 ``排除 / 观察池 / 进入深研 / 信息不足``，避免把
+    "排除，未达到进入深研标准"中的解释文字误判为 active research decision。
+    """
+
+    for line in text.splitlines():
+        for match in _RESEARCH_DECISION_ANCHOR.finditer(line):
+            fragment = _clean_decision_fragment(line[match.end() :])
+            for value in _RESEARCH_DECISION_VALUES:
+                if fragment.startswith(value):
+                    return value
+    return None
+
+
+def _has_active_research_decision(text: str) -> bool:
+    """返回结论锚点是否精确落在观察池 / 进入深研。"""
+
+    return _extract_research_decision(text) in _ACTIVE_RESEARCH_DECISION_VALUES
+
+
 def _scan_expectation_structure(chapter_path: Path, text: str) -> list[Issue]:
     """扫描预期差框架的结构性缺口。
 
     该规则只输出 warning，供 audit role 复核。第 08 章作为投资论点章始终要求
-    可证伪预期差；第 09 章只有在结论进入"观察池 / 进入深研"时要求，避免
+    可证伪预期差；第 00 / 09 章只有在结论进入"观察池 / 进入深研"时要求，避免
     rough 模式在"排除 / 信息不足"结论下被强制扩写。
     """
 
     chapter = chapter_path.stem
     should_check = chapter == "08_investment_thesis" or (
-        chapter == "09_research_decision" and _ACTIVE_RESEARCH_DECISION.search(text)
+        chapter in {"00_overview", "09_research_decision"} and _has_active_research_decision(text)
     )
     if not should_check:
         return []
@@ -478,7 +515,7 @@ def _scan_expectation_structure(chapter_path: Path, text: str) -> list[Issue]:
         )
 
     missing_split_terms = _missing_terms(text, _DECISION_SPLIT_REQUIRED_TERMS)
-    if missing_split_terms:
+    if chapter != "00_overview" and missing_split_terms:
         issues.append(
             Issue(
                 rule=_PROGRAMMATIC_RULE_S5,
