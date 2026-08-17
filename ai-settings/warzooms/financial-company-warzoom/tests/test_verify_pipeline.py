@@ -17,8 +17,16 @@ from pipeline_common import merge_section_texts, sha256_file, sha256_text  # noq
 
 
 class PipelineFixture:
-    def __init__(self, root: Path) -> None:
+    def __init__(
+        self,
+        root: Path,
+        *,
+        report_mode: str = "short",
+        earnings_baseline: dict[str, object] | None = None,
+    ) -> None:
         self.root = root
+        self.report_mode = report_mode
+        self.earnings_baseline = earnings_baseline
         self.output = root / "output"
         self.sections = self.output / "sections"
         self.audits = self.output / "audits"
@@ -30,7 +38,7 @@ class PipelineFixture:
                 (
                     "- 公司中文名：示例公司",
                     "- 证券代码：000001.SZ",
-                    "- 报告模式：short",
+                    f"- 报告模式：{report_mode}",
                     "- 数据截至日期：2026-07-21",
                 )
             )
@@ -42,9 +50,9 @@ class PipelineFixture:
         self.facets = self.output / "company_facets.md"
         self.search_log.write_text("## SRC-001\n- 标题：示例来源\n", encoding="utf-8")
         self.facts.write_text("| F001 | 营业收入 | 10 | 亿元 | SRC-001 |\n", encoding="utf-8")
-        self.facets.write_text("# 公司画像\n\n- 研究模式：short\n", encoding="utf-8")
+        self.facets.write_text(f"# 公司画像\n\n- 研究模式：{report_mode}\n", encoding="utf-8")
         self.section_ids = verify_pipeline.expected_section_ids(
-            "short",
+            report_mode,
             with_decision=False,
             with_overview=False,
         )
@@ -106,7 +114,7 @@ class PipelineFixture:
             encoding="utf-8",
         )
         manifest: dict[str, object] = {
-            "report_mode": "short",
+            "report_mode": self.report_mode,
             "workflow_mode": "full",
             "run_status": "completed",
             "blocked_reason": None,
@@ -123,6 +131,10 @@ class PipelineFixture:
                 "audit_file": "output/audits/final_consistency.audit.json",
             },
         }
+        if self.report_mode == "earnings":
+            manifest["earnings_baseline"] = self.earnings_baseline or {
+                "type": "first_coverage"
+            }
         (self.output / "manifest.json").write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2),
             encoding="utf-8",
@@ -176,6 +188,95 @@ class VerifyPipelineTests(unittest.TestCase):
 
         self.assertTrue(result.ok)
         self.assertEqual(result.bypassed, ())
+
+    def test_earnings_expected_sections_are_independent_nine_part_set(self) -> None:
+        self.assertEqual(
+            verify_pipeline.expected_section_ids(
+                "earnings",
+                with_decision=True,
+                with_overview=True,
+            ),
+            (
+                "10_earnings_snapshot",
+                "11_earnings_expectation_quality",
+                "12_earnings_segment_kpi",
+                "13_earnings_profit_expense",
+                "14_earnings_cash_capital_allocation",
+                "15_earnings_guidance_call",
+                "16_earnings_competition_market_reaction",
+                "17_earnings_model_valuation_bridge",
+                "18_earnings_thesis_action",
+            ),
+        )
+
+    def test_earnings_first_coverage_pipeline_passes(self) -> None:
+        fixture = PipelineFixture(
+            self.root / "earnings-first",
+            report_mode="earnings",
+            earnings_baseline={"type": "first_coverage"},
+        )
+        fixture.build()
+
+        result = verify_pipeline.validate_pipeline(fixture.root)
+
+        self.assertTrue(result.ok)
+
+    def test_earnings_prior_forecast_allows_only_fixed_statuses(self) -> None:
+        fixture = PipelineFixture(
+            self.root / "earnings-invalid-status",
+            report_mode="earnings",
+            earnings_baseline={
+                "type": "prior_forecast",
+                "prior_forecasts": [
+                    {
+                        "original_forecast": "收入同比增长 10%",
+                        "status": "超预期",
+                    }
+                ],
+            },
+        )
+        fixture.build()
+
+        result = verify_pipeline.validate_pipeline(fixture.root)
+
+        self.assertFalse(result.ok)
+        self.assertIn("EARNINGS_FORECAST_STATUS", {issue.code for issue in result.errors})
+
+    def test_earnings_prior_forecast_with_original_forecast_passes(self) -> None:
+        fixture = PipelineFixture(
+            self.root / "earnings-valid-prior",
+            report_mode="earnings",
+            earnings_baseline={
+                "type": "prior_forecast",
+                "prior_forecasts": [
+                    {
+                        "original_forecast": "毛利率改善 1 个百分点",
+                        "status": "部分命中",
+                    }
+                ],
+            },
+        )
+        fixture.build()
+
+        result = verify_pipeline.validate_pipeline(fixture.root)
+
+        self.assertTrue(result.ok)
+
+    def test_earnings_prior_forecast_requires_original_forecast(self) -> None:
+        fixture = PipelineFixture(
+            self.root / "earnings-missing-original",
+            report_mode="earnings",
+            earnings_baseline={
+                "type": "prior_forecast",
+                "prior_forecasts": [{"status": "无法验证"}],
+            },
+        )
+        fixture.build()
+
+        result = verify_pipeline.validate_pipeline(fixture.root)
+
+        self.assertFalse(result.ok)
+        self.assertIn("EARNINGS_BASELINE", {issue.code for issue in result.errors})
 
     def test_missing_expected_section_fails(self) -> None:
         (self.fixture.sections / "03_financials.md").unlink()

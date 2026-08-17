@@ -72,6 +72,7 @@ output： output/audits/<chapter_id>.audit.json
 | S2 | style | 主观夸饰用语（"显著领先"、"护城河深厚"等无证据强判断） |
 | S3 | style | 必备结构缺失（如第 03 章缺 markdown 表格、deep/short 的第 02 章缺 mermaid 图） |
 | S4 | style | rough / 决策章缺价格闸门、底的类型、硬伤快筛、edge 自检或 stop/go 结论 |
+| S5 | style | earnings 财报模式缺首次覆盖基线，或旧预测未保留原文 / 验证状态不属于 `命中 / 部分命中 / 未命中 / 无法验证` |
 
 ### 做什么
 

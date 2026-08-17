@@ -49,6 +49,15 @@ output/
     07_swot.md                     # short 模式可省略
     08_investment_thesis.md
     09_research_decision.md        # rough 默认；short/deep 可选：研究决策章（--with-decision）
+    10_earnings_snapshot.md        # earnings 模式：结论快照
+    11_earnings_expectation_quality.md # earnings 模式：预期差 / 质量
+    12_earnings_segment_kpi.md     # earnings 模式：分部 KPI
+    13_earnings_profit_expense.md  # earnings 模式：利润与费用
+    14_earnings_cash_capital_allocation.md # earnings 模式：现金流与资本配置
+    15_earnings_guidance_call.md   # earnings 模式：指引 / 电话会
+    16_earnings_competition_market_reaction.md # earnings 模式：竞争和市场反应
+    17_earnings_model_valuation_bridge.md # earnings 模式：模型估值变化桥
+    18_earnings_thesis_action.md   # earnings 模式：论点更新与行动清单
   research_report.md               # 合并后的完整调研报告
   research_report.docx             # Word 版本
 templates/
@@ -78,7 +87,7 @@ tests/
 
 1. 读取 `input/company.md` 完整内容，提取：
    - 公司中英文名、证券代码、交易所、官网
-   - 报告参数：`report_mode`（`rough` / `short` / `deep`）、数据截至日期、币种与单位、会计口径
+   - 报告参数：`report_mode`（`rough` / `short` / `deep` / `earnings`）、数据截至日期、币种与单位、会计口径
    - 粗读 / 价值闸门参数：研究流派、是否价格先行、关注的底、默认否决条件、期望输出
    - 研究重点与关键问题
    - 用户指定的可比公司
@@ -138,6 +147,13 @@ tests/
    - 近 5-10 年派息 / 回购连续性与股本摊薄趋势
    - 硬伤快筛：合股 + 折价供股循环、核数师辞任 / 保留意见、监管处分、资金占用、违规担保、存贷双高、异常关联交易、低价私有化劣迹
    缺失项写"暂未获取"，不得用不明来源估算。
+
+0.6. **财报模式事实优先**：若 `report_mode=earnings`，只为财报点评沉淀必要事实：
+   - 本期财报公告、业绩材料、电话会 / 指引、公司旧指引与用户旧预测
+   - 市场预期、分部 KPI、利润率、费用率、现金流、资本开支、分红回购、现金与债务
+   - 同业财报和财报后 1-3 个交易日市场反应
+   - 无历史预测时，在 facts.md 标注"首次覆盖基线"；有旧预测时逐条保留原预测文本，验证状态只能写：
+     `命中 / 部分命中 / 未命中 / 无法验证`
 
 1. **并行**沿以下维度搜集（可以同时发起多个 web_search 调用）：
    - 公司识别与股权（年报封面、招股书、工商信息）
@@ -392,6 +408,39 @@ rough 模式默认跳过 `04`、`05`、`07`、`08`；若硬伤集中在治理或
 只生成 `01`, `02`, `03`, `06`, `08` 五章，长度各砍半，跳过 `04`、`05`、`07`（行业 / 竞争内容可并入 `02`）。
 若报告用途是投资初筛但用户未选择 `rough`，第 `08` 章仍必须包含"底的类型 + 硬伤快筛 + edge 自检"。
 
+### earnings 模式（9 段财报点评，观察池 / 持续跟踪）
+
+定位于观察池或持续跟踪公司的财报复盘，只回答"本期财报是否改变跟踪优先级、研究论点和下一步动作"，
+不改变 `rough` 默认粗读闸门，不生成 deep 式完整公司故事。
+
+生成顺序：
+
+1. `10_earnings_snapshot.md` — 结论快照
+   - 财报期、披露日期、一句话结论、观察池状态变化、3 个以内关键超 / 低预期点
+2. `11_earnings_expectation_quality.md` — 预期差 / 财报质量
+   - 对照市场预期、公司指引、用户旧预测与实际结果
+   - 无历史基线时明确"首次覆盖基线"
+   - 有旧预测时保留原预测文本；验证状态只允许 `命中 / 部分命中 / 未命中 / 无法验证`
+3. `12_earnings_segment_kpi.md` — 分部与 KPI
+   - 分业务、地区、产品、订单、销量、价格、用户、产能利用率等行业 KPI
+4. `13_earnings_profit_expense.md` — 利润与费用
+   - 毛利率、经营利润率、净利率、研发 / 销售 / 管理 / 财务费用率、一次性项目
+5. `14_earnings_cash_capital_allocation.md` — 现金流与资本配置
+   - 经营现金流、自由现金流、营运资本、资本开支、分红、回购、现金和债务
+6. `15_earnings_guidance_call.md` — 指引与电话会
+   - 管理层指引、口径变化、电话会问答增量信息与待验证问题
+7. `16_earnings_competition_market_reaction.md` — 竞争、同业与市场反应
+   - 同业财报、行业景气、财报后 1-3 个交易日股价 / 成交 / 估值变化
+8. `17_earnings_model_valuation_bridge.md` — 模型与估值变化桥
+   - 从旧模型到新模型的收入、毛利率、费用、现金流、估值倍数变化；无旧模型时建立首次覆盖模型基线
+9. `18_earnings_thesis_action.md` — 论点更新与行动清单
+   - 多空论点变化、观察池优先级、下一期 KPI、触发事件与行动清单；不得输出评级或买卖建议
+
+manifest 要求：`manifest.report_mode = "earnings"`；`manifest.earnings_baseline.type`
+必须为 `first_coverage` 或 `prior_forecast`。若为 `prior_forecast`，`prior_forecasts[]`
+必须保留 `original_forecast` 原预测文本，且 `status` 只能为
+`命中 / 部分命中 / 未命中 / 无法验证`。
+
 ### 可选增强章节（默认关闭）
 
 - **第 09 章 `09_research_decision.md` — 是否值得继续深研与待验证问题**
@@ -465,6 +514,7 @@ rough 模式默认跳过 `04`、`05`、`07`、`08`；若硬伤集中在治理或
 | `S2` | style | 主观夸饰用语（"显著领先"、"护城河深厚"无证据） | patch |
 | `S3` | style | 必备结构缺失（如 03 章无 markdown 表格、deep/short 的 02 章无 mermaid 图） | regenerate |
 | `S4` | style | rough / 决策章缺价格闸门、底的类型、硬伤快筛、edge 自检或 stop/go 结论 | patch / regenerate |
+| `S5` | style | earnings 模式缺首次覆盖基线，或旧预测未保留原文 / 状态不合法 | patch |
 
 **角色硬约束**：`audit` role 只读，不得调用 web 检索、不得改正文、不得新增证据。
 若文本明确写的是"继续研究触发价 / 观察池触发价"，且上下文说明这只是时间管理阈值、
@@ -505,6 +555,7 @@ rough 模式默认跳过 `04`、`05`、`07`、`08`；若硬伤集中在治理或
 | `confirmed_missing` + `suggested_action=patch` | 改写为"未公开披露"或可证版本 |
 | `S3` 结构性失败 | 派发 `roles/regenerate.md` 整章重写 |
 | `S4` rough / 决策章缺闸门结构 | 可局部补齐则 `repair`；缺整块结构则 `regenerate` |
+| `S5` earnings 基线违规 | 保留原预测、补首次覆盖基线或把状态改为 `命中 / 部分命中 / 未命中 / 无法验证` 之一 |
 | 其它 `patch` | 派发 `roles/repair.md` 做最小局部修复 |
 
 修复完成后**回到 Step 1**重新审计；同一章重试上限 **3 次**，超限在 `manifest.json` 标记
@@ -592,8 +643,8 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 1. 先执行 Search Workflow，生成 `web_search_log.md` + `facts.md`
 2. 执行 Infer Workflow，生成 `company_facets.md`
 3. 执行 Section Workflow + Audit Loop，逐章写作 → 程序化预审 → audit → confirm → repair
-4. rough 模式默认写第 00 章与第 09 章；short / deep 模式仅在开启 `--with-decision` 时写第 09 章
-5. short / deep 模式若开启 `--with-overview`，最后回填第 00 章 + 走一次 Audit Loop
+4. rough 模式默认写第 00 章与第 09 章；earnings 模式写独立 10-18 财报章节；short / deep 模式仅在开启 `--with-decision` 时写第 09 章
+5. short / deep 模式若开启 `--with-overview`，最后回填第 00 章 + 走一次 Audit Loop；earnings 模式忽略该增强章节
 6. 执行 Step 5 最终一致性审计
 7. 运行 `make merge`；它会先验证流水线、刷新审计附录，再合并文档
 8. 运行 `bash scripts/convert.sh` 转 Word
@@ -610,7 +661,7 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 1. **连续两个 checkpoint 无进展**：SRC 数、facts 数、章节状态、审计状态均未变化。
 2. **重复同一失败**：相同错误、堆栈或失败断言连续出现 3 次。
 3. **预算耗尽**：超过 `input/company.md` 配置的时间 / Token / API 成本预算；未填写时，
-   rough / short / deep 的默认时长分别为 45 / 90 / 180 分钟。
+   rough / earnings / short / deep 的默认时长分别为 45 / 60 / 90 / 180 分钟。
 4. **外部阻塞**：缺凭证、网络不可达、目标分支冲突、依赖锁无法解决。
 
 停止后不得自动重试，也不得用 `--force` 绕过；`--force` 只处理已有章节的失败审计。
@@ -649,7 +700,7 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 
 ```json
 {
-  "report_mode": "rough | short | deep",
+  "report_mode": "rough | short | deep | earnings",
   "workflow_mode": "full | fast",
   "run_status": "running | completed | blocked",
   "blocked_reason": null,
@@ -659,6 +710,17 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
   },
   "with_decision": false,
   "with_overview": false,
+  "earnings_baseline": {
+    "type": "first_coverage | prior_forecast",
+    "prior_forecasts": [
+      {
+        "original_forecast": "原预测文本；first_coverage 时可省略",
+        "source_date": "2026-05-28",
+        "status": "命中 | 部分命中 | 未命中 | 无法验证",
+        "evidence": "SRC-001"
+      }
+    ]
+  },
   "data_as_of": "2026-05-28",
   "source_log_hash": "sha256:...",
   "facts_hash": "sha256:...",
@@ -701,6 +763,9 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
   变化都会使最终审计失效。
 - `workflow_mode=fast` 可跳过单章与最终 LLM 审计，但程序化检查必须覆盖全部必需章节且
   不得存在 error。
+- `report_mode=earnings` 时必须写 `earnings_baseline`：首次覆盖用 `type=first_coverage`；
+  有旧预测用 `type=prior_forecast`，并逐条保留 `original_forecast`，`status` 只能为
+  `命中 / 部分命中 / 未命中 / 无法验证`。
 
 合并前运行 `python3 scripts/verify_pipeline.py`。它会强制检查输入模式与日期、必需文件、
 三类来源 hash、严格章节集合、程序化检查新鲜度、单章审计与最终审计。`--force` 仅绕过
@@ -729,6 +794,15 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 - output/sections/07_swot.md                        # deep
 - output/sections/08_investment_thesis.md
 - output/sections/09_research_decision.md           # rough 默认；short/deep 仅当 --with-decision
+- output/sections/10_earnings_snapshot.md           # earnings
+- output/sections/11_earnings_expectation_quality.md # earnings
+- output/sections/12_earnings_segment_kpi.md        # earnings
+- output/sections/13_earnings_profit_expense.md     # earnings
+- output/sections/14_earnings_cash_capital_allocation.md # earnings
+- output/sections/15_earnings_guidance_call.md      # earnings
+- output/sections/16_earnings_competition_market_reaction.md # earnings
+- output/sections/17_earnings_model_valuation_bridge.md # earnings
+- output/sections/18_earnings_thesis_action.md      # earnings
 - output/research_report.md
 - output/research_report.docx
 ```
