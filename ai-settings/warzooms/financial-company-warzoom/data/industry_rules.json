@@ -1,0 +1,191 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "id": "software_subscription",
+      "name": "软件订阅",
+      "business_model_tags": ["软件订阅"],
+      "required_kpi_groups": [
+        {
+          "id": "recurring_revenue_quality",
+          "name": "经常性收入质量",
+          "description": "订阅收入、ARR/MRR、续费或净收入留存等可重复收入质量。",
+          "aliases": ["ARR", "MRR", "订阅收入", "经常性收入", "续费率", "客户留存", "NRR", "净收入留存", "流失率"],
+          "required_in_chapters": ["02_business_model", "03_financials", "08_investment_thesis"]
+        },
+        {
+          "id": "growth_efficiency",
+          "name": "增长效率",
+          "description": "收入增速、销售获客效率、Rule of 40、CAC 回收等增长质量。",
+          "aliases": ["收入增速", "ARR 增速", "Rule of 40", "CAC", "获客成本", "销售费用率", "回本周期"],
+          "required_in_chapters": ["03_financials", "08_investment_thesis"]
+        },
+        {
+          "id": "unit_economics",
+          "name": "单位经济性",
+          "description": "毛利率、LTV/CAC、客单价或客户生命周期价值。",
+          "aliases": ["毛利率", "LTV", "LTV/CAC", "客单价", "ARPU", "生命周期价值"],
+          "required_in_chapters": ["02_business_model", "03_financials"]
+        }
+      ],
+      "preferred_valuation_methods": ["EV/ARR", "EV/Sales", "Rule of 40", "FCF yield"],
+      "key_risks": ["续费率下滑", "获客成本上升", "收入确认激进", "大客户流失", "产品被平台或 AI 替代"],
+      "required_conclusions": ["必须判断增长是否由可重复订阅驱动", "必须说明当前估值是否由 Rule of 40 或现金流支撑"]
+    },
+    {
+      "id": "semiconductor",
+      "name": "半导体",
+      "business_model_tags": ["半导体"],
+      "required_kpi_groups": [
+        {
+          "id": "cycle_and_inventory",
+          "name": "周期与库存",
+          "description": "下游景气、库存水位、订单能见度和价格周期。",
+          "aliases": ["库存", "库存周转", "订单", "在手订单", "产能利用率", "ASP", "价格周期", "景气"],
+          "required_in_chapters": ["02_business_model", "03_financials", "08_investment_thesis"]
+        },
+        {
+          "id": "technology_and_product_mix",
+          "name": "技术与产品结构",
+          "description": "制程、产品代际、良率、研发投入和产品组合升级。",
+          "aliases": ["制程", "良率", "研发费用率", "产品结构", "产品组合", "先进封装", "节点"],
+          "required_in_chapters": ["02_business_model", "04_industry_competition"]
+        },
+        {
+          "id": "capex_and_depreciation",
+          "name": "资本开支与折旧",
+          "description": "产能投资、折旧摊销、资本开支强度和自由现金流压力。",
+          "aliases": ["资本开支", "Capex", "折旧", "摊销", "自由现金流", "产能扩张"],
+          "required_in_chapters": ["03_financials", "08_investment_thesis"]
+        }
+      ],
+      "preferred_valuation_methods": ["EV/EBIT", "EV/EBITDA", "P/B", "周期中枢盈利倍数"],
+      "key_risks": ["库存周期反转", "技术路线落后", "客户集中", "出口管制", "高资本开支拖累 FCF"],
+      "required_conclusions": ["必须判断公司处于上行、下行还是去库存阶段", "必须区分景气高点利润与正常化利润"]
+    },
+    {
+      "id": "bank",
+      "name": "银行",
+      "business_model_tags": ["银行"],
+      "required_kpi_groups": [
+        {
+          "id": "asset_quality",
+          "name": "资产质量",
+          "description": "不良率、关注率、拨备覆盖率、逾期和核销。",
+          "aliases": ["不良率", "不良贷款率", "关注率", "拨备覆盖率", "逾期", "核销", "拨贷比"],
+          "required_in_chapters": ["03_financials", "08_investment_thesis"]
+        },
+        {
+          "id": "profitability_spread",
+          "name": "息差与盈利能力",
+          "description": "净息差、净利差、ROE、ROA 与手续费收入质量。",
+          "aliases": ["净息差", "NIM", "净利差", "ROE", "ROA", "手续费", "非息收入"],
+          "required_in_chapters": ["03_financials", "08_investment_thesis"]
+        },
+        {
+          "id": "capital_and_liquidity",
+          "name": "资本与流动性",
+          "description": "核心一级资本充足率、资本充足率、存贷比和流动性指标。",
+          "aliases": ["核心一级资本", "资本充足率", "CET1", "存贷比", "流动性覆盖率", "LCR"],
+          "required_in_chapters": ["03_financials", "05_management_governance"]
+        }
+      ],
+      "preferred_valuation_methods": ["P/B", "ROE-P/B 框架", "股息率", "拨备后利润"],
+      "key_risks": ["资产质量恶化", "净息差收窄", "资本补充压力", "地方地产或平台敞口", "监管约束"],
+      "required_conclusions": ["必须说明 P/B 折价是否由资产质量或资本约束解释", "必须判断分红是否受资本充足率约束"]
+    },
+    {
+      "id": "consumer",
+      "name": "消费",
+      "business_model_tags": ["零售连锁", "餐饮连锁", "游戏", "文化娱乐", "教育培训"],
+      "required_kpi_groups": [
+        {
+          "id": "demand_and_same_store",
+          "name": "需求与同店",
+          "description": "同店、客流、客单价、复购和动销。",
+          "aliases": ["同店", "SSSG", "客流", "客单价", "复购", "动销", "GMV"],
+          "required_in_chapters": ["02_business_model", "03_financials", "08_investment_thesis"]
+        },
+        {
+          "id": "channel_and_brand",
+          "name": "渠道与品牌",
+          "description": "门店、渠道结构、会员、品牌力和营销效率。",
+          "aliases": ["门店", "渠道", "会员", "品牌", "营销费用率", "经销商", "直营"],
+          "required_in_chapters": ["02_business_model", "04_industry_competition"]
+        },
+        {
+          "id": "margin_and_working_capital",
+          "name": "利润率与营运资本",
+          "description": "毛利率、费用率、库存周转、现金转换。",
+          "aliases": ["毛利率", "费用率", "库存周转", "存货", "现金转换", "经营现金流"],
+          "required_in_chapters": ["03_financials", "08_investment_thesis"]
+        }
+      ],
+      "preferred_valuation_methods": ["P/E", "EV/EBIT", "FCF yield", "同店与门店成熟度情景"],
+      "key_risks": ["需求疲弱", "渠道库存积压", "品牌老化", "食品安全或合规事件", "门店扩张回报下降"],
+      "required_conclusions": ["必须判断增长来自同店、开店、提价还是渠道切换", "必须说明品牌与渠道是否支持持续现金回报"]
+    },
+    {
+      "id": "resource_extraction",
+      "name": "资源开采",
+      "business_model_tags": ["资源开采"],
+      "required_kpi_groups": [
+        {
+          "id": "reserve_and_production",
+          "name": "储量与产量",
+          "description": "资源储量、品位、产量、矿山寿命或采储比。",
+          "aliases": ["储量", "资源量", "品位", "产量", "矿山寿命", "采储比", "权益产量"],
+          "required_in_chapters": ["02_business_model", "03_financials", "08_investment_thesis"]
+        },
+        {
+          "id": "cost_curve",
+          "name": "成本曲线",
+          "description": "现金成本、完全成本、单位成本和行业成本分位。",
+          "aliases": ["现金成本", "完全成本", "单位成本", "AISC", "成本曲线", "成本分位"],
+          "required_in_chapters": ["03_financials", "04_industry_competition"]
+        },
+        {
+          "id": "commodity_price_sensitivity",
+          "name": "商品价格敏感性",
+          "description": "价格假设、盈亏平衡点和资源品价格对利润 / FCF 的敏感性。",
+          "aliases": ["商品价格", "价格敏感", "盈亏平衡", "敏感性", "套保", "实现价格"],
+          "required_in_chapters": ["03_financials", "08_investment_thesis"]
+        }
+      ],
+      "preferred_valuation_methods": ["EV/EBITDA", "NAV", "P/NAV", "周期中枢 FCF yield"],
+      "key_risks": ["商品价格下跌", "资源储量不及预期", "安全环保事故", "矿权或税费变化", "高资本开支"],
+      "required_conclusions": ["必须说明当前利润处于资源品周期的哪个位置", "必须判断底来自资源 NAV、低成本曲线还是现金回报"]
+    },
+    {
+      "id": "heavy_asset_production",
+      "name": "重资产生产",
+      "business_model_tags": ["重资产生产", "硬件制造", "新能源制造", "汽车整车", "汽车零部件"],
+      "required_kpi_groups": [
+        {
+          "id": "capacity_utilization",
+          "name": "产能与利用率",
+          "description": "产能、产量、产能利用率、在建工程和投产节奏。",
+          "aliases": ["产能", "产量", "产能利用率", "开工率", "在建工程", "投产"],
+          "required_in_chapters": ["02_business_model", "03_financials", "08_investment_thesis"]
+        },
+        {
+          "id": "unit_cost_and_margin",
+          "name": "单位成本与利润率",
+          "description": "单位成本、良率、毛利率、吨 / 件利润和规模效应。",
+          "aliases": ["单位成本", "良率", "毛利率", "吨利润", "单车利润", "规模效应", "制造费用"],
+          "required_in_chapters": ["03_financials", "04_industry_competition"]
+        },
+        {
+          "id": "capital_intensity_and_cashflow",
+          "name": "资本强度与现金流",
+          "description": "资本开支、折旧、营运资本、FCF 和净负债。",
+          "aliases": ["资本开支", "Capex", "折旧", "营运资本", "自由现金流", "FCF", "净负债"],
+          "required_in_chapters": ["03_financials", "08_investment_thesis"]
+        }
+      ],
+      "preferred_valuation_methods": ["EV/EBIT", "EV/EBITDA", "P/B", "FCF yield", "重置成本"],
+      "key_risks": ["产能过剩", "价格战", "原材料波动", "高杠杆", "折旧上行侵蚀利润"],
+      "required_conclusions": ["必须判断产能利用率是否足以覆盖折旧和资本成本", "必须说明便宜估值是否被资本开支和净负债抵消"]
+    }
+  ]
+}

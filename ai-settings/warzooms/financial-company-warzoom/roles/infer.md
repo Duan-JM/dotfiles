@@ -20,6 +20,7 @@ output： output/company_facets.md
 | `{extra_sources}` | `input/extra_sources/*.md`（拼接，缺则为空字符串） |
 | `{web_search_log}` | `output/web_search_log.md` |
 | `{facts}` | `output/facts.md` |
+| `{industry_rules}` | `data/industry_rules.json`（机器可检查行业规则包） |
 
 ## Subagent 必须遵守
 
@@ -55,6 +56,9 @@ output： output/company_facets.md
 #### 事实表
 {facts}
 
+#### 行业规则包
+{industry_rules}
+
 ### 做什么
 
 - 只从下列候选中选标签，**禁止**自由发散创造新标签：
@@ -67,6 +71,10 @@ output： output/company_facets.md
     高研发占比 / 产能扩张期 / 整合并购 / 巨额商誉 / 业绩对赌 / 关联交易复杂 /
     同业竞争 / 会计准则切换 / 其它
 - `business_model_tags` 选 1-3 个；`constraint_tags` 选 2-5 个。
+- 根据 `business_model_tags` 与上方行业规则包选择 1-3 个 `industry_rule_id`：
+  - 只有规则的 `business_model_tags` 与公司标签明确匹配时才选择。
+  - 未知、信息不足或高度混合且无法归类时，`selected_rule_ids` 输出空数组，并写明 `fallback_reason`。
+  - 不得为了触发规则而改写业务标签；不得选择超过 3 个规则。
 - 不确定时宁可少选，禁止凑数。
 - 必要时可调用最小检索补判定，但**禁止**展开二轮宽泛研究。
 - 对价值研究镜头必须区分"已有证据"与"信息不足"：缺价格 / 估值 / 股东回报 / 治理硬伤证据时，输出"信息不足"，不要臆断。
@@ -91,6 +99,25 @@ output： output/company_facets.md
 ## constraint_tags
 - TAG_A（一句话理由 + 影响哪一章）
 - TAG_B（一句话理由 + 影响哪一章）
+
+## industry_rule_selection
+```json
+{
+  "selected_rule_ids": ["software_subscription"],
+  "matched_business_model_tags": ["软件订阅"],
+  "fallback_reason": null,
+  "required_kpi_groups_to_cover": [
+    {
+      "rule_id": "software_subscription",
+      "rule_name": "软件订阅",
+      "kpi_groups": ["经常性收入质量", "增长效率", "单位经济性"],
+      "preferred_valuation_methods": ["EV/ARR", "EV/Sales", "Rule of 40", "FCF yield"],
+      "key_risks": ["续费率下滑", "获客成本上升"],
+      "required_conclusions": ["必须判断增长是否由可重复订阅驱动"]
+    }
+  ]
+}
+```
 
 ## value_research_lens
 - 粗读结论倾向：排除 / 观察池 / 进入深研 / 信息不足（一句话理由）
@@ -120,5 +147,6 @@ output： output/company_facets.md
 - 当 `value_research_lens.硬伤快筛` 为 `存疑` 或 `命中` → 第 06 / 09 章必须展开对应公告、监管或治理证据
 - 当 `value_research_lens.底的类型` 为 `现金回报底` → 第 03 / 09 章必须核验分红 + 回购是否被 FCF 覆盖、股本是否真实下降
 - 当 `value_research_lens.底的类型` 为 `正常化盈利底` 且命中 `周期股` → 第 03 / 09 章必须提示正常化利润或低谷利润口径
+- 当 `industry_rule_selection.selected_rule_ids` 非空 → 对应规则的必备 KPI 语义组必须进入第 02 / 03 / 08 / 09 章的写作检查清单；证据不足时写"暂未获取"，不得编造数字
 - …（按命中的 tags 增删）
 ```

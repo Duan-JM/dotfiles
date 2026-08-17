@@ -53,6 +53,8 @@ output/
   research_report.docx             # Word 版本
 templates/
   report_template.md               # 章节级 prompt 模板（CHAPTER_00 / 01..08 / 09 + SEARCH）
+data/
+  industry_rules.json               # 机器可检查行业规则包（KPI / 估值方法 / 风险 / 必写结论）
 roles/
   infer.md                         # 公司画像推理 role prompt
   audit.md                         # 单章审计 role prompt
@@ -61,6 +63,7 @@ roles/
   regenerate.md                    # 整章重建 role prompt
   final_audit.md                   # 跨章节一致性审计 role prompt
 scripts/
+  industry_rules.py                 # 行业规则包加载、schema 校验与 tag 匹配
   check_evidence.py                # 程序化证据 linter（句子级 / 表格行级）
   pipeline_common.py               # 流水线共享 hash / 章节拼接规则
   verify_pipeline.py               # 合并前 manifest / hash / 审计硬闸门
@@ -308,6 +311,49 @@ Tushare 事实写入会改变 `source_log_hash` / `facts_hash`。如果在**章�
 - 不确定时宁可少选；标签不为凑数。
 - 必要时可调用最小检索补判定，但**不得**展开二轮宽泛研究。
 
+### 行业规则包（机器可检查）
+
+`data/industry_rules.json` 是标准库可加载的 JSON 规则包，首批覆盖：
+
+- 软件订阅
+- 半导体
+- 银行
+- 消费
+- 资源开采
+- 重资产生产
+
+每条规则包含：
+
+- `business_model_tags`：可匹配的业务标签；
+- `required_kpi_groups`：必备 KPI 语义组、别名与应覆盖章节；
+- `preferred_valuation_methods`：优先估值方法；
+- `key_risks`：关键风险；
+- `required_conclusions`：必写结论。
+
+Infer 输出必须在 `company_facets.md` 增加以下机器可读块；未知 / 混合行业无法明确匹配时，
+`selected_rule_ids` 输出空数组并写明 `fallback_reason`，不得强行套用规则：
+
+````markdown
+## industry_rule_selection
+```json
+{
+  "selected_rule_ids": ["software_subscription"],
+  "matched_business_model_tags": ["软件订阅"],
+  "fallback_reason": null,
+  "required_kpi_groups_to_cover": [
+    {
+      "rule_id": "software_subscription",
+      "rule_name": "软件订阅",
+      "kpi_groups": ["经常性收入质量", "增长效率", "单位经济性"],
+      "preferred_valuation_methods": ["EV/ARR", "EV/Sales", "Rule of 40", "FCF yield"],
+      "key_risks": ["续费率下滑"],
+      "required_conclusions": ["必须判断增长是否由可重复订阅驱动"]
+    }
+  ]
+}
+```
+````
+
 ## Section Workflow（/company-generate）
 
 当用户要求生成章节时，必须先确认 `output/web_search_log.md` 与 `output/facts.md` 已存在且非空；
@@ -422,6 +468,10 @@ rough 模式默认跳过 `04`、`05`、`07`、`08`；若硬伤集中在治理或
   必须在同一句或同一行内包含 `SRC-XXX`。结果分 `error / warning / ignore` 三级，**仅作为
   LLM 审计输入，不直接触发修复**。
 - **C1 (禁词)**：扫描"据称 / 传闻 / 或将 / 据悉 / 应该会 / 业内人士"等弱来源用语。
+- **K1 (行业 KPI 覆盖)**：若 `company_facets.md` 的 `industry_rule_selection.selected_rule_ids`
+  已选择行业规则，则按 `data/industry_rules.json` 检查对应章节是否覆盖必备 KPI 语义组；
+  缺失只输出 `warning`，提示写"暂未获取"或补证据，**不得编造数据**。未选择行业规则、
+  旧版画像或未知行业安全降级，不影响旧用例。
 - 白名单：年份（`2024 年`）、章节编号（`第 3 章`）、源 ID（`SRC-001`）、股票代码、
   页码、电话号码、ISO 日期。
 - 输出同时记录 `source_log_hash` 与每章 `content_hash`；章节修复或证据库变更后必须重跑，

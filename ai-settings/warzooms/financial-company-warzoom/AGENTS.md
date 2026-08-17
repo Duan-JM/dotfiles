@@ -57,10 +57,13 @@ output/
   research_report.docx
 templates/
   report_template.md               # 章节级 prompt 模板（CHAPTER_00 / 01..08 / 09 + SEARCH）
+data/
+  industry_rules.json               # 机器可检查行业规则包（KPI / 估值方法 / 风险 / 必写结论）
 roles/
   infer.md / audit.md / confirm.md / repair.md / regenerate.md / final_audit.md
                                    # 审计闭环各 role 的独立 prompt 文件
 scripts/
+  industry_rules.py                 # 行业规则包加载、schema 校验与 tag 匹配
   check_evidence.py                # 程序化 evidence linter
   pipeline_common.py               # 共享 hash / 章节拼接规则
   verify_pipeline.py               # 合并前 manifest / hash / 审计硬闸门
@@ -140,7 +143,9 @@ tests/
 参考 dayu-agent 设计，每章写完执行：
 
 1. **程序化预审**（`scripts/check_evidence.py`）：句子级 / 表格行级 evidence linter，
-   带白名单与 severity，结果作为 LLM 审计输入，**不**触发自动修复。
+   带白名单与 severity，结果作为 LLM 审计输入，**不**触发自动修复；若
+   `company_facets.md` 显式选择了 `data/industry_rules.json` 中的行业规则，还会检查
+   必备 KPI 语义组覆盖，缺失只给 warning，证据不足写"暂未获取"。
 2. **`audit` role**：基于章节正文 + 证据库摘要，输出违规清单 JSON。
 3. **`confirm` role**（仅在 E 类违规时）：在证据库范围内复核违规，必须返回
    `supporting_quote`；**严禁**自由搜索补证据。

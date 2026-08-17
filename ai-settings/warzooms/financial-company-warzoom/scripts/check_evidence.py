@@ -10,6 +10,8 @@
       但同一句 / 同一表格行内未发现 ``SRC-XXX`` 引用。
     - ``E2``：正文出现的 ``SRC-XXX`` 引用未在 ``output/web_search_log.md`` 中登记。
     - ``C1``：扫描"据称 / 传闻 / 或将 / 据悉 / 应该会 / 业内人士"等弱来源用语。
+    - ``K1``：若 ``company_facets.md`` 显式选择行业规则，检查对应章节是否覆盖必备
+      KPI 语义组；缺失仅给 warning。
 
 白名单（不视为定量断言）：
     - 年份 / 月份 / 日 / 季度（``2024 年``、``Q3``、``2023H2``）
@@ -39,14 +41,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
+from industry_rules import (
+    DEFAULT_RULES_FILE,
+    IndustryRule,
+    find_rules_by_id,
+    load_rule_package,
+)
 from pipeline_common import sha256_file, sha256_text
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = ROOT / "output"
 SECTIONS_DIR = OUTPUT_DIR / "sections"
 SEARCH_LOG_FILE = OUTPUT_DIR / "web_search_log.md"
+COMPANY_FACETS_FILE = OUTPUT_DIR / "company_facets.md"
 AUDITS_DIR = OUTPUT_DIR / "audits"
 PROGRAMMATIC_CHECK_FILE = AUDITS_DIR / "programmatic_check.json"
+INDUSTRY_RULES_FILE = DEFAULT_RULES_FILE
 
 # 数字 + 单位 / 后缀的核心模式：捕获定量断言。
 # 注意：不匹配单独年份（4 位数 + "年"）和"第 X 章 / 第 X 条"等结构性数字。
@@ -110,9 +120,19 @@ _CHAPTER_FILE_PATTERN = re.compile(r"^(\d{2})_[\w_]+\.md$")
 _PROGRAMMATIC_RULE_E1 = "E1"
 _PROGRAMMATIC_RULE_E2 = "E2"
 _PROGRAMMATIC_RULE_C1 = "C1"
+_PROGRAMMATIC_RULE_K1 = "K1"
 
 _SEVERITY_ERROR = "error"
 _SEVERITY_WARNING = "warning"
+
+_SELECTED_RULE_IDS_JSON = re.compile(
+    r"##\s*industry_rule_selection\b.*?```json\s*(\{.*?\})\s*```",
+    re.IGNORECASE | re.DOTALL,
+)
+_SELECTED_RULE_IDS_KEY = re.compile(
+    r"selected_rule_ids\s*[:：]\s*(?:\[(?P<bracket>[^\]]*)\]|(?P<plain>[^\n]+))",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -167,6 +187,47 @@ def _read_text(path: Path) -> str:
     if not path.exists():
         return ""
     return path.read_text(encoding="utf-8")
+
+
+def _extract_selected_rule_ids(company_facets_text: str) -> tuple[str, ...]:
+    """从 ``company_facets.md`` 提取 infer 已选择的行业规则 ID。
+
+    优先读取 ``## industry_rule_selection`` 下的 JSON 代码块；若没有 JSON，则兼容
+    ``selected_rule_ids: [id1, id2]`` 或 ``selected_rule_ids: id1, id2`` 文本行。
+    旧版 ``company_facets.md`` 没有该字段时返回空 tuple，确保旧流程安全降级。
+    """
+
+    json_match = _SELECTED_RULE_IDS_JSON.search(company_facets_text)
+    if json_match:
+        try:
+            payload = json.loads(json_match.group(1))
+        except json.JSONDecodeError:
+            return ()
+        raw_ids = payload.get("selected_rule_ids")
+        if isinstance(raw_ids, list):
+            return tuple(item.strip() for item in raw_ids if isinstance(item, str) and item.strip())[:3]
+        return ()
+
+    key_match = _SELECTED_RULE_IDS_KEY.search(company_facets_text)
+    if not key_match:
+        return ()
+    raw = key_match.group("bracket") if key_match.group("bracket") is not None else key_match.group("plain")
+    rule_ids = [
+        part.strip().strip("\"'`")
+        for part in re.split(r"[,，、\s]+", raw)
+        if part.strip().strip("\"'`")
+    ]
+    return tuple(rule_ids[:3])
+
+
+def _load_selected_industry_rules(company_facets_text: str) -> tuple[IndustryRule, ...]:
+    """加载 company_facets 中显式选择的行业规则；未选择时安全降级为空。"""
+
+    selected_rule_ids = _extract_selected_rule_ids(company_facets_text)
+    if not selected_rule_ids:
+        return ()
+    package = load_rule_package(INDUSTRY_RULES_FILE)
+    return find_rules_by_id(package, selected_rule_ids)
 
 
 def _collect_registered_src_ids(search_log_text: str) -> frozenset[str]:
@@ -406,7 +467,60 @@ def _scan_c1_in_line(line: str, *, line_number: int) -> list[Issue]:
     return issues
 
 
-def _scan_chapter(chapter_path: Path, *, registered: frozenset[str]) -> ChapterReport:
+def _text_contains_alias(text: str, alias: str) -> bool:
+    """判断章节文本是否包含 KPI 语义别名。
+
+    英文别名使用大小写不敏感匹配；中文别名直接做子串匹配。该检查只判断"是否覆盖议题"，
+    不判断数字是否正确，也不会生成或补充任何数据。
+    """
+
+    if re.search(r"[A-Za-z]", alias):
+        return alias.casefold() in text.casefold()
+    return alias in text
+
+
+def _scan_required_kpi_coverage(
+    chapter_stem: str,
+    chapter_text: str,
+    *,
+    selected_rules: tuple[IndustryRule, ...],
+) -> list[Issue]:
+    """按已选择行业规则检查章节是否覆盖必备 KPI 语义组。
+
+    缺失项一律为 warning：它只提示写作 / 审计角色注意覆盖，不因缺数据而编造，也不影响
+    ``--fail-on-error`` 的退出码。
+    """
+
+    issues: list[Issue] = []
+    if not selected_rules:
+        return issues
+    for rule in selected_rules:
+        for group in rule.required_kpi_groups:
+            if chapter_stem not in group.required_in_chapters:
+                continue
+            if any(_text_contains_alias(chapter_text, alias) for alias in group.aliases):
+                continue
+            issues.append(
+                Issue(
+                    rule=_PROGRAMMATIC_RULE_K1,
+                    severity=_SEVERITY_WARNING,
+                    line=1,
+                    snippet=_truncate(f"{rule.name} / {group.name}"),
+                    hint=(
+                        f"company_facets 已选择行业规则 ``{rule.id}``，本章应覆盖 KPI 语义组"
+                        f"「{group.name}」；如证据不足请写“暂未获取”，不要编造数据。"
+                    ),
+                )
+            )
+    return issues
+
+
+def _scan_chapter(
+    chapter_path: Path,
+    *,
+    registered: frozenset[str],
+    selected_rules: tuple[IndustryRule, ...] = (),
+) -> ChapterReport:
     """扫描单个章节文件，返回章节级检查报告。
 
     Args:
@@ -435,6 +549,13 @@ def _scan_chapter(chapter_path: Path, *, registered: frozenset[str]) -> ChapterR
         issues.extend(_scan_e1_in_line(line, line_number=line_number))
         issues.extend(_scan_e2_in_line(line, line_number=line_number, registered=registered))
         issues.extend(_scan_c1_in_line(line, line_number=line_number))
+    issues.extend(
+        _scan_required_kpi_coverage(
+            chapter_path.stem,
+            text,
+            selected_rules=selected_rules,
+        )
+    )
 
     return ChapterReport(
         chapter=chapter_path.stem,
@@ -496,6 +617,7 @@ def _write_aggregated_report(
     reports: list[ChapterReport],
     *,
     source_log_hash: str,
+    selected_rules: tuple[IndustryRule, ...],
 ) -> Path:
     """把所有章节报告写入 ``output/audits/programmatic_check.json``。
 
@@ -515,6 +637,10 @@ def _write_aggregated_report(
         "version": "1.1",
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source_log_hash": source_log_hash,
+        "industry_rules": {
+            "selected_rule_ids": [rule.id for rule in selected_rules],
+            "rules_hash": sha256_file(INDUSTRY_RULES_FILE) if INDUSTRY_RULES_FILE.is_file() else None,
+        },
         "chapters": [_serialize_report(report) for report in reports],
     }
     PROGRAMMATIC_CHECK_FILE.write_text(
@@ -606,14 +732,19 @@ def run(
     """
 
     search_log_text = _read_text(SEARCH_LOG_FILE)
+    company_facets_text = _read_text(COMPANY_FACETS_FILE)
     registered = _collect_registered_src_ids(search_log_text)
-    reports = [_scan_chapter(path, registered=registered) for path in _iter_target_chapter_files(section_filter)]
+    selected_rules = _load_selected_industry_rules(company_facets_text)
+    reports = [
+        _scan_chapter(path, registered=registered, selected_rules=selected_rules)
+        for path in _iter_target_chapter_files(section_filter)
+    ]
     source_log_hash = (
         sha256_file(SEARCH_LOG_FILE)
         if SEARCH_LOG_FILE.is_file()
         else sha256_text(search_log_text)
     )
-    _write_aggregated_report(reports, source_log_hash=source_log_hash)
+    _write_aggregated_report(reports, source_log_hash=source_log_hash, selected_rules=selected_rules)
     _print_summary(reports)
     if require_sections and not reports:
         print("[check_evidence] 错误: 没有匹配的章节文件。", file=sys.stderr)
