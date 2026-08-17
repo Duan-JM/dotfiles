@@ -62,6 +62,7 @@ roles/
                                    # 审计闭环各 role 的独立 prompt 文件
 scripts/
   check_evidence.py                # 程序化 evidence linter
+  financial_quality_check.py       # 标准库 JSON 财报质量核查：应计 / 现金转化 / DSO 背离 / A-D 分级
   pipeline_common.py               # 共享 hash / 章节拼接规则
   verify_pipeline.py               # 合并前 manifest / hash / 审计硬闸门
   render_role.py                   # 把 roles/<role>.md 渲染为可派发的完整 prompt
@@ -184,6 +185,7 @@ tests/
 
 ```bash
 make verify                                           # 仓库级单元测试（无需生成报告）
+make financial-quality-check INPUT=financials.json    # JSON 输入 / 输出的财报质量核查（可选辅助）
 make check                                            # 严格 evidence 检查；无章节或 error 时失败
 make pipeline-check                                   # 校验 manifest / hash / 章节 / 审计闸门
 make pipeline-check FORCE=1                           # 仅绕过 audit_status=failed

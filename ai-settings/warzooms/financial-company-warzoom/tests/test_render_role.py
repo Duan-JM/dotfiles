@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import io
 import json
+import shutil
 import sys
-import tempfile
 import unittest
+import uuid
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
@@ -32,8 +33,8 @@ class RenderRoleTests(unittest.TestCase):
         self.assertEqual(rendered, "03_financials\n原文保留 {chapter_id}")
 
     def test_all_registered_roles_render_with_fixture_inputs(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
+        root = PROJECT_ROOT / "tests" / ".scratch" / f"render_role_{uuid.uuid4().hex}"
+        try:
             input_dir = root / "input"
             sections_dir = root / "output" / "sections"
             audits_dir = root / "output" / "audits"
@@ -115,6 +116,8 @@ class RenderRoleTests(unittest.TestCase):
                         exit_code = render_role.run(argv)
                     self.assertEqual(exit_code, 0, msg=f"{argv}: {stderr.getvalue()}")
                     self.assertTrue(stdout.getvalue().strip())
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
 
 
 if __name__ == "__main__":

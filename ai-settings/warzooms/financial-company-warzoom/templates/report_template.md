@@ -86,6 +86,18 @@ web 搜集只需补充 tushare 未覆盖的维度（管理层 / 行业 / 新闻 
 
 多来源数字冲突时，**以 primary source 为准**，并在备注列说明差异。
 
+### 3.5.（可选）财报质量 JSON 核查
+若三表字段已经结构化可用，且不额外拉长首次粗读流程，可把最近两期数据整理为 JSON 后运行：
+
+```bash
+python3 scripts/financial_quality_check.py --input financials.json
+```
+
+该步骤**不改变首次粗读默认行为**，只作为已有结构化字段的辅助核查。结果可摘入
+`facts.md` 的"财报质量核查"小节，必须保留 JSON 中的 `errors`、`missing_fields`、
+`checks` 与 `grade.level`；不得把缺字段项目改写成已通过。A/B/C/D 含义仅作为
+infer 与审计的风险输入，不替代原始 `SRC-XXX` 证据。
+
 ### 4. 数据完整度评估
 在 `web_search_log.md` 末尾列出：
 - 信息充分的维度
@@ -187,6 +199,10 @@ web 搜集只需补充 tushare 未覆盖的维度（管理层 / 行业 / 新闻 
 - 现金流量表核心指标（经营 / 投资 / 筹资活动现金流、自由现金流）
 - 关键效率与回报指标（ROE、ROA、ROIC、资产周转率）
 - 同行横向对比（若已选择可比公司）
+- 若 `facts.md` 已包含 `scripts/financial_quality_check.py` 输出的财报质量核查 JSON，
+  必须在本章单独解释：总应计比率代理、经营现金流 / 净利润现金转化、DSO / 收入增长
+  背离（字段存在时）、缺失字段与 A/B/C/D 可信度分级；若没有该 JSON，不得临时补算或
+  影响首次粗读默认行为。
 - 若为 rough / 投资初筛，必须额外列"阶段 0 财务与估值闸门"：
   - 价格、市值、EV、P/B、EV/EBITDA、EV/EBIT、FCF yield
   - 净股东回报率 = (现金分红 + 净回购 - 股权激励 / 增发摊薄) / 市值

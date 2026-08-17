@@ -62,6 +62,7 @@ roles/
   final_audit.md                   # 跨章节一致性审计 role prompt
 scripts/
   check_evidence.py                # 程序化证据 linter（句子级 / 表格行级）
+  financial_quality_check.py       # 标准库 JSON 财报质量核查：应计 / 现金转化 / DSO 背离 / A-D 分级
   pipeline_common.py               # 流水线共享 hash / 章节拼接规则
   verify_pipeline.py               # 合并前 manifest / hash / 审计硬闸门
   render_role.py                   # 把 roles/<role>.md 渲染为可派发的完整 prompt
@@ -152,6 +153,14 @@ tests/
 2. **登记证据**到 `output/web_search_log.md`，每条来源使用固定模板（见下方"web_search_log 模板"）。
 
 3. **事实归一化**：搜集完成后，把关键定量数据沉淀到 `output/facts.md`（指标、数值、期间、币种、口径、来源 ID）。多来源数字冲突时，标注差异并以 primary source 为准。
+
+3.5. **财报质量核查（可选辅助，不改变首次粗读默认行为）**：若三表字段已经结构化可用，
+   可运行 `scripts/financial_quality_check.py` 做 JSON 输入 / JSON 输出核查，覆盖总应计比率
+   代理、经营现金流 / 净利润现金转化、DSO / 收入增长背离（字段存在时）、结构化缺失字段和
+   A/B/C/D 可信度分级。结果若进入 `facts.md`，必须原样保留 `errors` 与
+   `missing_fields`；不得把缺字段或 `not_calculated` 写成已通过。infer 阶段仅把 C/D 或
+   high_risk 作为硬伤快筛输入；A/B 不构成"通过尽调"结论。audit 阶段需复核章节是否完整
+   呈现缺字段和错误，并确认脚本结果未替代原始 `SRC-XXX` 财报数字。
 
 4. 在搜索 log 末尾给出"数据完整度评估"：哪些维度信息充分、哪些缺口需要补充。
    rough 模式需额外列出"阶段 0 闸门缺口"：缺哪个估值 / 股东回报 / 硬伤检查项，会如何影响结论。
@@ -737,6 +746,7 @@ manifest 状态机相同，最终合并产物相同。本 skill **不**依赖子
 
 ```bash
 make verify                                         # 跑仓库级单元测试（无需生成报告）
+make financial-quality-check INPUT=financials.json  # JSON 输入 / 输出的财报质量核查（可选辅助）
 make check                                          # 严格 evidence 检查；无章节或 error 时失败
 make pipeline-check                                 # 校验 manifest / hash / 章节 / 审计闸门
 make pipeline-check FORCE=1                         # 仅绕过 audit_status=failed
@@ -759,6 +769,7 @@ python3 scripts/render_role.py confirm --chapter 03_financials
 python3 scripts/render_role.py repair --chapter 03_financials
 python3 scripts/render_role.py regenerate --chapter 03_financials
 python3 scripts/render_role.py final_audit
+python3 scripts/financial_quality_check.py --input financials.json
 ```
 
 ## Disclaimer
