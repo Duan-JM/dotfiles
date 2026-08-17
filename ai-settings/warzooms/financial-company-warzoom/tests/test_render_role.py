@@ -114,7 +114,22 @@ class RenderRoleTests(unittest.TestCase):
                     with redirect_stdout(stdout), redirect_stderr(stderr):
                         exit_code = render_role.run(argv)
                     self.assertEqual(exit_code, 0, msg=f"{argv}: {stderr.getvalue()}")
-                    self.assertTrue(stdout.getvalue().strip())
+                    rendered = stdout.getvalue()
+                    self.assertTrue(rendered.strip())
+                    for placeholder in (
+                        "{company_meta}",
+                        "{web_search_log}",
+                        "{facts}",
+                        "{company_facets}",
+                        "{chapter_markdown}",
+                    ):
+                        self.assertNotIn(placeholder, rendered)
+                    if argv[0] == "infer":
+                        self.assertIn("expectation_gap_after_gate", rendered)
+                        self.assertIn("市场隐含预期", rendered)
+                    if argv[0] == "audit":
+                        self.assertIn("S5", rendered)
+                        self.assertIn("预期差", rendered)
 
 
 if __name__ == "__main__":

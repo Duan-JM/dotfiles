@@ -72,6 +72,7 @@ output： output/audits/<chapter_id>.audit.json
 | S2 | style | 主观夸饰用语（"显著领先"、"护城河深厚"等无证据强判断） |
 | S3 | style | 必备结构缺失（如第 03 章缺 markdown 表格、deep/short 的第 02 章缺 mermaid 图） |
 | S4 | style | rough / 决策章缺价格闸门、底的类型、硬伤快筛、edge 自检或 stop/go 结论 |
+| S5 | style | 预期差结构缺失或不可证伪：第 08 章缺市场隐含预期 / 我方预期 / 证据锚点 / 差异方向 / 验证日期 / 先行指标 / 上下行失效条件，或缺内在价值判断 / 1-3个月路径判断 / 研究动作三分法；第 09 章仅在结论为观察池 / 进入深研时适用 |
 
 ### 做什么
 
@@ -80,6 +81,10 @@ output： output/audits/<chapter_id>.audit.json
 - 对每条违规给出 `claim_quote` 原文（必填）与 `suggested_action`。
 - 若文本明确写的是"继续研究触发价 / 观察池触发价"，且上下文说明这只是时间管理阈值、
   不是目标价、评级或买卖建议，不按 `C2` 处理；否则仍按投资建议处理。
+- 对 rough 模式：`排除 / 信息不足` 结论不得因缺预期差框架判 S5；只有 `观察池 / 进入深研`
+  后才要求闸门后的预期差验证框架。
+- 对 short / deep 的 `08_investment_thesis`：必须包含可证伪预期差。若写明"暂无可证伪预期差"，
+  研究动作必须降为"观察 / 继续验证"，且不得出现买入 / 卖出 / 持有建议；否则按 S5 或 C2 处理。
 
 ### 不做什么
 
@@ -97,7 +102,7 @@ output： output/audits/<chapter_id>.audit.json
   "category": "ok | evidence_insufficient | content_violation | style_violation",
   "violations": [
     {
-      "rule": "E1 | E2 | E3 | C1 | C2 | S1 | S2 | S3 | S4",
+      "rule": "E1 | E2 | E3 | C1 | C2 | S1 | S2 | S3 | S4 | S5",
       "severity": "blocking | warning",
       "claim_quote": "<正文原句>",
       "evidence_anchor": "SRC-XXX 或 null",
