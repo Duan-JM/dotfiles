@@ -108,6 +108,18 @@ def _get_number(payload: dict[str, Any], key: str) -> float | None:
     return float(value)
 
 
+def _get_number_with_default(payload: dict[str, Any], key: str, default: float, *, label: str | None = None) -> float:
+    """读取带默认值的数字字段；仅字段缺失时使用默认值。"""
+
+    if key not in payload:
+        return default
+    value = payload[key]
+    field = label or key
+    if value is None or isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        raise ValuationInputError(f"{field} 必须是有限数字")
+    return float(value)
+
+
 def _require_positive(payload: dict[str, Any], key: str) -> float | None:
     """读取可选正数字段；字段存在但非正时拒绝。"""
 
@@ -245,8 +257,8 @@ def _compute_reverse_dcf(payload: dict[str, Any], *, market_cap: float | None, n
     if missing:
         return {"status": "unavailable", "missing": missing, "reason": "缺少反向 DCF 所需字段"}
 
-    low = float(config.get("growth_low", -0.9))
-    high = float(config.get("growth_high", 1.0))
+    low = _get_number_with_default(config, "growth_low", -0.9, label="reverse_dcf.growth_low")
+    high = _get_number_with_default(config, "growth_high", 1.0, label="reverse_dcf.growth_high")
     if not math.isfinite(low) or not math.isfinite(high) or low <= -1 or low >= high:
         raise ValuationInputError("reverse_dcf.growth_low/growth_high 区间非法")
 

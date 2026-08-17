@@ -117,6 +117,31 @@ class ValuationCalculatorTests(unittest.TestCase):
         self.assertGreater(result["reverse_dcf"]["required_fcf_cagr"], -0.1)
         self.assertLess(result["reverse_dcf"]["required_fcf_cagr"], 0.1)
 
+    def test_reverse_dcf_rejects_invalid_growth_bounds(self) -> None:
+        base_payload = {
+            "market_cap": 120,
+            "total_debt": 0,
+            "cash_and_equivalents": 0,
+            "free_cash_flow": 10,
+            "reverse_dcf": {
+                "wacc": 0.10,
+                "terminal_g": 0.02,
+                "projection_years": 5,
+            },
+        }
+
+        invalid_cases = (
+            ("growth_low", None),
+            ("growth_low", "abc"),
+            ("growth_high", True),
+        )
+        for key, value in invalid_cases:
+            with self.subTest(key=key, value=value):
+                payload = json.loads(json.dumps(base_payload))
+                payload["reverse_dcf"][key] = value
+                with self.assertRaisesRegex(valuation_calculator.ValuationInputError, f"reverse_dcf.{key}"):
+                    valuation_calculator.calculate_valuation(payload)
+
     def test_cli_reads_stdin_and_writes_error_json(self) -> None:
         stdin = io.StringIO(json.dumps({"price": 10, "shares_outstanding": -1}))
         stdout = io.StringIO()
@@ -128,6 +153,34 @@ class ValuationCalculatorTests(unittest.TestCase):
         self.assertEqual(exit_code, 1)
         self.assertEqual(payload["status"], "error")
         self.assertIn("shares_outstanding", payload["error"]["message"])
+
+    def test_cli_reports_reverse_dcf_growth_errors_as_json(self) -> None:
+        stdin = io.StringIO(
+            json.dumps(
+                {
+                    "market_cap": 120,
+                    "total_debt": 0,
+                    "cash_and_equivalents": 0,
+                    "free_cash_flow": 10,
+                    "reverse_dcf": {
+                        "wacc": 0.10,
+                        "terminal_g": 0.02,
+                        "projection_years": 5,
+                        "growth_low": None,
+                    },
+                }
+            )
+        )
+        stdout = io.StringIO()
+
+        with patch("sys.stdin", stdin), redirect_stdout(stdout):
+            exit_code = valuation_calculator.run([])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error"]["type"], "invalid_input")
+        self.assertIn("reverse_dcf.growth_low", payload["error"]["message"])
 
 
 if __name__ == "__main__":
