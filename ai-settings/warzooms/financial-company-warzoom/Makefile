@@ -1,4 +1,4 @@
-.PHONY: check verify pipeline-check audit-summary render-role merge docx clean clean-audits help
+.PHONY: check verify valuation pipeline-check audit-summary render-role merge docx clean clean-audits help
 
 help: ## 显示帮助信息
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -8,6 +8,10 @@ check: ## 严格检查已生成章节；无章节或存在 error 时失败
 
 verify: ## 运行仓库级单元测试（无需生成报告）
 	PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'test_*.py'
+
+valuation: ## 运行粗读估值计算器，需 INPUT=<json> [OUTPUT=<json>]
+	@if [ -z "$(INPUT)" ]; then echo "用法: make valuation INPUT=input/valuation_example.json [OUTPUT=...]"; exit 1; fi
+	python3 scripts/valuation_calculator.py --input "$(INPUT)" $(if $(OUTPUT),--output "$(OUTPUT)",) --pretty
 
 pipeline-check: ## 校验 manifest / hash / 章节 / 审计闸门；FORCE=1 仅绕过失败审计
 	python3 scripts/verify_pipeline.py $(if $(FORCE),--force,)
