@@ -122,6 +122,99 @@ class FinancialQualityCheckTests(unittest.TestCase):
         payload = json.loads(stdout.getvalue())
         self.assertEqual(payload["version"], "1.0")
 
+    def test_negative_profit_uses_loss_making_interpretation_not_positive_profit_thresholds(self) -> None:
+        payload = {
+            "periods": [
+                {"period": "2025", "total_assets": 1000, "revenue": 480, "dso": 50},
+                {
+                    "period": "2026",
+                    "net_income": -100,
+                    "operating_cash_flow": -20,
+                    "total_assets": 1000,
+                    "revenue": 500,
+                    "dso": 52,
+                },
+            ]
+        }
+
+        result = financial_quality_check.evaluate(payload)
+
+        cash = next(item for item in result["checks"] if item["id"] == "cash_conversion")
+        self.assertEqual(cash["status"], "high_risk")
+        self.assertIsNone(cash["value"])
+        self.assertIn("净亏损", cash["interpretation"])
+        self.assertNotIn("覆盖较好", cash["interpretation"])
+
+    def test_zero_denominators_do_not_abort_other_checks(self) -> None:
+        payload = {
+            "periods": [
+                {"period": "2025", "total_assets": 0, "revenue": 0, "dso": 0},
+                {
+                    "period": "2026",
+                    "net_income": 0,
+                    "operating_cash_flow": 10,
+                    "total_assets": 0,
+                    "revenue": 0,
+                    "dso": 25,
+                },
+            ]
+        }
+
+        result = financial_quality_check.evaluate(payload)
+
+        self.assertEqual(result["errors"], [])
+        checks = {item["id"]: item for item in result["checks"]}
+        self.assertEqual(checks["accrual_ratio"]["status"], "not_calculated")
+        self.assertEqual(checks["cash_conversion"]["status"], "not_calculated")
+        self.assertEqual(checks["dso_revenue_divergence"]["status"], "not_calculated")
+        self.assertIn("平均总资产为 0", checks["accrual_ratio"]["interpretation"])
+        self.assertIn("净利润为 0", checks["cash_conversion"]["interpretation"])
+        self.assertIn("上一期收入为 0", checks["dso_revenue_divergence"]["interpretation"])
+
+    def test_explicit_optional_fields_path_allows_zero_revenue_data(self) -> None:
+        payload = {
+            "periods": [
+                {"period": "2025", "total_assets": 1000, "revenue": 0, "dso": 0},
+                {
+                    "period": "2026",
+                    "net_income": 10,
+                    "operating_cash_flow": 12,
+                    "total_assets": 1000,
+                    "revenue": 0,
+                    "dso": 8,
+                    "revenue_growth": 0.5,
+                },
+            ]
+        }
+
+        result = financial_quality_check.evaluate(payload)
+
+        dso_check = next(item for item in result["checks"] if item["id"] == "dso_revenue_divergence")
+        self.assertEqual(dso_check["status"], "ok")
+        self.assertEqual(dso_check["fields_used"], ["dso", "previous.dso", "revenue_growth"])
+        self.assertNotIn("dso_revenue_divergence", {item["check_id"] for item in result["missing_fields"]})
+
+    def test_dso_warning_when_previous_dso_is_zero_and_current_rises(self) -> None:
+        payload = {
+            "periods": [
+                {"period": "2025", "total_assets": 1000, "revenue": 100, "dso": 0},
+                {
+                    "period": "2026",
+                    "net_income": 10,
+                    "operating_cash_flow": 12,
+                    "total_assets": 1000,
+                    "revenue": 110,
+                    "dso": 12,
+                },
+            ]
+        }
+
+        result = financial_quality_check.evaluate(payload)
+
+        dso_check = next(item for item in result["checks"] if item["id"] == "dso_revenue_divergence")
+        self.assertEqual(dso_check["status"], "warning")
+        self.assertIn("上期 DSO 为 0", dso_check["interpretation"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -195,7 +195,18 @@ def _check_accrual_ratio(
         )
     assert net_income is not None and cfo is not None and avg_assets is not None
     if avg_assets == 0:
-        raise FinancialQualityInputError("ZERO_DENOMINATOR", f"{period} 平均总资产为 0，无法计算应计比率")
+        return CheckResult(
+            "accrual_ratio",
+            "总应计比率代理",
+            "not_calculated",
+            None,
+            "ratio",
+            "(净利润 - 经营现金流) / 平均总资产；这是现金流口径的总应计代理",
+            ("net_income", "operating_cash_flow") + asset_fields,
+            (),
+            thresholds,
+            "平均总资产为 0，分母不可用；该单项不计算，但不影响其他核查继续执行",
+        )
     value = (net_income - cfo) / abs(avg_assets)
     if value > 0.10:
         status = "high_risk"
@@ -231,7 +242,12 @@ def _check_cash_conversion(current: dict[str, Any], missing_items: list[MissingF
         for field, value in (("net_income", net_income), ("operating_cash_flow", cfo))
         if value is None
     )
-    thresholds = {"低风险": ">= 0.8", "关注": "0.5 到 0.8", "高风险": "< 0.5 或为负"}
+    thresholds = {
+        "低风险": "正净利润且 >= 0.8",
+        "关注": "正净利润且 0.5 到 0.8；或净亏损但经营现金流为正",
+        "高风险": "正净利润且 < 0.5 或为负；或净亏损且经营现金流为负",
+        "不适用": "净利润为 0 时不计算现金转化率",
+    }
     if missing_fields:
         missing_items.append(
             _missing(
@@ -257,7 +273,37 @@ def _check_cash_conversion(current: dict[str, Any], missing_items: list[MissingF
         )
     assert net_income is not None and cfo is not None
     if net_income == 0:
-        raise FinancialQualityInputError("ZERO_DENOMINATOR", f"{period} 净利润为 0，无法计算现金转化率")
+        return CheckResult(
+            "cash_conversion",
+            "经营现金流 / 净利润现金转化",
+            "not_calculated",
+            None,
+            "ratio",
+            "经营现金流 / 净利润",
+            ("operating_cash_flow", "net_income"),
+            (),
+            thresholds,
+            "净利润为 0，现金转化率分母不可用；该单项不计算，但不影响其他核查继续执行",
+        )
+    if net_income < 0:
+        if cfo < 0:
+            status = "high_risk"
+            interpretation = "净亏损且经营现金流为负，亏损同时消耗现金；正利润现金转化率阈值不适用"
+        else:
+            status = "warning"
+            interpretation = "净亏损但经营现金流为正，不能套用正利润现金转化率阈值；需拆解亏损原因与营运资本释放"
+        return CheckResult(
+            "cash_conversion",
+            "经营现金流 / 净利润现金转化",
+            status,
+            None,
+            "ratio",
+            "净利润为负时不计算经营现金流 / 净利润倍率，改按亏损是否消耗现金判定",
+            ("operating_cash_flow", "net_income"),
+            (),
+            thresholds,
+            interpretation,
+        )
     value = cfo / net_income
     if value < 0.5:
         status = "high_risk"
@@ -293,7 +339,11 @@ def _derive_dso(row: dict[str, Any], *, prefix: str) -> tuple[float | None, tupl
     days = _get_number(row, "days_in_period")
     if receivable is not None and revenue is not None and days is not None:
         if revenue == 0:
-            raise FinancialQualityInputError("ZERO_DENOMINATOR", f"{_period_label(row)} revenue 为 0，无法计算 DSO")
+            return None, (
+                f"{prefix}accounts_receivable",
+                f"{prefix}revenue",
+                f"{prefix}days_in_period",
+            ), (f"{prefix}revenue(non_zero_denominator)",)
         return receivable / revenue * days, (
             f"{prefix}accounts_receivable",
             f"{prefix}revenue",
@@ -317,7 +367,7 @@ def _revenue_growth(current: dict[str, Any], previous: dict[str, Any] | None) ->
     previous_revenue = _get_number(previous, "revenue") if previous is not None else None
     if current_revenue is not None and previous_revenue is not None:
         if previous_revenue == 0:
-            raise FinancialQualityInputError("ZERO_DENOMINATOR", "上一期 revenue 为 0，无法计算收入增速")
+            return None, ("revenue", "previous.revenue"), ("previous.revenue(non_zero_denominator)",)
         return (current_revenue - previous_revenue) / abs(previous_revenue), ("revenue", "previous.revenue"), ()
     missing: list[str] = []
     if current_revenue is None:
@@ -366,6 +416,12 @@ def _check_dso_divergence(
     growth, growth_fields, growth_missing = _revenue_growth(current, previous)
     missing_fields = dso_current_missing + dso_previous_missing + growth_missing
     if missing_fields:
+        unavailable_reasons = []
+        if "revenue(non_zero_denominator)" in missing_fields:
+            unavailable_reasons.append("本期收入为 0，无法由应收账款推导 DSO")
+        if "previous.revenue(non_zero_denominator)" in missing_fields:
+            unavailable_reasons.append("上一期收入为 0，无法计算收入增速或推导上期 DSO")
+        interpretation = "；".join(unavailable_reasons) if unavailable_reasons else "字段不存在时按可选项跳过，但已结构化记录缺口"
         missing_items.append(
             _missing(
                 check_id="dso_revenue_divergence",
@@ -389,7 +445,7 @@ def _check_dso_divergence(
             dso_current_fields + dso_previous_fields + growth_fields,
             missing_fields,
             thresholds,
-            "字段不存在时按可选项跳过，但已结构化记录缺口",
+            interpretation,
         )
     assert dso_current is not None and dso_previous is not None and growth is not None
     dso_change = dso_current - dso_previous
@@ -397,6 +453,9 @@ def _check_dso_divergence(
     if dso_change > 15 and growth < 0.05:
         status = "high_risk"
         interpretation = "收入低增长或下滑时 DSO 明显拉长，可能存在回款质量或收入确认压力"
+    elif dso_previous == 0 and dso_change > 10:
+        status = "warning"
+        interpretation = "上期 DSO 为 0，本期 DSO 显著增加，不能按相对增速缺失视为正常"
     elif dso_change > 10 and dso_growth is not None and dso_growth - growth > 0.20:
         status = "warning"
         interpretation = "DSO 增速明显快于收入增速，需要核验信用政策、渠道压货或应收质量"
@@ -424,6 +483,7 @@ def _grade(checks: list[CheckResult], missing_items: list[MissingField]) -> dict
     calculated_core = [check for check in core if check.status != "not_calculated"]
     high_count = sum(1 for check in checks if check.status == "high_risk")
     warning_count = sum(1 for check in checks if check.status == "warning")
+    core_unavailable = any(check.status == "not_calculated" for check in core)
     core_missing = any(item.severity == "core" for item in missing_items)
     optional_missing = any(item.severity == "optional" for item in missing_items)
     rationale: list[str] = []
@@ -437,9 +497,9 @@ def _grade(checks: list[CheckResult], missing_items: list[MissingField]) -> dict
     elif high_count == 1:
         level = "C"
         rationale.append("存在一个高风险财报质量信号")
-    elif core_missing:
+    elif core_unavailable or core_missing:
         level = "C"
-        rationale.append("至少一个核心核查项缺字段，不能给出高可信结论")
+        rationale.append("至少一个核心核查项缺字段或分母不可用，不能给出高可信结论")
     elif warning_count >= 2:
         level = "C"
         rationale.append("多个关注项同时出现")
