@@ -20,6 +20,7 @@ description: Searches public and structured sources for a target company (A-shar
 - **粗读优先**：若用户只是想"看看这家公司"、"粗读公司"、"判断值不值得深挖"，默认使用 `rough` 模式，不直接生成完整深度报告。
 - **价格先当闸门**：投资初筛场景先看价格、市值、EV、P/B、EV/EBITDA、EV/EBIT、FCF yield、净股东回报率、净现金 / 净负债与硬伤快筛；没有可识别的"底"时，应输出观察或排除，而不是补故事。
 - **否决条件先行**：老千 / 掏空 / 审计硬伤、存贷双高、合股供股循环、异常关联交易、资金占用、违规担保等明显信号是一票否决项，不能因估值便宜而忽略。
+- **估值计算器可选**：rough 模式可运行 `scripts/valuation_calculator.py` 做标准化简算。该脚本只接受 JSON 输入 / 输出、只用标准库、不补缺失字段；所有金额输入必须统一币种、单位与会计口径。缺字段返回 `unavailable` / `missing`，非法输入（如 WACC <= terminal_g、非正股本）必须拒绝并停止使用该组结果。
 
 ## Workspace Layout
 
@@ -63,6 +64,7 @@ roles/
 scripts/
   check_evidence.py                # 程序化证据 linter（句子级 / 表格行级）
   financial_quality_check.py       # 标准库 JSON 财报质量核查：应计 / 现金转化 / DSO 背离 / A-D 分级
+  valuation_calculator.py          # JSON 输入 / 输出的粗读估值计算器（标准库）
   pipeline_common.py               # 流水线共享 hash / 章节拼接规则
   verify_pipeline.py               # 合并前 manifest / hash / 审计硬闸门
   render_role.py                   # 把 roles/<role>.md 渲染为可派发的完整 prompt
@@ -85,6 +87,34 @@ tests/
    - 用户指定的可比公司
 2. 读取 `input/extra_sources/` 下全部 `.md` 文件作为**优先来源**（高于 web 搜索结果）。
 3. 从 `templates/report_template.md` 中读取对应章节提示模板。
+
+## 粗读估值计算器（可选）
+
+当 `input/company.md` 填写"是否需要运行粗读估值计算器：是"且提供 JSON 路径时，可运行：
+
+```bash
+python3 scripts/valuation_calculator.py --input input/valuation.json --pretty
+```
+
+输入 JSON 只接受标准数字字段；所有金额字段必须已经统一为 `currency` + `unit` 指定的同一
+币种与同一单位（例如「人民币」+「亿元」），且符合 `accounting_basis` 指定的同一会计口径
+（例如「合并报表 / TTM」）。脚本不做币种换算、单位换算、年化、TTM 拼接或缺失值估算。
+
+核心字段：
+
+| 字段 | 口径 |
+|------|------|
+| `market_cap` | 可直接输入市值；若缺失，则用 `price * shares_outstanding` 推导 |
+| `price`, `shares_outstanding` | 股价与总股本 / 稀释后股本；`shares_outstanding` 必须为正 |
+| `total_debt`, `cash_and_equivalents`, `short_term_investments` | 用于 EV 与净现金 / 净负债；债务和现金字段不得为负 |
+| `preferred_equity`, `minority_interest` | EV 附加项；缺失按 0 处理，但如有事实应显式输入 |
+| `book_equity` | P/B 分母，建议使用归母或合并口径股东权益并在 `accounting_basis` 说明 |
+| `ebit`, `ebitda`, `free_cash_flow` | EV/EBIT、EV/EBITDA、FCF yield 的分子，期间须与估值口径一致 |
+| `dividends`, `buybacks`, `sbc`, `issuance_dilution` | 净股东回报率分子；`buybacks` 也兼容旧名 `net_buybacks`，真实为 0 时也必须显式填 0 |
+| `reverse_dcf` | 可选；`wacc` 必须大于 `terminal_g`，否则拒绝计算 |
+
+输出中每个指标都有 `status`：`available` 表示可用；`unavailable` 表示缺字段或分母不适用，
+并在 `missing` / `reason` 中列出原因。写入报告时仍必须引用支撑原始输入的 `SRC-XXX`。
 
 ## Source Priority（跨市场数据源）
 

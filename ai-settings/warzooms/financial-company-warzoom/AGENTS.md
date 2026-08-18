@@ -63,6 +63,7 @@ roles/
 scripts/
   check_evidence.py                # 程序化 evidence linter
   financial_quality_check.py       # 标准库 JSON 财报质量核查：应计 / 现金转化 / DSO 背离 / A-D 分级
+  valuation_calculator.py          # JSON 输入 / 输出的粗读估值计算器（标准库）
   pipeline_common.py               # 共享 hash / 章节拼接规则
   verify_pipeline.py               # 合并前 manifest / hash / 审计硬闸门
   render_role.py                   # 把 roles/<role>.md 渲染为可派发的完整 prompt
@@ -186,6 +187,7 @@ tests/
 ```bash
 make verify                                           # 仓库级单元测试（无需生成报告）
 make financial-quality-check INPUT=financials.json    # JSON 输入 / 输出的财报质量核查（可选辅助）
+make valuation INPUT=input/valuation.json             # 运行粗读估值计算器（可选 OUTPUT=...）
 make check                                            # 严格 evidence 检查；无章节或 error 时失败
 make pipeline-check                                   # 校验 manifest / hash / 章节 / 审计闸门
 make pipeline-check FORCE=1                           # 仅绕过 audit_status=failed
@@ -222,6 +224,9 @@ Copilot CLI 主代理可直接捕获 `python3 scripts/render_role.py <role> [--c
 - 报告头部必须标注"数据截至 YYYY-MM-DD"
 - 跨市场公司明确币种、单位、会计口径
 - 粗读闸门中的估值与现金回报指标同样必须带来源；缺失时不得估算凑数，写明缺口与下一步取数方式
+- `scripts/valuation_calculator.py` 仅用于 rough 模式估值简算辅助：JSON 输入 / 输出、只用标准库、
+  不联网、不补数。输入金额必须统一币种、单位、会计口径；字段缺失返回 `unavailable` 与
+  `missing`，非法输入（如 WACC <= terminal_g、非正股本）必须停止使用该组结果。
 
 ## 公式格式约定
 

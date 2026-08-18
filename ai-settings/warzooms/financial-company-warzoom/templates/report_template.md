@@ -61,6 +61,16 @@ web 搜集只需补充 tushare 未覆盖的维度（管理层 / 行业 / 新闻 
 - 硬伤快筛：合股 + 折价供股循环、核数师辞任 / 保留意见、监管处分、资金占用、
   违规担保、存贷双高、异常关联交易、低价私有化劣迹
 
+如用户在 `company.md` 填写"估值计算器 JSON 路径"，可在事实登记完成后运行：
+
+```bash
+python3 scripts/valuation_calculator.py --input <估值计算器 JSON 路径> --pretty
+```
+
+计算器只接受 JSON 输入 / 输出，且不联网、不补数。所有金额字段必须已经统一为同一币种、
+同一单位、同一会计口径；缺字段时使用输出中的 `unavailable` / `missing` 写入缺口，不得
+用计算器结果替代 `SRC-XXX` 证据引用。
+
 ### 1. 多维度并行搜集
 对以下 8 个维度分别发起搜索，每个维度产出 2-4 条 primary 来源：
 - 公司识别与股权结构
@@ -224,6 +234,10 @@ web 搜索来源。
 - 篇幅：deep 模式 1000-2000 字；short 模式 600-1000 字
 - rough 模式只保留闸门指标与最关键解释，500-800 字
 - 如做估值简算（用户在 `company.md` 中要求），使用 LaTeX 公式：行内 `$...$`，块级 `$$...$$`
+- rough 模式可选使用 `scripts/valuation_calculator.py` 辅助计算市值、EV、P/B、EV/EBIT、
+  EV/EBITDA、FCF yield、净股东回报率、净现金 / 净负债；这是简算工具，不强制 DCF 或复杂估值。
+  若输出为 `unavailable`，正文写"暂未获取"并列明缺失字段；若输入非法（如 WACC <= terminal_g、
+  非正股本），不得继续使用该组估值结果。
 - 周期股不得用景气高点 EBIT/EBITDA 直接套低倍数；必须提示 7-10 年正常化利润或低谷利润压力测试缺口
 - 重资产 / 高 capex 公司优先看 EV/EBIT、owner earnings、FCF，EV/EBITDA 只能作为辅助
 ---END---
