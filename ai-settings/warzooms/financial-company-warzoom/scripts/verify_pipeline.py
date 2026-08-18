@@ -41,8 +41,21 @@ _BASE_SECTIONS: dict[str, tuple[str, ...]] = {
         "07_swot",
         "08_investment_thesis",
     ),
+    "earnings": (
+        "10_earnings_snapshot",
+        "11_earnings_expectation_quality",
+        "12_earnings_segment_kpi",
+        "13_earnings_profit_expense",
+        "14_earnings_cash_capital_allocation",
+        "15_earnings_guidance_call",
+        "16_earnings_competition_market_reaction",
+        "17_earnings_model_valuation_bridge",
+        "18_earnings_thesis_action",
+    ),
 }
 _VALID_WORKFLOW_MODES = {"full", "fast"}
+_VALID_EARNINGS_BASELINE_TYPES = {"first_coverage", "prior_forecast"}
+_VALID_EARNINGS_FORECAST_STATUSES = {"命中", "部分命中", "未命中", "无法验证"}
 _DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -78,11 +91,77 @@ def expected_section_ids(
     """根据报告模式与可选标记返回严格章节集合。"""
 
     base = list(_BASE_SECTIONS[report_mode])
+    if report_mode == "earnings":
+        return tuple(base)
     if report_mode != "rough" and with_overview:
         base.insert(0, "00_overview")
     if report_mode != "rough" and with_decision:
         base.append("09_research_decision")
     return tuple(base)
+
+
+def _validate_earnings_baseline(
+    manifest: dict[str, Any],
+    *,
+    issues: list[ValidationIssue],
+) -> None:
+    """校验 earnings 模式的基线与旧预测状态。"""
+
+    baseline = manifest.get("earnings_baseline")
+    if not isinstance(baseline, dict):
+        issues.append(
+            ValidationIssue(
+                "EARNINGS_BASELINE",
+                "earnings 模式必须在 manifest.earnings_baseline 标明 first_coverage 或 prior_forecast",
+            )
+        )
+        return
+
+    baseline_type = baseline.get("type")
+    if baseline_type not in _VALID_EARNINGS_BASELINE_TYPES:
+        issues.append(
+            ValidationIssue(
+                "EARNINGS_BASELINE",
+                f"earnings_baseline.type 非法：{baseline_type!r}",
+            )
+        )
+        return
+
+    if baseline_type == "first_coverage":
+        return
+
+    forecasts = baseline.get("prior_forecasts")
+    if not isinstance(forecasts, list) or not forecasts:
+        issues.append(
+            ValidationIssue(
+                "EARNINGS_BASELINE",
+                "prior_forecast 基线必须保留 prior_forecasts 列表",
+            )
+        )
+        return
+
+    for index, forecast in enumerate(forecasts, start=1):
+        if not isinstance(forecast, dict):
+            issues.append(
+                ValidationIssue("EARNINGS_BASELINE", f"prior_forecasts[{index}] 必须是 object")
+            )
+            continue
+        if not forecast.get("original_forecast"):
+            issues.append(
+                ValidationIssue(
+                    "EARNINGS_BASELINE",
+                    f"prior_forecasts[{index}] 缺少 original_forecast 原预测文本",
+                )
+            )
+        status = forecast.get("status")
+        if status not in _VALID_EARNINGS_FORECAST_STATUSES:
+            issues.append(
+                ValidationIssue(
+                    "EARNINGS_FORECAST_STATUS",
+                    f"prior_forecasts[{index}].status 非法：{status!r}；仅允许 "
+                    + " / ".join(sorted(_VALID_EARNINGS_FORECAST_STATUSES)),
+                )
+            )
 
 
 def _extract_input_field(company_text: str, header: str) -> str:
@@ -297,6 +376,8 @@ def validate_pipeline(root: Path = ROOT, *, force: bool = False) -> ValidationRe
     if report_mode not in _BASE_SECTIONS:
         issues.append(ValidationIssue("REPORT_MODE", f"manifest.report_mode 非法：{report_mode!r}"))
         return ValidationResult(tuple(issues), ())
+    if report_mode == "earnings":
+        _validate_earnings_baseline(manifest, issues=issues)
     workflow_mode = manifest.get("workflow_mode")
     if workflow_mode not in _VALID_WORKFLOW_MODES:
         issues.append(

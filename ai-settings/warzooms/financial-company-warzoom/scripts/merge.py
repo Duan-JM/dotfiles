@@ -5,6 +5,7 @@
     - ``00_overview.md``（``rough`` 默认；``--with-overview`` 可选）—— 粗读闸门或投资要点概览，置于报告最前
     - ``01_...`` ~ ``08_...`` —— 标准 8 章
     - ``09_research_decision.md``（``rough`` 默认；``--with-decision`` 可选）—— 研究决策章
+    - ``10_earnings_...`` ~ ``18_earnings_...`` —— ``earnings`` 财报模式九段式章节
 
 附录：
     - 附录 A：全网检索证据库（来自 ``output/web_search_log.md``）
@@ -70,7 +71,7 @@ def build_header(company_text):
 def collect_section_files(root: Path = ROOT) -> list[Path]:
     """按文件名升序收集所有可合并的章节文件。
 
-    返回包含 00_overview / 01..08 / 09_research_decision 等已存在章节的有序列表。
+    返回包含 00_overview / 01..08 / 09_research_decision / 10..18 earnings 等已存在章节的有序列表。
     跳过 .gitkeep 等占位文件。
     """
     sections_dir = root / "output" / "sections"

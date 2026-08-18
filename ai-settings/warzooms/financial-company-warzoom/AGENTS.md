@@ -57,6 +57,15 @@ output/
     07_swot.md                     # deep 模式
     08_investment_thesis.md
     09_research_decision.md        # rough 默认；short/deep 可选：研究决策章（--with-decision）
+    10_earnings_snapshot.md        # earnings 模式：结论快照
+    11_earnings_expectation_quality.md # earnings 模式：预期差 / 质量
+    12_earnings_segment_kpi.md     # earnings 模式：分部 KPI
+    13_earnings_profit_expense.md  # earnings 模式：利润与费用
+    14_earnings_cash_capital_allocation.md # earnings 模式：现金流与资本配置
+    15_earnings_guidance_call.md   # earnings 模式：指引 / 电话会
+    16_earnings_competition_market_reaction.md # earnings 模式：竞争和市场反应
+    17_earnings_model_valuation_bridge.md # earnings 模式：模型估值变化桥
+    18_earnings_thesis_action.md   # earnings 模式：论点更新与行动清单
   research_report.md
   research_report.docx
 templates/
@@ -98,11 +107,11 @@ tests/
 | `/company-all` | 全流程：search → infer → generate（含 audit）→ final audit → merge → 转换 |
 
 `/company-generate` 与 `/company-all` 会按 `input/company.md` 的报告模式选择产出：
-`rough`（粗读闸门）、`short`（简报）、`deep`（深度报告）。二者支持以下可选标记：
+`rough`（粗读闸门）、`short`（简报）、`deep`（深度报告）、`earnings`（观察池 / 持续跟踪财报点评）。二者支持以下可选标记；`earnings` 使用独立 10-18 九段式章节，不改变 rough 默认：
 
 - `--fast` — 跳过 audit / confirm / repair（仍跑程序化预审作为最低红线）
 - `--with-decision` — short / deep 模式额外生成第 09 章「研究决策章」；rough 模式默认生成
-- `--with-overview` — short / deep 模式额外生成第 00 章「投资要点概览」（最后回填）；rough 模式第 00 章为一页纸闸门
+- `--with-overview` — short / deep 模式额外生成第 00 章「投资要点概览」（最后回填）；rough 模式第 00 章为一页纸闸门；earnings 模式忽略该标记
 - `--force` — 仅允许绕过已有合法 audit JSON、且明确标记为 `audit_status=failed` 的章节；
   缺审计产物、缺章节、过期 hash、`not_run/stale` 或程序化 error 仍禁止合并
 
@@ -144,6 +153,26 @@ tests/
 - **Claude Code**：可在 `.claude/agents/<role>.md` 建立子代理配置，body 引用 `roles/<role>.md` 的 Prompt 段；调用前同样跑 `render_role.py` 填占位符。
 - **无子代理运行时**：主代理读 `roles/<role>.md` Prompt 段 → `render_role.py` 填占位符 → 作为 system prompt 调模型 → 自行处理文件落地。
 
+## earnings 财报模式（观察池 / 持续跟踪）
+
+`report_mode=earnings` 专门用于已在观察池或需要持续跟踪的公司财报复盘，不生成 deep 式完整公司故事，
+也不改变 rough 的默认粗读闸门。章节固定为 9 段：
+
+1. `10_earnings_snapshot` — 结论快照
+2. `11_earnings_expectation_quality` — 预期差 / 财报质量
+3. `12_earnings_segment_kpi` — 分部与 KPI
+4. `13_earnings_profit_expense` — 利润与费用
+5. `14_earnings_cash_capital_allocation` — 现金流与资本配置
+6. `15_earnings_guidance_call` — 指引与电话会
+7. `16_earnings_competition_market_reaction` — 竞争、同业与市场反应
+8. `17_earnings_model_valuation_bridge` — 模型与估值变化桥
+9. `18_earnings_thesis_action` — 论点更新与行动清单
+
+基线纪律：无历史预测时必须明确「首次覆盖基线」；有旧预测时必须保留原预测文本，不得事后改写，
+验证状态只允许 `命中 / 部分命中 / 未命中 / 无法验证`。`manifest.report_mode` 支持 `earnings`；
+`manifest.earnings_baseline.type` 必须为 `first_coverage` 或 `prior_forecast`，后者的
+`prior_forecasts[]` 必须包含 `original_forecast` 与上述合法状态。
+
 ## 审计闭环（核心）
 
 参考 dayu-agent 设计，每章写完执行：
@@ -171,7 +200,7 @@ tests/
 1. 连续两个 checkpoint 的 SRC 数、facts 数、章节状态与审计状态均无进展。
 2. 同一错误、堆栈或失败断言连续出现 3 次。
 3. 超过 `input/company.md` 配置的时间 / Token / API 成本预算；默认时长为
-   rough 45 分钟、short 90 分钟、deep 180 分钟。
+   rough 45 分钟、earnings 60 分钟、short 90 分钟、deep 180 分钟。
 4. 出现缺凭证、网络不可达、目标分支冲突、依赖锁无法解决等外部阻塞。
 
 命中后向用户展示当前 manifest 与阻塞原因，不得自动重试或用 `--force` 绕过。
@@ -221,7 +250,7 @@ Copilot CLI 主代理可直接捕获 `python3 scripts/render_role.py <role> [--c
    - **Copilot CLI**：让主代理顺序执行 `search → infer → generate → audit → final_audit → merge → docx`；
      subagent 派发用 `task` 工具 + `scripts/render_role.py`
    - **Claude Code**：可注册同名 slash command，或直接让主代理执行
-4. 一键完成：触发 `/company-all`；粗读公司建议在 `input/company.md` 选择 `rough`；short / deep 如需研究决策章与概览页，用 `/company-all --with-decision --with-overview`
+4. 一键完成：触发 `/company-all`；粗读公司建议在 `input/company.md` 选择 `rough`；观察池财报复盘选择 `earnings`；short / deep 如需研究决策章与概览页，用 `/company-all --with-decision --with-overview`
 5. 或分步执行：先 `/company-search`，再 `/company-infer`，再 `/company-generate`，最后
    `make pipeline-check && make merge && make docx`
 

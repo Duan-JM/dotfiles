@@ -74,6 +74,7 @@ output： output/audits/<chapter_id>.audit.json
 | S4 | style | rough / 决策章缺价格闸门、底的类型、硬伤快筛、edge 自检或 stop/go 结论 |
 | S5 | style | 引用财报质量核查 JSON 时，遗漏 `errors` / `missing_fields`，或把 `not_calculated` 写成已通过 |
 | S6 | style | 预期差结构缺失或不可证伪：第 08 章缺市场隐含预期 / 我方预期 / 证据锚点 / 差异方向 / 验证日期 / 先行指标 / 上下行失效条件，或缺内在价值判断 / 1-3个月路径判断 / 研究动作三分法；第 00 / 09 章仅在结论锚点精确为观察池 / 进入深研时适用，其中第 00 章不要求三分法 |
+| S7 | style | earnings 财报模式缺首次覆盖基线，或旧预测未保留原文 / 验证状态不属于 `命中 / 部分命中 / 未命中 / 无法验证` |
 
 ### 做什么
 
@@ -107,7 +108,7 @@ output： output/audits/<chapter_id>.audit.json
   "category": "ok | evidence_insufficient | content_violation | style_violation",
   "violations": [
     {
-      "rule": "E1 | E2 | E3 | C1 | C2 | S1 | S2 | S3 | S4 | S5 | S6",
+      "rule": "E1 | E2 | E3 | C1 | C2 | S1 | S2 | S3 | S4 | S5 | S6 | S7",
       "severity": "blocking | warning",
       "claim_quote": "<正文原句>",
       "evidence_anchor": "SRC-XXX 或 null",
