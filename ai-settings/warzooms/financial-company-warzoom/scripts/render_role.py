@@ -32,6 +32,7 @@ ROLES_DIR = ROOT / "roles"
 SECTIONS_DIR = ROOT / "output" / "sections"
 AUDITS_DIR = ROOT / "output" / "audits"
 TEMPLATE_FILE = ROOT / "templates" / "report_template.md"
+INDUSTRY_RULES_FILE = ROOT / "data" / "industry_rules.json"
 
 INPUT_COMPANY = ROOT / "input" / "company.md"
 INPUT_EXTRA_DIR = ROOT / "input" / "extra_sources"
@@ -329,6 +330,7 @@ def _build_infer_mapping() -> dict[str, str]:
         "extra_sources": _read_extra_sources(),
         "web_search_log": _read_text(WEB_SEARCH_LOG, allow_missing=True),
         "facts": _read_text(FACTS_FILE, allow_missing=True),
+        "industry_rules": _read_text(INDUSTRY_RULES_FILE, allow_missing=True),
     }
 
 
