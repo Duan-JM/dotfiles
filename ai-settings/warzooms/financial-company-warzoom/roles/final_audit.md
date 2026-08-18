@@ -63,6 +63,7 @@ output： output/audits/final_consistency.audit.json
 | X7 | 跨章节是否存在矛盾结论（如 02 章说"高度集中"但 04 章说"格局分散"） |
 | X8 | 涉及跨市场 / 多币种公司：会计准则、币种、口径在多章是否一致 |
 | X9 | rough 模式第 00 / 09 章是否坚持"排除 / 观察池 / 进入深研 / 信息不足"的研究决策，不输出买卖评级或目标价 |
+| X10 | short / deep 第 08 章是否包含可证伪预期差；若无独立观点，研究动作是否降为观察 / 继续验证；第 09 章是否分离内在价值、1-3个月路径与研究动作 |
 
 ### 做什么
 
@@ -85,7 +86,7 @@ output： output/audits/final_consistency.audit.json
   "category": "ok | inconsistency_detected | missing_evidence",
   "violations": [
     {
-      "rule": "X1 | X2 | X3 | X4 | X5 | X6 | X7 | X8 | X9",
+      "rule": "X1 | X2 | X3 | X4 | X5 | X6 | X7 | X8 | X9 | X10",
       "severity": "blocking | warning",
       "chapters": ["03_financials", "08_investment_thesis"],
       "claim_quote": "<跨章节冲突的关键原文>",

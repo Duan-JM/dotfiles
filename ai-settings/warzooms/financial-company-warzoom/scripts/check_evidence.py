@@ -10,6 +10,9 @@
       但同一句 / 同一表格行内未发现 ``SRC-XXX`` 引用。
     - ``E2``：正文出现的 ``SRC-XXX`` 引用未在 ``output/web_search_log.md`` 中登记。
     - ``C1``：扫描"据称 / 传闻 / 或将 / 据悉 / 应该会 / 业内人士"等弱来源用语。
+    - ``S6``：结构性提示。第 08 章必须包含可证伪预期差框架与
+      "内在价值 / 1-3 个月路径 / 研究动作"三分法；第 00 / 09 章仅在结论为
+      "观察池 / 进入深研"时要求补充该框架，其中第 00 章不要求三分法。
 
 白名单（不视为定量断言）：
     - 年份 / 月份 / 日 / 季度（``2024 年``、``Q3``、``2023H2``）
@@ -110,9 +113,33 @@ _CHAPTER_FILE_PATTERN = re.compile(r"^(\d{2})_[\w_]+\.md$")
 _PROGRAMMATIC_RULE_E1 = "E1"
 _PROGRAMMATIC_RULE_E2 = "E2"
 _PROGRAMMATIC_RULE_C1 = "C1"
+_PROGRAMMATIC_RULE_S6 = "S6"
 
 _SEVERITY_ERROR = "error"
 _SEVERITY_WARNING = "warning"
+
+_EXPECTATION_GAP_REQUIRED_TERMS: tuple[str, ...] = (
+    "市场隐含预期",
+    "我方预期",
+    "证据锚点",
+    "差异方向",
+    "验证日期",
+    "先行指标",
+    "上行失效条件",
+    "下行失效条件",
+)
+
+_DECISION_SPLIT_REQUIRED_TERMS: tuple[str, ...] = (
+    "内在价值判断",
+    "1-3个月路径判断",
+    "研究动作",
+)
+
+_RESEARCH_DECISION_ANCHOR = re.compile(
+    r"(?:研究结论|初步结论|粗读结论|研究动作|结论)\s*(?:[：:｜|]|\|\s*)\s*"
+)
+_RESEARCH_DECISION_VALUES: tuple[str, ...] = ("排除", "观察池", "进入深研", "信息不足")
+_ACTIVE_RESEARCH_DECISION_VALUES = frozenset(("观察池", "进入深研"))
 
 
 @dataclass(frozen=True)
@@ -406,6 +433,101 @@ def _scan_c1_in_line(line: str, *, line_number: int) -> list[Issue]:
     return issues
 
 
+def _missing_terms(text: str, required_terms: tuple[str, ...]) -> list[str]:
+    """返回正文中缺失的结构性关键词。
+
+    Args:
+        text: 章节全文。
+        required_terms: 必须出现的关键词。
+
+    Returns:
+        未出现关键词列表。
+    """
+
+    normalized = text.replace(" ", "")
+    return [term for term in required_terms if term not in normalized]
+
+
+def _clean_decision_fragment(fragment: str) -> str:
+    """清理结论锚点后的 markdown / 表格噪声，保留结论精确前缀。"""
+
+    cleaned = fragment.strip()
+    previous = None
+    while cleaned != previous:
+        previous = cleaned
+        cleaned = cleaned.strip()
+        cleaned = re.sub(r"^[\s|:：\-—–>「『【\[\(（`*_]+", "", cleaned)
+        cleaned = re.sub(r"^[\s|:：\-—–>」』】\]\)）`*_]+", "", cleaned)
+    return cleaned
+
+
+def _extract_research_decision(text: str) -> str | None:
+    """解析结论锚点后的四选一精确值。
+
+    只接受锚点后紧随的 ``排除 / 观察池 / 进入深研 / 信息不足``，避免把
+    "排除，未达到进入深研标准"中的解释文字误判为 active research decision。
+    """
+
+    for line in text.splitlines():
+        for match in _RESEARCH_DECISION_ANCHOR.finditer(line):
+            fragment = _clean_decision_fragment(line[match.end() :])
+            for value in _RESEARCH_DECISION_VALUES:
+                if fragment.startswith(value):
+                    return value
+    return None
+
+
+def _has_active_research_decision(text: str) -> bool:
+    """返回结论锚点是否精确落在观察池 / 进入深研。"""
+
+    return _extract_research_decision(text) in _ACTIVE_RESEARCH_DECISION_VALUES
+
+
+def _scan_expectation_structure(chapter_path: Path, text: str) -> list[Issue]:
+    """扫描预期差框架的结构性缺口。
+
+    该规则只输出 warning，供 audit role 复核。第 08 章作为投资论点章始终要求
+    可证伪预期差；第 00 / 09 章只有在结论进入"观察池 / 进入深研"时要求，避免
+    rough 模式在"排除 / 信息不足"结论下被强制扩写。
+    """
+
+    chapter = chapter_path.stem
+    should_check = chapter == "08_investment_thesis" or (
+        chapter in {"00_overview", "09_research_decision"} and _has_active_research_decision(text)
+    )
+    if not should_check:
+        return []
+
+    issues: list[Issue] = []
+    missing_gap_terms = _missing_terms(text, _EXPECTATION_GAP_REQUIRED_TERMS)
+    if missing_gap_terms:
+        issues.append(
+            Issue(
+                rule=_PROGRAMMATIC_RULE_S6,
+                severity=_SEVERITY_WARNING,
+                line=1,
+                snippet=f"{chapter} 缺预期差字段：{', '.join(missing_gap_terms)}",
+                hint=(
+                    "通过粗读闸门后，应列出市场隐含预期、我方预期、证据锚点、"
+                    "差异方向、验证日期、先行指标、上行失效条件、下行失效条件。"
+                ),
+            )
+        )
+
+    missing_split_terms = _missing_terms(text, _DECISION_SPLIT_REQUIRED_TERMS)
+    if chapter != "00_overview" and missing_split_terms:
+        issues.append(
+            Issue(
+                rule=_PROGRAMMATIC_RULE_S6,
+                severity=_SEVERITY_WARNING,
+                line=1,
+                snippet=f"{chapter} 缺判断分层：{', '.join(missing_split_terms)}",
+                hint="需分离内在价值判断、1-3个月路径判断、研究动作，避免把研究动作写成买卖建议。",
+            )
+        )
+    return issues
+
+
 def _scan_chapter(chapter_path: Path, *, registered: frozenset[str]) -> ChapterReport:
     """扫描单个章节文件，返回章节级检查报告。
 
@@ -435,6 +557,7 @@ def _scan_chapter(chapter_path: Path, *, registered: frozenset[str]) -> ChapterR
         issues.extend(_scan_e1_in_line(line, line_number=line_number))
         issues.extend(_scan_e2_in_line(line, line_number=line_number, registered=registered))
         issues.extend(_scan_c1_in_line(line, line_number=line_number))
+    issues.extend(_scan_expectation_structure(chapter_path, text))
 
     return ChapterReport(
         chapter=chapter_path.stem,

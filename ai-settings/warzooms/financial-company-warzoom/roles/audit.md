@@ -73,6 +73,7 @@ output： output/audits/<chapter_id>.audit.json
 | S3 | style | 必备结构缺失（如第 03 章缺 markdown 表格、deep/short 的第 02 章缺 mermaid 图） |
 | S4 | style | rough / 决策章缺价格闸门、底的类型、硬伤快筛、edge 自检或 stop/go 结论 |
 | S5 | style | 引用财报质量核查 JSON 时，遗漏 `errors` / `missing_fields`，或把 `not_calculated` 写成已通过 |
+| S6 | style | 预期差结构缺失或不可证伪：第 08 章缺市场隐含预期 / 我方预期 / 证据锚点 / 差异方向 / 验证日期 / 先行指标 / 上下行失效条件，或缺内在价值判断 / 1-3个月路径判断 / 研究动作三分法；第 00 / 09 章仅在结论锚点精确为观察池 / 进入深研时适用，其中第 00 章不要求三分法 |
 
 ### 做什么
 
@@ -84,6 +85,11 @@ output： output/audits/<chapter_id>.audit.json
   `SRC-XXX` 财报数字；DSO / 收入背离为 `not_calculated` 时不得写成"无背离"。
 - 若文本明确写的是"继续研究触发价 / 观察池触发价"，且上下文说明这只是时间管理阈值、
   不是目标价、评级或买卖建议，不按 `C2` 处理；否则仍按投资建议处理。
+- 对 rough 模式：`排除 / 信息不足` 结论不得因缺预期差框架判 S6；只有第 00 / 09 章结论锚点
+  精确为 `观察池 / 进入深研` 后才要求闸门后的预期差验证框架。第 00 章只检查极简预期差结构，
+  不要求内在价值判断 / 1-3个月路径判断 / 研究动作三分法。
+- 对 short / deep 的 `08_investment_thesis`：必须包含可证伪预期差。若写明"暂无可证伪预期差"，
+  研究动作必须降为"观察 / 继续验证"，且不得出现买入 / 卖出 / 持有建议；否则按 S6 或 C2 处理。
 
 ### 不做什么
 
@@ -101,7 +107,7 @@ output： output/audits/<chapter_id>.audit.json
   "category": "ok | evidence_insufficient | content_violation | style_violation",
   "violations": [
     {
-      "rule": "E1 | E2 | E3 | C1 | C2 | S1 | S2 | S3 | S4",
+      "rule": "E1 | E2 | E3 | C1 | C2 | S1 | S2 | S3 | S4 | S5 | S6",
       "severity": "blocking | warning",
       "claim_quote": "<正文原句>",
       "evidence_anchor": "SRC-XXX 或 null",

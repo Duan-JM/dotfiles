@@ -73,6 +73,106 @@ class CheckEvidenceTests(unittest.TestCase):
         self.assertEqual(payload["chapters"][0]["content_hash"], sha256_file(section_file))
         self.assertEqual(payload["chapters"][0]["issues"], [])
 
+    def test_investment_thesis_warns_when_expectation_gap_missing(self) -> None:
+        self.search_log.write_text("## SRC-001\n", encoding="utf-8")
+        (self.sections_dir / "08_investment_thesis.md").write_text(
+            "# 投资逻辑与风险\n\n营业收入为 10 亿元（SRC-001）。\n",
+            encoding="utf-8",
+        )
+
+        exit_code = check_evidence.run(None, fail_on_error=True, require_sections=True)
+        payload = json.loads(
+            (self.audits_dir / "programmatic_check.json").read_text(encoding="utf-8")
+        )
+        issues = payload["chapters"][0]["issues"]
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual({issue["rule"] for issue in issues}, {"S6"})
+        self.assertTrue(all(issue["severity"] == "warning" for issue in issues))
+
+    def test_rough_decision_does_not_force_expectation_gap_after_rejection(self) -> None:
+        self.search_log.write_text("## SRC-001\n", encoding="utf-8")
+        (self.sections_dir / "09_research_decision.md").write_text(
+            "# 九、是否值得继续深研与待验证问题\n\n"
+            "研究结论：排除。观察池触发价暂未获取。营业收入为 10 亿元（SRC-001）。\n",
+            encoding="utf-8",
+        )
+
+        exit_code = check_evidence.run(None, fail_on_error=True, require_sections=True)
+        payload = json.loads(
+            (self.audits_dir / "programmatic_check.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["chapters"][0]["issues"], [])
+
+    def test_rough_decision_does_not_match_negated_deep_research_phrase(self) -> None:
+        self.search_log.write_text("## SRC-001\n", encoding="utf-8")
+        (self.sections_dir / "09_research_decision.md").write_text(
+            "# 九、是否值得继续深研与待验证问题\n\n"
+            "研究结论：排除，未达到进入深研标准。营业收入为 10 亿元（SRC-001）。\n",
+            encoding="utf-8",
+        )
+
+        exit_code = check_evidence.run(None, fail_on_error=True, require_sections=True)
+        payload = json.loads(
+            (self.audits_dir / "programmatic_check.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["chapters"][0]["issues"], [])
+
+    def test_rough_decision_warns_when_active_gate_lacks_expectation_gap(self) -> None:
+        self.search_log.write_text("## SRC-001\n", encoding="utf-8")
+        (self.sections_dir / "09_research_decision.md").write_text(
+            "# 九、是否值得继续深研与待验证问题\n\n研究结论：观察池。营业收入为 10 亿元（SRC-001）。\n",
+            encoding="utf-8",
+        )
+
+        exit_code = check_evidence.run(None, fail_on_error=True, require_sections=True)
+        payload = json.loads(
+            (self.audits_dir / "programmatic_check.json").read_text(encoding="utf-8")
+        )
+        issues = payload["chapters"][0]["issues"]
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual({issue["rule"] for issue in issues}, {"S6"})
+
+    def test_overview_warns_when_active_gate_lacks_expectation_gap(self) -> None:
+        self.search_log.write_text("## SRC-001\n", encoding="utf-8")
+        (self.sections_dir / "00_overview.md").write_text(
+            "# 一页纸粗读闸门\n\n初步结论：进入深研。营业收入为 10 亿元（SRC-001）。\n",
+            encoding="utf-8",
+        )
+
+        exit_code = check_evidence.run(None, fail_on_error=True, require_sections=True)
+        payload = json.loads(
+            (self.audits_dir / "programmatic_check.json").read_text(encoding="utf-8")
+        )
+        issues = payload["chapters"][0]["issues"]
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual({issue["rule"] for issue in issues}, {"S6"})
+
+    def test_overview_expectation_gap_does_not_require_decision_split(self) -> None:
+        self.search_log.write_text("## SRC-001\n", encoding="utf-8")
+        (self.sections_dir / "00_overview.md").write_text(
+            "# 一页纸粗读闸门\n\n"
+            "初步结论：观察池。营业收入为 10 亿元（SRC-001）。\n\n"
+            "| 市场隐含预期 | 我方预期 | 证据锚点 | 差异方向 | 验证日期 | 先行指标 | 上行失效条件 | 下行失效条件 |\n"
+            "|---|---|---|---|---|---|---|---|\n"
+            "| 暂未获取 | 暂无可证伪预期差 | SRC-001 | 暂未判断 | 2026-08-17 | 收入 | 收入不达预期 | 估值不降 |\n",
+            encoding="utf-8",
+        )
+
+        exit_code = check_evidence.run(None, fail_on_error=True, require_sections=True)
+        payload = json.loads(
+            (self.audits_dir / "programmatic_check.json").read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["chapters"][0]["issues"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

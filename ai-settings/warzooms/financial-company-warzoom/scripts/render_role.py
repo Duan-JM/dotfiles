@@ -416,15 +416,32 @@ def _build_regenerate_mapping(chapter_id: str) -> dict[str, str]:
     """
 
     chapter_file = SECTIONS_DIR / f"{chapter_id}.md"
+    company_meta = _read_text(INPUT_COMPANY, allow_missing=True)
+    company_facets = _read_text(COMPANY_FACETS, allow_missing=True)
+    web_search_log = _read_text(WEB_SEARCH_LOG, allow_missing=True)
+    facts = _read_text(FACTS_FILE, allow_missing=True)
+    chapter_prompt = _read_chapter_prompt(chapter_id)
+    if chapter_prompt != EMPTY_PLACEHOLDER:
+        chapter_prompt = _substitute(
+            chapter_prompt,
+            {
+                "company_meta": company_meta,
+                "extra_sources": _read_extra_sources(),
+                "web_search_log": web_search_log,
+                "facts": facts,
+                "company_facets": company_facets,
+                "previous_sections": _read_merged_draft(),
+            },
+        )
     return {
         "chapter_id": chapter_id,
-        "chapter_prompt": _read_chapter_prompt(chapter_id),
+        "chapter_prompt": chapter_prompt,
         "chapter_markdown": _read_text(chapter_file, allow_missing=True),
         "audit_violations": _read_audit_violations(chapter_id, only_evidence=False),
-        "company_meta": _read_text(INPUT_COMPANY, allow_missing=True),
-        "company_facets": _read_text(COMPANY_FACETS, allow_missing=True),
-        "web_search_log": _read_text(WEB_SEARCH_LOG, allow_missing=True),
-        "facts": _read_text(FACTS_FILE, allow_missing=True),
+        "company_meta": company_meta,
+        "company_facets": company_facets,
+        "web_search_log": web_search_log,
+        "facts": facts,
     }
 
 
