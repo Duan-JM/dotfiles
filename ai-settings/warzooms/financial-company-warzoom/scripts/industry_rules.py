@@ -194,4 +194,3 @@ def find_rules_by_id(package: IndustryRulePackage, rule_ids: Iterable[str]) -> t
         if len(selected) >= 3:
             break
     return tuple(selected)
-

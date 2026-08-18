@@ -146,11 +146,12 @@ def _validate_earnings_baseline(
                 ValidationIssue("EARNINGS_BASELINE", f"prior_forecasts[{index}] 必须是 object")
             )
             continue
-        if not forecast.get("original_forecast"):
+        original_forecast = forecast.get("original_forecast")
+        if not isinstance(original_forecast, str) or not original_forecast.strip():
             issues.append(
                 ValidationIssue(
                     "EARNINGS_BASELINE",
-                    f"prior_forecasts[{index}] 缺少 original_forecast 原预测文本",
+                    f"prior_forecasts[{index}].original_forecast 必须是非空字符串",
                 )
             )
         status = forecast.get("status")

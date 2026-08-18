@@ -279,6 +279,29 @@ class VerifyPipelineTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("EARNINGS_BASELINE", {issue.code for issue in result.errors})
 
+    def test_earnings_prior_forecast_requires_original_forecast_text(self) -> None:
+        for label, original_forecast in (("number", 123), ("blank", "   ")):
+            with self.subTest(label=label):
+                fixture = PipelineFixture(
+                    self.root / f"earnings-invalid-original-{label}",
+                    report_mode="earnings",
+                    earnings_baseline={
+                        "type": "prior_forecast",
+                        "prior_forecasts": [
+                            {
+                                "original_forecast": original_forecast,
+                                "status": "无法验证",
+                            }
+                        ],
+                    },
+                )
+                fixture.build()
+
+                result = verify_pipeline.validate_pipeline(fixture.root)
+
+                self.assertFalse(result.ok)
+                self.assertIn("EARNINGS_BASELINE", {issue.code for issue in result.errors})
+
     def test_missing_expected_section_fails(self) -> None:
         (self.fixture.sections / "03_financials.md").unlink()
 
