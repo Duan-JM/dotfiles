@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import io
 import json
+import shutil
 import sys
-import tempfile
 import unittest
+import uuid
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
@@ -163,13 +164,13 @@ class PipelineFixture:
 
 class VerifyPipelineTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp_dir.name)
+        self.root = PROJECT_ROOT / "tests" / ".scratch" / f"verify_pipeline_{uuid.uuid4().hex}"
+        self.root.mkdir(parents=True)
         self.fixture = PipelineFixture(self.root)
         self.manifest = self.fixture.build()
 
     def tearDown(self) -> None:
-        self.temp_dir.cleanup()
+        shutil.rmtree(self.root, ignore_errors=True)
 
     def test_valid_full_pipeline_passes(self) -> None:
         result = verify_pipeline.validate_pipeline(self.root)

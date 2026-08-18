@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import json
+import shutil
 import sys
-import tempfile
 import unittest
+import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,8 +17,7 @@ from pipeline_common import sha256_file  # noqa: E402
 
 class CheckEvidenceTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp_dir.name)
+        self.root = PROJECT_ROOT / "tests" / ".scratch" / f"check_evidence_{uuid.uuid4().hex}"
         self.sections_dir = self.root / "output" / "sections"
         self.audits_dir = self.root / "output" / "audits"
         self.search_log = self.root / "output" / "web_search_log.md"
@@ -36,7 +36,7 @@ class CheckEvidenceTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.patcher.stop()
-        self.temp_dir.cleanup()
+        shutil.rmtree(self.root, ignore_errors=True)
 
     def test_require_sections_rejects_empty_output(self) -> None:
         exit_code = check_evidence.run(None, require_sections=True)

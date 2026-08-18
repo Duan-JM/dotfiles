@@ -70,6 +70,11 @@ output： output/company_facets.md
 - 不确定时宁可少选，禁止凑数。
 - 必要时可调用最小检索补判定，但**禁止**展开二轮宽泛研究。
 - 对价值研究镜头必须区分"已有证据"与"信息不足"：缺价格 / 估值 / 股东回报 / 治理硬伤证据时，输出"信息不足"，不要臆断。
+- 如果 `facts.md` 中包含 `scripts/financial_quality_check.py` 的 JSON 结果：
+  - `grade.level=D` 或多个 `checks[].status=high_risk` → `硬伤快筛` 至少写 `命中`，并列明是哪一项；
+  - `grade.level=C` 或单个 `high_risk` / 多个 `warning` → `硬伤快筛` 至少写 `存疑`；
+  - `missing_fields` 中 `severity=core` → 结论不得高于 `信息不足` / `存疑`；
+  - `grade.level=A/B` 只能说明财报质量核查未直接否决，不能替代估值、治理和原始 SRC 证据。
 
 ### 不做什么
 

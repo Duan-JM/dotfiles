@@ -72,12 +72,16 @@ output： output/audits/<chapter_id>.audit.json
 | S2 | style | 主观夸饰用语（"显著领先"、"护城河深厚"等无证据强判断） |
 | S3 | style | 必备结构缺失（如第 03 章缺 markdown 表格、deep/short 的第 02 章缺 mermaid 图） |
 | S4 | style | rough / 决策章缺价格闸门、底的类型、硬伤快筛、edge 自检或 stop/go 结论 |
+| S5 | style | 引用财报质量核查 JSON 时，遗漏 `errors` / `missing_fields`，或把 `not_calculated` 写成已通过 |
 
 ### 做什么
 
 - 只审正文与「证据与出处」文本是否符合规则。
 - 程序化预审标 `error` 的条目优先复核，标 `warning` 的择重要者复核。
 - 对每条违规给出 `claim_quote` 原文（必填）与 `suggested_action`。
+- 若章节引用 `financial_quality_check.py` 的 A/B/C/D 分级，必须同时核对 facts 中 JSON 的
+  `checks.status`、`missing_fields` 与 `errors`：不能只摘等级；不能用该脚本输出替代原始
+  `SRC-XXX` 财报数字；DSO / 收入背离为 `not_calculated` 时不得写成"无背离"。
 - 若文本明确写的是"继续研究触发价 / 观察池触发价"，且上下文说明这只是时间管理阈值、
   不是目标价、评级或买卖建议，不按 `C2` 处理；否则仍按投资建议处理。
 
