@@ -32,6 +32,103 @@ checksum() {
   fi
 }
 
+verify_checksum() {
+  file=$1
+  checksum_file="$file.sha256"
+
+  if [ ! -f "$checksum_file" ]; then
+    printf '[%s] skipping invalid physical backup without checksum: %s\n' "$(date -Iseconds)" "$file" >&2
+    return 1
+  fi
+
+  expected_checksum=$(sed -n '1{s/[[:space:]].*$//;p;}' "$checksum_file")
+  if command -v sha256sum >/dev/null 2>&1; then
+    actual_checksum=$(sha256sum "$file" | awk '{print $1}')
+  else
+    actual_checksum=$(shasum -a 256 "$file" | awk '{print $1}')
+  fi
+
+  if [ -z "$expected_checksum" ] || [ "$actual_checksum" != "$expected_checksum" ]; then
+    printf '[%s] skipping physical backup with invalid checksum: %s\n' "$(date -Iseconds)" "$file" >&2
+    return 1
+  fi
+}
+
+base_backup_start_wal() {
+  backup_file=$1
+
+  verify_checksum "$backup_file" || return 1
+  if ! backup_label=$(tar -xOzf "$backup_file" ./backup_label 2>/dev/null); then
+    printf '[%s] skipping physical backup with unreadable backup_label: %s\n' "$(date -Iseconds)" "$backup_file" >&2
+    return 1
+  fi
+
+  start_wal=$(printf '%s\n' "$backup_label" | awk '
+    /^START WAL LOCATION:/ {
+      sub(/^.*\(file /, "")
+      sub(/\).*$/, "")
+      print
+      exit
+    }
+  ')
+
+  case "$start_wal" in
+    ''|*[!0-9A-F]*)
+      printf '[%s] skipping physical backup with invalid start WAL: %s\n' "$(date -Iseconds)" "$backup_file" >&2
+      return 1
+      ;;
+  esac
+
+  if [ "${#start_wal}" -ne 24 ]; then
+    printf '[%s] skipping physical backup with invalid start WAL: %s\n' "$(date -Iseconds)" "$backup_file" >&2
+    return 1
+  fi
+
+  printf '%s\n' "$start_wal"
+}
+
+cleanup_wal_archive() {
+  backup_dir=$1
+  archive_dir=/var/lib/postgresql/wal_archive
+
+  if [ ! -d "$archive_dir" ] || [ ! -w "$archive_dir" ]; then
+    printf '[%s] WAL archive cleanup failed: archive directory is not writable: %s\n' "$(date -Iseconds)" "$archive_dir" >&2
+    return 1
+  fi
+
+  if ! command -v pg_archivecleanup >/dev/null 2>&1; then
+    printf '[%s] WAL archive cleanup failed: pg_archivecleanup is unavailable\n' "$(date -Iseconds)" >&2
+    return 1
+  fi
+
+  oldest_backup=
+  oldest_start_wal=
+  for candidate in $(find "$backup_dir" -maxdepth 1 -type f -name 'basebackup_*.tar.gz' | sort); do
+    if candidate_start_wal=$(base_backup_start_wal "$candidate"); then
+      oldest_backup=$candidate
+      oldest_start_wal=$candidate_start_wal
+      break
+    fi
+  done
+
+  if [ -z "$oldest_backup" ]; then
+    printf '[%s] WAL archive cleanup failed: no valid retained physical backup found\n' "$(date -Iseconds)" >&2
+    return 1
+  fi
+
+  backup_marker=$(find "$archive_dir" -maxdepth 1 -type f -name "${oldest_start_wal}.*.backup" | sort | sed -n '1p')
+  if [ -z "$backup_marker" ]; then
+    printf '[%s] WAL archive cleanup failed: backup history marker not found for %s\n' "$(date -Iseconds)" "$oldest_backup" >&2
+    return 1
+  fi
+
+  backup_marker_name=${backup_marker##*/}
+  printf '[%s] cleaning archived WAL before %s required by oldest valid backup: %s\n' \
+    "$(date -Iseconds)" "$oldest_start_wal" "$oldest_backup"
+  pg_archivecleanup "$archive_dir" "$backup_marker_name"
+  printf '[%s] WAL archive cleanup completed\n' "$(date -Iseconds)"
+}
+
 logical_backup() {
   : "${DB_USER:?Set DB_USER}"
   : "${DB_PASSWORD:?Set DB_PASSWORD}"
@@ -119,6 +216,7 @@ base_backup() {
     -F plain \
     -X stream \
     --checkpoint=fast
+  pg_verifybackup "$TMP_DIR"
   tar -C "$TMP_DIR" -czf "$TMP_FILE" .
   rm -rf "$TMP_DIR"
   TMP_DIR=
@@ -128,6 +226,7 @@ base_backup() {
   checksum "$backup_file"
   find "$backup_dir" -type f \( -name 'basebackup_*.tar.gz' -o -name 'basebackup_*.tar.gz.sha256' \) -mtime +"$retention_days" -delete
   printf '[%s] physical base backup written: %s\n' "$(date -Iseconds)" "$backup_file"
+  cleanup_wal_archive "$backup_dir"
 }
 
 case "$ACTION" in

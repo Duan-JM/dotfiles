@@ -90,6 +90,7 @@ services:
       BASEBACKUP_RETENTION_DAYS: ${BASEBACKUP_RETENTION_DAYS:-7}
     volumes:
       - ./backups:/backups
+      - postgres_wal_archive:/var/lib/postgresql/wal_archive
       - ./scripts/container-backup.sh:/scripts/container-backup.sh:ro
       - ./scripts/container-backup-entrypoint.sh:/scripts/container-backup-entrypoint.sh:ro
     entrypoint: ["/bin/sh", "/scripts/container-backup-entrypoint.sh"]

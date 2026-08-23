@@ -59,6 +59,7 @@ Defaults:
 - startup physical base backup: after every successful `./deploy.sh start`
 - physical base backup: every Sunday at 03:15, written to `./backups/base`
 - retention: logical and physical backups 7 days
+- WAL retention: after a verified physical backup, archived WAL older than the oldest valid retained physical backup is removed
 
 Tune these in `.env`:
 
@@ -84,4 +85,4 @@ Use `./deploy.sh backup-logs` to inspect scheduled backup runs. The `backups` di
 
 Before exposing PostgreSQL outside a trusted private network, restrict `config/pg_hba.conf` to specific client CIDRs and firewall the published port.
 
-WAL archive files are stored in the `infra_postgres_wal_archive` Docker volume. Copy or sync that volume to durable off-host storage if you need real disaster recovery.
+WAL archive files are stored in the `infra_postgres_wal_archive` Docker volume. Cleanup only runs after a physical backup passes `pg_verifybackup`, is checksummed, and has a matching backup history marker in the archive. If no valid retained physical backup can be established, cleanup fails without removing WAL. Copy or sync the volume to durable off-host storage if you need real disaster recovery.
