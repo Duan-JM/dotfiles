@@ -1,0 +1,33 @@
+# encoding: utf-8
+
+patch:
+  schema_list:
+    - schema: rime_ice               # 雾凇拼音（全拼，默认）
+    - schema: double_pinyin          # 自然码双拼
+    - schema: double_pinyin_flypy    # 小鹤双拼
+    - schema: double_pinyin_mspy     # 微软双拼
+    - schema: double_pinyin_sogou    # 搜狗双拼
+    - schema: double_pinyin_abc      # 智能 ABC 双拼
+    - schema: double_pinyin_ziguang  # 紫光双拼
+    - schema: double_pinyin_jiajia   # 拼音加加双拼
+
+  menu/page_size: 5
+
+  switcher/hotkeys:
+    - F4
+    - Control+grave
+    - Control+Shift+grave
+
+  switcher/save_options:
+    - ascii_punct
+    - traditionalization
+    - emoji
+    - full_shape
+
+  ascii_composer/good_old_caps_lock: true
+  ascii_composer/switch_key:
+    Caps_Lock: clear
+    Shift_L: commit_code
+    Shift_R: noop
+    Control_L: noop
+    Control_R: noop

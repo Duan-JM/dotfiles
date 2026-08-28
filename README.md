@@ -17,6 +17,7 @@ cd dotfiles
 make vim_install
 make tmux_install
 make zsh_install
+make rime_install
 ```
 
 安装脚本可能通过 Homebrew 或 APT 安装依赖，并修改 Home 目录下的配置。执行前请先阅读对应目录的说明：
@@ -25,6 +26,7 @@ make zsh_install
 - [Tmux](tmux/README.md)
 - [Zsh](zsh/README.md)
 - [Kitty](kitty/README.md)
+- [Rime / Squirrel](rime/README.md)
 
 ## 目录
 
@@ -34,6 +36,7 @@ make zsh_install
 | [`tmux/`](tmux/) | Tmux 配置、快捷键和插件 |
 | [`zsh/`](zsh/) | Zsh、Oh My Zsh、插件和个人命令配置 |
 | [`kitty/`](kitty/) | Kitty 终端配置 |
+| [`rime/`](rime/) | 鼠须管 / Rime 简体拼音配置、雾凇拼音与 Catppuccin 皮肤 |
 | [`macos/`](macos/) | Homebrew Bundle 与常用应用清单 |
 | [`copilot/`](copilot/) | GitHub Copilot CLI 设置与 hooks |
 | [`ai-settings/`](ai-settings/) | AI 工具使用的规则、技能和模板 |

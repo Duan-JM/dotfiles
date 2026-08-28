@@ -1,0 +1,82 @@
+# encoding: utf-8
+
+patch:
+  style/color_scheme: catppuccin_latte
+  style/color_scheme_dark: catppuccin_macchiato
+  style/candidate_list_layout: linear
+  style/text_orientation: horizontal
+  style/inline_preedit: true
+  style/inline_candidate: false
+  style/candidate_format: "%c %@ "
+  style/corner_radius: 6
+  style/hilited_corner_radius: 5
+  style/line_spacing: 10
+  style/border_height: 1
+  style/border_width: 1
+  style/font_face: "PingFangSC"
+  style/font_point: 16
+  style/label_font_point: 13
+  style/comment_font_point: 14
+
+  app_options/com.apple.Spotlight/ascii_mode: true
+  app_options/com.apple.Terminal/ascii_mode: true
+  app_options/com.apple.Terminal/no_inline: true
+  app_options/com.googlecode.iterm2/ascii_mode: true
+  app_options/com.googlecode.iterm2/no_inline: true
+  app_options/com.microsoft.VSCode/ascii_mode: true
+
+  preset_color_schemes/catppuccin_latte:
+    name: Catppuccin Latte
+    back_color: 0xE8E0DC
+    border_color: 0xEFE9E6
+    text_color: 0x775F5C
+    label_color: 0x856F6C
+    candidate_text_color: 0x694F4C
+    hilited_back_color: 0xef3988
+    hilited_candidate_text_color: 0xF5F1EF
+    hilited_candidate_label_color: 0xDAD0CC
+    hilited_text_color: 0xBEB0AC
+    hilited_comment_text_color: 0xDAD0CC
+    comment_text_color: 0xBEB0AC
+
+  preset_color_schemes/catppuccin_mocha:
+    name: Catppuccin Mocha
+    back_color: 0x1B1111
+    border_color: 0x251818
+    text_color: 0xDEC2BA
+    label_color: 0xC8ADA6
+    candidate_text_color: 0xF4D6CD
+    hilited_back_color: 0xF7A6CB
+    hilited_candidate_text_color: 0x2E1E1E
+    hilited_candidate_label_color: 0x443231
+    hilited_text_color: 0x705B58
+    hilited_comment_text_color: 0x443231
+    comment_text_color: 0x705B58
+
+  preset_color_schemes/catppuccin_frappe:
+    name: Catppuccin Frappe
+    back_color: 0x342623
+    border_color: 0x3C2C29
+    text_color: 0xE2BFB5
+    label_color: 0xCEADA5
+    candidate_text_color: 0xF5D0C6
+    hilited_back_color: 0xE69ECA
+    hilited_candidate_text_color: 0x463430
+    hilited_candidate_label_color: 0x594541
+    hilited_text_color: 0x806862
+    hilited_comment_text_color: 0x594541
+    comment_text_color: 0x806862
+
+  preset_color_schemes/catppuccin_macchiato:
+    name: Catppuccin Macchiato
+    back_color: 0x261918
+    border_color: 0x30201E
+    text_color: 0xE0C0B8
+    label_color: 0xCBADA5
+    candidate_text_color: 0xF5D3CA
+    hilited_back_color: 0xF6A0C6
+    hilited_candidate_text_color: 0x3A2724
+    hilited_candidate_label_color: 0x4F3A36
+    hilited_text_color: 0x70B558
+    hilited_comment_text_color: 0x4F3A36
+    comment_text_color: 0x70B558

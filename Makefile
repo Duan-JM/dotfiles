@@ -40,3 +40,7 @@ zsh_install:
 sudo_zsh_install:
 	@echo "WARNING: sudo_zsh_install is deprecated; use zsh_install instead."
 	$(MAKE) --no-print-directory zsh_install
+
+.PHONY: rime_install
+rime_install:
+	cd "$(ROOT_DIR)/rime" && env $(INSTALL_ENV) bash install.sh

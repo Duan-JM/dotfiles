@@ -1,0 +1,25 @@
+# encoding: utf-8
+
+patch:
+  switches:
+    - name: ascii_mode
+      states: [中, 英]
+      reset: 0
+    - name: ascii_punct
+      states: [中标, 英标]
+      reset: 0
+    - name: traditionalization
+      states: [简, 繁]
+      reset: 0
+    - name: emoji
+      states: [无 Emoji, Emoji]
+      reset: 1
+    - name: full_shape
+      states: [半角, 全角]
+      reset: 0
+    - name: search_single_char
+      states: [正常, 单字]
+      reset: 0
+
+  translator/enable_user_dict: true
+  translator/enable_word_completion: true
