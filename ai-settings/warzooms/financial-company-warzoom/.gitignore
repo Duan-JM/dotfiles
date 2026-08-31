@@ -1,6 +1,10 @@
 .claude/settings.local.json
 __pycache__/
 *.py[cod]
+scripts/data_sources/**/node_modules/
+scripts/data_sources/**/dist/
+scripts/data_sources/**/.env
+output/raw/
 
 output/*
 !output/.gitkeep

@@ -76,6 +76,9 @@ roles/
   infer.md / audit.md / confirm.md / repair.md / regenerate.md / final_audit.md
                                    # 审计闭环各 role 的独立 prompt 文件
 scripts/
+  README.md                         # 脚本分类、入口与新增规则
+  data_sources/
+    tushare/                        # A 股 Tushare Pro TypeScript 数据连接器
   industry_rules.py                 # 行业规则包加载、schema 校验与 tag 匹配
   check_evidence.py                # 程序化 evidence linter
   financial_quality_check.py       # 标准库 JSON 财报质量核查：应计 / 现金转化 / DSO 背离 / A-D 分级

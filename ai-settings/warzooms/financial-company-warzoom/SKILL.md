@@ -77,6 +77,9 @@ roles/
   regenerate.md                    # 整章重建 role prompt
   final_audit.md                   # 跨章节一致性审计 role prompt
 scripts/
+  README.md                         # 脚本分类、入口与新增规则
+  data_sources/
+    tushare/                        # A 股 Tushare Pro TypeScript 数据连接器
   industry_rules.py                 # 行业规则包加载、schema 校验与 tag 匹配
   check_evidence.py                # 程序化证据 linter（句子级 / 表格行级）
   financial_quality_check.py       # 标准库 JSON 财报质量核查：应计 / 现金转化 / DSO 背离 / A-D 分级
@@ -134,19 +137,17 @@ python3 scripts/valuation_calculator.py --input input/valuation.json --pretty
 
 ## Source Priority（跨市场数据源）
 
-财务数字、股权结构、董监高、关联交易等关键事实必须走可追溯来源。对 A 股及 Tushare
-覆盖的事实性数据，**默认先走 Tushare 官方 skill**；只有 Tushare 不覆盖、权限不足、
-结果为空或需要原始公告交叉验证时，才补充 web / extra sources。
+财务数字、股权结构、董监高、关联交易等关键事实必须走可追溯来源。优先使用监管机构、
+交易所、公司公告与定期报告等 Primary source；web 搜索负责定位和读取原始文件，
+`input/extra_sources/` 中的用户资料作为高优先级补充来源。
 
 ### A 股
-- **Tushare 官方 skill（事实数据默认入口）**：安装自
-  `https://github.com/waditu-tushare/skills`，在运行时以 `tushare` 或 `tushare-data`
-  skill 加载。公司识别、财报三表、财务指标、业绩预告 / 快报、估值、行情、资金流、
-  公告新闻、板块与宏观等结构化事实，先由该 skill 取数并整理，再登记到
-  `output/web_search_log.md` 与 `output/facts.md`。
+- `scripts/data_sources/tushare/`：可选的结构化数据入口，覆盖公司基础信息、三表、财务指标、
+  行情估值、分红和股份回购。需要 `TUSHARE_TOKEN`，输出只进入 `output/raw/tushare/`；
+  Tushare 按 Secondary source 处理，不能替代交易所公告和公司定期报告。
 - 巨潮资讯网 cninfo.com.cn、上交所 / 深交所 / 北交所公告、公司投资者关系页面：
-  作为 Primary source，用于 Tushare 不覆盖、权限不足、字段冲突或需要原文复核的场景。
-  不要把 Tushare 已能稳定获取的三表数字改为手工网页摘录。
+  作为财报、股权结构、治理、关联交易与重大事项的 Primary source。
+- 国家统计局、行业主管部门与行业协会：用于宏观、行业产量、价格和渗透率等外部基准。
 
 ### 港股
 - HKEXnews 披露易 hkexnews.hk
@@ -171,12 +172,12 @@ python3 scripts/valuation_calculator.py --input input/valuation.json --pretty
 
 当用户要求"先做全网搜索"、"做调研"、"先查资料"时执行：
 
-0. **先判断 Tushare 覆盖范围**：若目标是 A 股上市公司，或任务涉及 Tushare 可覆盖的行情、
-   财报、估值、资金流、公告新闻、板块、宏观数据，必须先加载 `tushare` / `tushare-data`
-   skill 取数并沉淀事实；web 搜索只补充 Tushare 不能覆盖的业务背景、管理层、行业解释、
-   原文公告复核和新闻语境。
+若目标为 A 股且环境中存在 `TUSHARE_TOKEN`，可先运行
+`make tushare-query TS_CODE=<代码> PERIODS=<报告期列表> AS_OF=<日期>`
+获取结构化辅助数据。查询结果必须由主代理登记为 `SRC-XXX` 后才能进入正文；接口无权限、
+无数据或失败时明确记录缺口，不得将失败伪装为零值，也不得阻断 Primary source 搜集。
 
-0.5. **粗读闸门事实优先**：若 `report_mode=rough` 或用户目标是投资初筛，先沉淀一页纸闸门所需事实：
+0. **粗读闸门事实优先**：若 `report_mode=rough` 或用户目标是投资初筛，先沉淀一页纸闸门所需事实：
    - 价格 / 市值 / EV（含净负债口径）
    - P/B 及大致资产构成（现金、应收、存货、固定资产、商誉 / 无形）
    - EV/EBITDA、EV/EBIT；重资产 / 高 capex 公司以 EV/EBIT、owner earnings、FCF 为主
@@ -186,7 +187,7 @@ python3 scripts/valuation_calculator.py --input input/valuation.json --pretty
    - 硬伤快筛：合股 + 折价供股循环、核数师辞任 / 保留意见、监管处分、资金占用、违规担保、存贷双高、异常关联交易、低价私有化劣迹
    缺失项写"暂未获取"，不得用不明来源估算。
 
-0.6. **财报模式事实优先**：若 `report_mode=earnings`，只为财报点评沉淀必要事实：
+0.1. **财报模式事实优先**：若 `report_mode=earnings`，只为财报点评沉淀必要事实：
    - 本期财报公告、业绩材料、电话会 / 指引、公司旧指引与用户旧预测
    - 市场预期、分部 KPI、利润率、费用率、现金流、资本开支、分红回购、现金与债务
    - 同业财报和财报后 1-3 个交易日市场反应
@@ -196,7 +197,7 @@ python3 scripts/valuation_calculator.py --input input/valuation.json --pretty
 1. **并行**沿以下维度搜集（可以同时发起多个 web_search 调用）：
    - 公司识别与股权（年报封面、招股书、工商信息）
    - 业务与产品（官网、年报 MD&A、产品页面）
-   - 财务（最近 3 年年报 + 最新季报 / 中报；A 股三表和财务指标必须先走 Tushare skill）
+   - 财务（最近 3 年年报 + 最新季报 / 中报，优先使用交易所公告、公司定期报告与监管文件）
    - 估值与现金回报（市值、EV、P/B、EV/EBITDA、EV/EBIT、FCF yield、分红、回购、股本趋势）
    - 行业与竞争（行业研报、监管统计、可比公司公告）
    - 管理层与治理（年报董监高章节、监管处罚、诉讼）
@@ -217,93 +218,6 @@ python3 scripts/valuation_calculator.py --input input/valuation.json --pretty
 
 4. 在搜索 log 末尾给出"数据完整度评估"：哪些维度信息充分、哪些缺口需要补充。
    rough 模式需额外列出"阶段 0 闸门缺口"：缺哪个估值 / 股东回报 / 硬伤检查项，会如何影响结论。
-
-### Tushare Skill 接入（事实数据默认路径）
-
-本项目不再把 A 股三表、财务指标、行情估值等结构化事实依赖人工网页摘录。凡是 Tushare
-覆盖的数据，先通过官方 Tushare skill 获取；主代理再把结果转换成本项目统一的
-`SRC-XXX` / `Fact ID` 证据格式。
-
-#### 安装要求
-
-项目运行前必须安装 Tushare 官方 skills，来源：
-`https://github.com/waditu-tushare/skills`。
-
-```bash
-# 安装 Python SDK
-python3 -m pip install tushare
-
-# 任选其一安装 skill（需要本地支持 npx skills）
-npx skills add https://github.com/waditu-tushare/skills.git --skill tushare-data
-npx skills add https://gitee.com/lwdt/skills.git --skill tushare-data
-
-# 配置 token
-export TUSHARE_TOKEN="your_token_here"
-```
-
-若运行时使用项目内 skills 目录，也可把官方仓库里的 `tushare` / `tushare-data`
-目录复制到 `.agents/skills/`。Copilot CLI 中优先加载 `tushare`，若仅安装了
-`tushare-data`，则加载 `tushare-data`。
-
-#### 必须优先走 Tushare 的事实范围
-
-| 事实类型 | 首选 Tushare 接口 / 工作流 | 写入位置 |
-|----------|----------------------------|----------|
-| 公司识别、上市状态、行业、注册地址 | `stock_basic`, `stock_company`, `stock_st` | `web_search_log.md`, `facts.md` |
-| 财报三表 | `income`, `balancesheet`, `cashflow` | `facts.md` 为主，必要时在 `web_search_log.md` 摘要 |
-| 财务质量与核心比率 | `fina_indicator` | `facts.md` |
-| 业绩预告 / 快报 / 披露日期 | `forecast`, `express`, `disclosure_date` | `web_search_log.md`, `facts.md` |
-| 估值与行情事实 | `daily_basic`, `daily`, `pro_bar` | `facts.md` |
-| 资金流与市场行为 | `moneyflow`, `moneyflow_hsgt`, `hsgt_top10`, `top_list` | `web_search_log.md`, `facts.md` |
-| 公告、新闻、研报 | `anns_d`, `news`, `major_news`, `research_report` | `web_search_log.md` |
-| 板块、指数、概念与宏观 | `index_*`, `sw_daily`, `ths_*`, `dc_*`, `cn_*` | `web_search_log.md`, `facts.md` |
-
-如果 Tushare 返回空表，要区分"非交易日 / 区间无数据 / 未上市 / 权限不足 / 参数错误"，
-不能直接改用网页数字绕过。只有确认 Tushare 不覆盖或权限不足，才允许补充其他来源，
-并在 `web_search_log.md` 记录原因。
-
-#### 派发与登记规则（单写者模型）
-
-为避免 `SRC-XXX` 编号竞争，Tushare 子流程只负责取数与输出结构化结果；**主代理**
-统一写入 `output/web_search_log.md`、`output/facts.md` 和 `output/manifest.json`。
-推荐顺序：
-
-1. 加载 `tushare` / `tushare-data` skill，完成 Python、`tushare` 包、`TUSHARE_TOKEN`
-   与权限检查。
-2. 对 A 股公司先拉公司基础信息、最近 3 年年报 + 最新季报 / 中报的三表与
-   `fina_indicator`；再按研究重点补行情、估值、资金流、公告新闻、板块或宏观。
-3. 将每次 Tushare 查询按"接口 + 参数 + 字段 + 抓取时间 + 行数 + `ann_date` /
-   `end_date` / `report_type` / `comp_type`（如有）"登记为 `SRC-XXX`。
-4. 把可直接用于正文的数字写入 `facts.md`，每行指向对应 `SRC-XXX`。
-5. 再做 web 搜索，只补 Tushare 不覆盖的业务解释、行业背景、管理层治理、监管事件和原文复核。
-
-Tushare source 条目模板：
-
-```markdown
-## SRC-001
-- 标题：Tushare Pro income / balancesheet / cashflow 查询：002594.SZ 最近三年及最新一期
-- 发布机构：Tushare Pro
-- URL：https://tushare.pro/wctapi/documents/...
-- 发布时间：按 ann_date / end_date 标注；无单一发布日期时写"数据接口返回"
-- 抓取时间：YYYY-MM-DD
-- 来源类型：Tushare Pro · 官方 skill
-- 可信等级：Secondary
-- 关键摘录：
-  > 接口：income, balancesheet, cashflow；参数：ts_code=002594.SZ, periods=...
-  > 字段：revenue, n_income_attr_p, total_assets, total_liab, n_cashflow_act...
-  > 返回行数：income=4, balancesheet=4, cashflow=4；保留 ann_date/report_type/comp_type。
-- 拟用于章节：03_financials, 08_investment_thesis
-```
-
-Tushare 是 Secondary 来源；若与交易所公告、公司年报等 Primary source 冲突，必须记录差异，
-以 Primary source 为准并说明冲突原因。没有原文复核需求时，不要为了"更像 primary"
-而重复手工摘录三表数字。
-
-#### Manifest stale 警告
-
-Tushare 事实写入会改变 `source_log_hash` / `facts_hash`。如果在**章节已生成 + 审计已通过**
-之后补拉或修正 Tushare 数据，则所有引用受影响 facts 的章节 audit 都应标记为 `stale`
-并重跑审计闭环。建议把 Tushare 取数一次性做在 Search Workflow 阶段、章节写作之前。
 
 ## Infer Workflow（公司画像推理 · 必选前置）
 

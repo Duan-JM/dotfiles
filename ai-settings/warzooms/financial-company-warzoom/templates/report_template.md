@@ -27,27 +27,7 @@
 
 请完成以下任务：
 
-### 0.（仅 A 股公司 · 强烈推荐）先跑 Tushare 财务抓取
-
-为避免 `SRC-XXX` 编号竞争（多个写者同时申请编号），**A 股公司的 search 阶段必须按
-单写者顺序**：先完整跑完 Tushare 抓取 + 导出 + 合并，再开始下面第 1 步的并行 web
-搜集。
-
-```bash
-# 假设：repo 根 = $REPO；当前项目 cp 到 $PROJ
-python3 $REPO/financial-skills/tushare/scripts/fetch_all.py <ts_code> \
-    --periods <YYYYMMDD> ... --out $PROJ/tushare-<code>/
-python3 $REPO/financial-skills/tushare/scripts/export.py --in $PROJ/tushare-<code>/
-python3 $REPO/financial-skills/tushare/scripts/merge.py \
-    --in $PROJ/tushare-<code>/ --target $PROJ/output/
-```
-
-跑完后 `output/web_search_log.md` 与 `output/facts.md` 已包含 Tushare 来源条目；
-web 搜集只需补充 tushare 未覆盖的维度（管理层 / 行业 / 新闻 / 监管事件 / ESG 等）。
-
-非 A 股公司或无 token 时直接跳过本步进入第 1 步。
-
-### 0.5. 粗读闸门事实优先
+### 0. 粗读闸门事实优先
 
 如果 `company.md` 中 `报告模式=rough`，或报告用途是"粗读公司 / 投资初筛 / 尽调初筛"，
 先为一页纸闸门沉淀事实；缺失项写"暂未获取"，不要用不明来源估算：
@@ -226,13 +206,6 @@ infer 与审计的风险输入，不替代原始 `SRC-XXX` 证据。
   - 净现金 / 净负债、短债覆盖、利息覆盖
   - 近 5-10 年派息 / 回购连续性与股本摊薄趋势
   - 初步判断属于"资产底 / 正常化盈利底 / 现金回报底 / 无可识别底"中的哪一类
-
-**A 股公司**：财务数字优先采用 Tushare 登记的 SRC 条目（识别方式：`web_search_log.md`
-中该 SRC 的 `- 发布机构：Tushare Pro...`、`- 上游原始来源：上市公司定期报告，公告日
-YYYYMMDD（Tushare API: <接口>）`）。若 facts.md 中已有 Tushare 抓取的字段（营收 /
-利润 / EPS / ROE / 资产负债率等），**直接引用**对应 SRC，不要重复从年报 PDF 誊抄。
-仅当 Tushare 字段不足以支撑本章某个论点（如分业务收入、研发资本化率）时，才补人工
-web 搜索来源。
 
 要求：
 - **所有数字必须以 markdown 表格列出**，每个数字单元格后附 `（SRC-XXX）`
