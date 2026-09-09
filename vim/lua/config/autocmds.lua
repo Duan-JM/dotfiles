@@ -86,6 +86,17 @@ autocmd("FileType", {
 
 autocmd("FileType", {
 	group = ft,
+	pattern = { "markdown", "quarto", "rmd", "rmarkdown" },
+	callback = function()
+		vim.opt_local.wrap = true
+		vim.opt_local.linebreak = true
+		vim.opt_local.breakindent = true
+		vim.opt_local.showbreak = "↪ "
+	end,
+})
+
+autocmd("FileType", {
+	group = ft,
 	pattern = "python",
 	callback = function()
 		vim.opt_local.tabstop = 4

@@ -39,6 +39,7 @@ init.lua
     ├── ui.lua              lualine, rainbow-delimiters, web-devicons
     ├── treesitter.lua      nvim-treesitter (+ textobjects, autotag)
     ├── coding.lua          aerial.nvim (outline)
+    ├── markdown.lua        wrapped Markdown table reader / preview
     ├── git.lua             gitsigns + vim-fugitive
     ├── telescope.lua       fuzzy finder
     ├── formatting.lua      conform.nvim (format-on-save)
@@ -85,6 +86,18 @@ Inside Telescope: `<C-j/k>` next/prev, `<C-]>` open in tab, `<C-x/v>` h/v split.
 | `<leader>nt` | Open Neo-tree on left, reveal file      |
 | `<leader>o`  | Toggle Aerial outline (replaces Vista)  |
 | `<leader>u`  | Toggle undotree                         |
+
+### Markdown
+
+Markdown prose uses word-aware soft wrapping. Documents containing pipe tables
+open in a rendered Reader where long content wraps inside individual cells.
+Press `q` in the Reader to return to the source.
+
+| Keys         | Action                                    |
+|--------------|-------------------------------------------|
+| `<leader>mr` | Toggle table Reader / source              |
+| `<leader>mi` | Toggle inline table rendering             |
+| `<leader>mf` | Preview the table under cursor in a float |
 
 ### LSP (set on `LspAttach`)
 
